@@ -16,6 +16,7 @@ It is built for lifeblood.
 * [redacted]
 * Optionally integrates with infinite grimm. Spend points earned fighting him on [redacted].
 * [redacted]
+* Does not damage your savefile. You can uninstall it safely without your [redacted] being affected.
 
 
 ### How to install
