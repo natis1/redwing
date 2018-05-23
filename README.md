@@ -37,7 +37,7 @@ You may optionally install this mod alongside [Infinite Grimm](https://github.co
 
 Note about copyright:
 
-All files with the exception of PlayMakerFSMExtensions.cs are copyright under the Gnu Public License Version 3 (see LICENSE).
+[REALLY IMPORTANT but Redacted point]
 
 FsmUtil originally by KDT and obtained from 56's Mantis God's repository. Used in accordance with the Gnu Public License Version 3
 
