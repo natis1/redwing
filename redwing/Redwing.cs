@@ -67,7 +67,8 @@ namespace redwing
 
         private void AddComponent()
         {
-            
+            GameManager.instance.gameObject.AddComponent<RedwingPseudoFSM>();
+
             //GameManager.instance.gameObject.AddComponent<GrimmChild>();
             //GameManager.instance.gameObject.AddComponent<GrimmballFireReal>();
         }
