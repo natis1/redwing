@@ -79,6 +79,12 @@ namespace redwing
             throw new NotImplementedException();
         }
 
+
+        private void classifiedAnimeFlight()
+        {
+
+        }
+
         
 
 
