@@ -9,10 +9,8 @@ namespace redwing
     public class redwing : Mod <redwingSettings, redwingGlobalSettings>, ITogglableMod
     {
 
-        public static string version = "0.1.0";
+        public static string version = "0.0.3";
         public readonly int loadOrder = 90;
-        public bool IGAvailable;
-        public static bool usingIG;
 
         // Version detection code originally by Seanpr, used with permission.
         public override string GetVersion()
@@ -24,7 +22,7 @@ namespace redwing
             bool noModCommon = !(from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "ModCommon" select type).Any();
 
             if (apiTooLow) ver += " (Error: ModAPI too old)";
-            if (noModCommon) ver += " (Error: Grimmchild Upgrades requires ModCommon)";
+            if (noModCommon) ver += " (Error: Redwing requires ModCommon)";
 
             return ver;
         }
@@ -33,7 +31,6 @@ namespace redwing
         {
             ModHooks.Instance.AfterSavegameLoadHook += SaveGame;
             ModHooks.Instance.NewGameHook += AddComponent;
-            
 
             ModHooks.Instance.ApplicationQuitHook += SaveGlobalSettings;
         }
@@ -67,10 +64,8 @@ namespace redwing
 
         private void AddComponent()
         {
-            GameManager.instance.gameObject.AddComponent<RedwingPseudoFSM>();
-
-            //GameManager.instance.gameObject.AddComponent<GrimmChild>();
-            //GameManager.instance.gameObject.AddComponent<GrimmballFireReal>();
+            Log("Adding Redwing to game.");
+            GameManager.instance.gameObject.AddComponent<RedwingFlame>();
         }
 
         public override int LoadPriority()
@@ -85,6 +80,12 @@ namespace redwing
             ModHooks.Instance.NewGameHook -= AddComponent;
             
         }
-        
+
+        new public void Log(String str)
+        {
+            Modding.Logger.Log("[Redwing] " + str);
+        }
+
+
     }
 }
