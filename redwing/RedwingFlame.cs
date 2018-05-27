@@ -146,8 +146,8 @@ namespace redwing
                     int offset = i % INTERPOLATE_DEGREES;
                     double avgWeighting = (double)offset / INTERPOLATE_DEGREES;
 
-
-
+                    radialIntensity400[i] = radialIntensity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
+                    radialOpacity400[i] = radialOpacity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
                 }
             }
 
