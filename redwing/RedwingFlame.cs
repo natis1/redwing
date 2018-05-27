@@ -12,11 +12,11 @@ namespace redwing
         public GameObject canvas;
 
 
-        private readonly int TEXTURE_WIDTH = 400;
-        private readonly int TEXTURE_HEIGHT = 400;
-        private readonly int TEXTURE_WMIDPOINT = 200;
-        private readonly int TEXTURE_HMIDPOINT = 200;
-        private readonly int INTERPOLATE_DEGREES = 8;
+        private readonly int TEXTURE_WIDTH = 800;
+        private readonly int TEXTURE_HEIGHT = 800;
+        private readonly int TEXTURE_WMIDPOINT = 400;
+        private readonly int TEXTURE_HMIDPOINT = 400;
+        private readonly int INTERPOLATE_DEGREES = 12;
 
         public readonly Color[] flameIntensityCurve = { Color.red, new Color(1f, 0.3f, 0f), Color.yellow, Color.white };
 
@@ -53,10 +53,10 @@ namespace redwing
 
             //SpriteRenderer rend = plane.AddComponent<SpriteRenderer>();
             
-            Sprite renderSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(300, 300));
+            Sprite renderSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0, 0));
             //rend.sprite = renderSprite;
 
-            canvas = CanvasUtil.CreateImagePanel(plane, renderSprite, new CanvasUtil.RectData(new Vector2(400f, 400f), new Vector2(300f, 300f) ));
+            canvas = CanvasUtil.CreateImagePanel(plane, renderSprite, new CanvasUtil.RectData(new Vector2(TEXTURE_WIDTH, TEXTURE_HEIGHT), new Vector2(600f, 200f) ));
 
             // make it able to be walked on 
             //plane.tag = "HeroWalkable";
@@ -117,13 +117,13 @@ namespace redwing
             System.Random rng = new System.Random();
             if (tex == null)
             {
-                tex = new Texture2D(400, 400);
+                tex = new Texture2D(TEXTURE_WIDTH, TEXTURE_HEIGHT);
             }
             double[] radialIntensity400 = new double[360];
             double[] radialOpacity400 = new double[360];
 
             // Generation
-            for (int i = 0; i < 355; i++)
+            for (int i = 0; i < 360 - INTERPOLATE_DEGREES; i++)
             {
                 if (i % INTERPOLATE_DEGREES == 0)
                 {
@@ -131,30 +131,39 @@ namespace redwing
                     radialOpacity400[i] = rng.NextDouble();
 
                     // because c# sucks NextDouble can't return arbitrary numbers
-                    // so apply a transformation to map radialIntensity400 -> 1-1.5
-                    // and radialOpacity400 -> -0.4 - 0.4
-                    radialIntensity400[i] = (radialIntensity400[i] * 0.5) + 1.0;
-                    radialOpacity400[i] = (radialOpacity400[i] * 0.8) - 0.4;
+                    // so apply a transformation to map radialIntensity400 -> 0-1.5
+                    // and radialOpacity400 -> -0.3 - 0
+                    radialIntensity400[i] = (radialIntensity400[i] * 1.5);
+                    radialOpacity400[i] = (radialOpacity400[i] * 0.3) - 0.3;
                 }
             }
 
             // Interpolation (to avoid really crazy looking balls)
-            for (int i = 0; i < 355; i++)
+            for (int i = 0; i < 360 - INTERPOLATE_DEGREES; i++)
             {
                 if (i % INTERPOLATE_DEGREES != 0)
                 {
                     int offset = i % INTERPOLATE_DEGREES;
-                    double avgWeighting = (double)offset / INTERPOLATE_DEGREES;
+                    double avgWeighting = (double)offset / (double)INTERPOLATE_DEGREES;
 
                     radialIntensity400[i] = radialIntensity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
                     radialOpacity400[i] = radialOpacity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
                 }
             }
-
-
-            for (int x = 0; x < 400; x++)
+            // Interpolation (but it wraps around)
+            for (int i = 360 - INTERPOLATE_DEGREES; i < 360; i++)
             {
-                for (int y = 0; y < 400; y++)
+                int offset = i % INTERPOLATE_DEGREES;
+                double avgWeighting = (double)offset / (double)INTERPOLATE_DEGREES;
+
+                radialIntensity400[i] = radialIntensity400[0] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
+                radialOpacity400[i] = radialOpacity400[0] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
+
+            }
+            // Actually set the colors
+            for (int x = 0; x < TEXTURE_WIDTH; x++)
+            {
+                for (int y = 0; y < TEXTURE_HEIGHT; y++)
                 {
                     int angel = getNearestAngel(x, y);
                     tex.SetPixel(x, y, getFireColor(getDistance(x, y), radialIntensity400[angel], radialOpacity400[angel]));
@@ -199,7 +208,7 @@ namespace redwing
 
         public double getRealOpacity(double distance, double opacity400)
         {
-            double averageWeighting = distance / 200.0;
+            double averageWeighting = distance / (double) TEXTURE_HMIDPOINT;
             double opactReal = opacity400 * averageWeighting + ((1.0 - averageWeighting) * 1.6);
             if (opactReal < 0.0)
             {
@@ -213,7 +222,7 @@ namespace redwing
 
         public double getRealIntensity(double distance, double intensity400)
         {
-            double averageWeighting = distance / 200.0;
+            double averageWeighting = distance / (double)TEXTURE_HMIDPOINT;
             double intenReal = intensity400 * averageWeighting + ((1.0 - averageWeighting) * 4.0);
             if (intenReal < 0.0)
             {
