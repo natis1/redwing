@@ -152,7 +152,7 @@ namespace redwing
 
         public void Update()
         {
-            sceneTimer++;
+            //sceneTimer++;
 
             if (sceneTimer % 30 == 0)
             {
@@ -188,10 +188,10 @@ namespace redwing
 
         private void Reset(Scene arg0, LoadSceneMode arg1)
         {
-            sceneTimer = 0;
+            sceneTimer = 1;
             currentImg = 0;
             Log("PLACING BUILD IMAGE SOMEWHERE");
-            PlaceTextureSomewhere();
+            //PlaceTextureSomewhere();
 
 
         }
