@@ -65,7 +65,7 @@ namespace redwing
         private void AddComponent()
         {
             Log("Adding Redwing to game.");
-            GameManager.instance.gameObject.AddComponent<RedwingFlame>();
+            GameManager.instance.gameObject.AddComponent<RedwingFlameGen>();
         }
 
         public override int LoadPriority()
