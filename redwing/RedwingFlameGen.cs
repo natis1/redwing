@@ -144,10 +144,11 @@ namespace redwing
             //soundFXClip[1] = new AudioClip();
             //soundFXClip[0] = AudioClip.Create("fireball1", AUDIO_SAMPLE_HZ * 2, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
             soundFXClip[1] = AudioClip.Create("fireball2meme", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
-            soundFXClip[1].SetData(generateFBSound(AUDIO_SAMPLE_HZ * 10), 0);
+            //soundFXClip[1].SetData(generateFBSound(AUDIO_SAMPLE_HZ * 10), 0);
+            soundFXClip[1].SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 10), 0);
             //soundFXClip[2] = AudioClip.Create("fireball3", AUDIO_SAMPLE_HZ * 5, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
             //soundFXClip[3] = AudioClip.Create("fireball4", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
-            
+
         }
 
         private float[] generatePinkNoise(float volume, float[] fx)
@@ -223,10 +224,13 @@ namespace redwing
             try
             {
                 //fx = generateNoise(0.9, 100.0, 10000, 15.0, fx);
-                fx = generatePinkNoise(0.7f, fx);
-                fx = generateNoiseAtHZ(1.2, 160, fx, 0, fx.Length);
-                fx = generateNoiseAtHZ(1.0, 100, fx, 0, fx.Length);
-                fx = generateNoiseAtHZ(1.5, 50, fx, 0, fx.Length);
+                //fx = generatePinkNoise(0.7f, fx);
+                //fx = generateNoiseAtHZ(1.2, 160, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(1.0, 100, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(1.5, 50, fx, 0, fx.Length);
+                fx = generateWhiteNoise(1.0, 0, fx.Length, fx);
+                fx = generateNoiseAtHZ(2.0, 4000, fx, 0, fx.Length);
+
                 fx = normalizeVolume(fx);
                 Log("Made fireball sound without error");
 
@@ -238,6 +242,96 @@ namespace redwing
             }
         }
 
+        private float[] generateLaserSound(int length)
+        {
+            float[] fx = new float[length];
+            return generateLaserSound(fx);
+        }
+
+        private float[] generateLaserSound(float[] fx)
+        {
+            try
+            {
+                //fx = generateNoise(0.9, 100.0, 10000, 15.0, fx);
+                //fx = generatePinkNoise(0.7f, fx);
+                //fx = generateNoiseAtHZ(1.2, 160, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(1.0, 100, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(1.5, 50, fx, 0, fx.Length);
+                fx = generateWhiteNoise(6.0, 0, fx.Length, fx);
+
+                fx = generateSawtooth(3.0, 4000, fx, 0, fx.Length);
+                fx = generateSawtooth(2.0, 2000, fx, 0, fx.Length);
+                fx = generateSawtooth(1.0, 1000, fx, 0, fx.Length);
+                fx = generateSawtooth(4.0, 250, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(2.0, 4000, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(1.0, 2000, fx, 0, fx.Length);
+                ///fx = generateNoiseAtHZ(2.0, 1000, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(1.0, 500, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(2.0, 250, fx, 0, fx.Length);
+
+                fx = normalizeVolume(fx);
+                Log("Made fireball sound without error");
+
+                return fx;
+            }
+            catch (Exception e)
+            {
+                Log("Unable to make sound because " + e);
+                return null;
+            }
+        }
+
+        private float[] lowPassFilter(double frequency, float[] fx)
+        {
+
+            return fx;
+        }
+
+        private float[] speedUpEffect(double speed, float[] fx)
+        {
+            float[] speededFX = new float[fx.Length];
+
+            for (int i = 0; i < fx.Length; i++)
+            {
+                double realPosition = i * speed;
+                int positionRoundedDown = (int)realPosition;
+                double weighting = realPosition % 1.0;
+                if (positionRoundedDown + 1 < fx.Length)
+                {
+                    speededFX[i] = (float)(((1.0 - weighting) * fx[positionRoundedDown]) + (weighting * fx[positionRoundedDown + 1]));
+
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return speededFX;
+        }
+
+
+        private float[] generateExplosionSound(double volume, float[] fx)
+        {
+            float[] pass1 = speedUpEffect(1.5, fx);
+            pass1 = fadeAudio(0.0, 0, (int) (pass1.Length / 1.5), pass1);
+            float[] pass2 = speedUpEffect(1.5, pass1);
+            pass2 = fadeAudio(0.0, 0, (int)(pass2.Length / 2.25), pass2);
+            float[] pass3 = speedUpEffect(1.5, pass2);
+
+            fx = lowPassFilter(100.0, fx);
+            pass1 = lowPassFilter(200.0, pass1);
+            pass2 = lowPassFilter(400.0, pass2);
+            
+
+            // merge effects
+            for (int i = 0; i < fx.Length; i++)
+            {
+                fx[i] = fx[i] + pass1[i] + pass2[i] + pass3[i];
+            }
+
+            return fx;
+        }
 
 
         private float[] fadeAudio(double fadeVolume, int startTime, int endFade, float[] fx)
@@ -270,7 +364,67 @@ namespace redwing
             return fx;
         }
 
+        private float[] generateWhiteNoise(double volume, int startTime, int endTime, float[] fx)
+        {
+            try
+            {
+                for (int i = startTime; i < endTime; i++)
+                {
+                    double r = rng.NextDouble() * 2.0 - 1.0;
+                    fx[i] += (float) (r * volume);
+                }
+            }
+            catch (Exception e)
+            {
+                Log("Unable to generate white noise from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
+            }
 
+            return fx;
+        }
+
+        private float[] generateSawtooth(double volume, double frequency, float[] fx)
+        {
+            return generateSawtooth(volume, frequency, fx, 0, fx.Length);
+        }
+
+        private float[] generateSawtooth(double volume, double frequency, float[] fx, int startTime, int endTime)
+        {
+            // get number of samples that a pitch lasts
+            double pitchTime = AUDIO_SAMPLE_HZ / frequency;
+
+            // Don't generate every frequency at the same point
+            // Gotta pick random ones.
+            double randomOffset = rng.NextDouble() * pitchTime;
+
+            bool inverseData = false;
+            double doInverse = rng.NextDouble();
+            if (doInverse >= 0.5)
+            {
+                inverseData = true;
+            }
+
+            
+
+            try
+            {
+                for (int i = startTime; i < endTime; i++)
+                {
+                    double currentPos = (double)i + randomOffset;
+                    double currentVal = 2 * (currentPos % pitchTime) / pitchTime;
+                    if (inverseData)
+                    {
+                        currentVal *= -1;
+                    }
+                    fx[i] += (float) (currentVal * volume);
+
+                }
+            } catch (Exception e)
+            {
+                Log("Unable to generate sawtooth from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
+            }
+
+            return fx;
+        }
 
         private float[] generateNoise(double volume, double freqMin, double freqMax,
             double freqInterval, float[] fx)
