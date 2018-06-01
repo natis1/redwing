@@ -25,6 +25,13 @@ namespace redwing
 
         // bullshit number picked because all the cool kids are doing it
         private readonly int AUDIO_SAMPLE_HZ = 44100;
+
+
+        long[] pink_Rows = new long[30];
+        long pink_RunningSum;   /* Used to optimize summing of generators. */
+        float pink_Scalar;       /* Used to scale within range of -1.0 to +1.0 */
+        int pink_IndexMask = (1 << 30) - 1;
+        int pink_Index;
         //private readonly 
 
 
@@ -113,9 +120,9 @@ namespace redwing
 
             GameManager.instance.StartCoroutine(GetHeroFSMs());
 
-            ModHooks.Instance.DashPressedHook += checkFireBalls;
+            //ModHooks.Instance.DashPressedHook += checkFireBalls;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += Reset;
-            ModHooks.Instance.OnGetEventSenderHook -= FireSoul;
+            //ModHooks.Instance.OnGetEventSenderHook += FireSoul;
         }
 
         private GameObject FireSoul(GameObject go, Fsm fsm)
@@ -136,11 +143,73 @@ namespace redwing
         {
             //soundFXClip[1] = new AudioClip();
             //soundFXClip[0] = AudioClip.Create("fireball1", AUDIO_SAMPLE_HZ * 2, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
-            soundFXClip[1] = AudioClip.Create("fireball2meme", AUDIO_SAMPLE_HZ * 20, 1, AUDIO_SAMPLE_HZ, false);
-            soundFXClip[1].SetData(generateFBSound(AUDIO_SAMPLE_HZ * 20), 0);
+            soundFXClip[1] = AudioClip.Create("fireball2meme", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
+            soundFXClip[1].SetData(generateFBSound(AUDIO_SAMPLE_HZ * 10), 0);
             //soundFXClip[2] = AudioClip.Create("fireball3", AUDIO_SAMPLE_HZ * 5, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
             //soundFXClip[3] = AudioClip.Create("fireball4", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
             
+        }
+
+        private float[] generatePinkNoise(float volume, float[] fx)
+        {
+            pink_Index = 0;
+            pink_Scalar = 1.0f / (31.0f * (1 << (24 - 1)));
+            pink_RunningSum = 0;
+
+            try
+            {
+                for (int i = 0; i < fx.Length; i++)
+                {
+                    fx[i] = generatePinkValue() * volume;
+                }
+            } catch (Exception e)
+            {
+                Log("Error building pink noise " + e);
+            }
+
+
+            return fx;
+        }
+
+        private float generatePinkValue()
+        {
+            float f;
+            long sum;
+            long newRandom;
+            pink_Index = (pink_Index++) & pink_IndexMask;
+            if (pink_Index != 0)
+            {
+                int numZeros = 0;
+                int n = pink_Index;
+                while ( (n & 1) == 0)
+                {
+                    n = n >> 1;
+                    numZeros++;
+                }
+
+                pink_RunningSum -= pink_Rows[numZeros];
+                newRandom = rng.Next(int.MinValue, int.MaxValue);
+                newRandom = (newRandom << 32);
+                newRandom = newRandom | (long)rng.Next(int.MinValue, int.MaxValue);
+                pink_RunningSum += newRandom;
+                pink_Rows[numZeros] = newRandom;
+
+            }
+
+            newRandom = rng.Next(int.MinValue, int.MaxValue);
+            newRandom = (newRandom << 32);
+            newRandom = newRandom | (long)rng.Next(int.MinValue, int.MaxValue);
+            sum = pink_RunningSum + newRandom;
+
+            f = pink_Scalar * sum;
+            if (f > 1.0)
+            {
+                f = 1.0f;
+            } else if (f < -1.0)
+            {
+                f = 1.0f;
+            }
+            return f;
         }
 
         private float[] generateFBSound(int length)
@@ -153,8 +222,11 @@ namespace redwing
         {
             try
             {
-                fx = generateNoise(0.9, 100.0, 10000, 15.0, fx);
-                fx = generateNoise(0.9, 20, 400, 2, fx);
+                //fx = generateNoise(0.9, 100.0, 10000, 15.0, fx);
+                fx = generatePinkNoise(0.7f, fx);
+                fx = generateNoiseAtHZ(1.2, 160, fx, 0, fx.Length);
+                fx = generateNoiseAtHZ(1.0, 100, fx, 0, fx.Length);
+                fx = generateNoiseAtHZ(1.5, 50, fx, 0, fx.Length);
                 fx = normalizeVolume(fx);
                 Log("Made fireball sound without error");
 
@@ -368,6 +440,7 @@ namespace redwing
             //sceneTimer++;
             if (currentImg == 0 && voidKnight != null)
             {
+                Log("Playing audio...");
                 AudioSource.PlayClipAtPoint(soundFXClip[1], voidKnight.transform.position);
                 currentImg = 1;
             } else if (voidKnight == null)

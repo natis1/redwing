@@ -61,9 +61,10 @@
     <Compile Include="FsmUtil.cs" />
     <Compile Include="PlayMakerFSMExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RedAudioSerial.cs" />
     <Compile Include="Redwing.cs" />
     <Compile Include="Greymoth.cs" />
-    <Compile Include="RedwingFlame.cs" />
+    <Compile Include="RedwingFlameGen.cs" />
     <Compile Include="RedwingSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
