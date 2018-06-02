@@ -18,7 +18,9 @@ namespace redwing
         Texture2D[] fireSpikes = new Texture2D[16];
 
         AudioSource soundPlayer;
-        AudioClip[] soundFXClip = new AudioClip[4];
+        AudioClip[] soundFXClip = new AudioClip[3];
+        private readonly int TESTING_CLIP = 2;
+        int boopTimer;
 
 
         //float[][] soundEffects = new float[4][];
@@ -42,7 +44,7 @@ namespace redwing
 
         
 
-        private GameObject voidKnight;
+        private HeroController voidKnight;
         private GameObject sharpShadow;
         private PlayMakerFSM sharpShadowFSM;
 
@@ -103,21 +105,9 @@ namespace redwing
             Log("BUILD IMAGE SUCCESS ATTEMPTING TO SAVE");
             GenerateSoundEffects();
 
-            Log("Music made! attempting to play");
-
-            try
-            {
-                
-                
-
-            }
-            catch (Exception e)
-            {
-                Log("Unable to play clip because " + e);
-            }
-            //RedAudioSerial a = new RedAudioSerial();
-            //                Log("Soundplayer loaded with " + soundPlayer.clip.name + " and playing at volume " + soundPlayer.volume + " and is muted " + soundPlayer.mute);
-
+            //Log("Music made! attempting to play");
+            //ModHooks.Instance.SlashHitHook += BoopOnHit;
+            
             GameManager.instance.StartCoroutine(GetHeroFSMs());
 
             //ModHooks.Instance.DashPressedHook += checkFireBalls;
@@ -139,16 +129,63 @@ namespace redwing
             return go;
         }
 
+
+
+        //for testing only
+
+        IEnumerator VolumeFade(AudioSource _AudioSource, float waitTime)
+        {
+            float _StartTime = Time.time;
+            waitTime = waitTime + _StartTime;
+            while (_StartTime < waitTime)
+            {
+                _StartTime = Time.time;
+                yield return null;
+            }
+            _AudioSource.Stop();
+
+        }
+
+
+
+        void BoopOnHit(Collider2D otherCollider, GameObject gameObject)
+        {
+            if (voidKnight == null || voidKnight != HeroController.instance)
+                return;
+
+
+            if (boopTimer <= 0)
+            {
+                voidKnight.GetComponent<AudioSource>().volume = 1.0f;
+                voidKnight.GetComponent<AudioSource>().PlayOneShot(soundFXClip[TESTING_CLIP]);
+                StartCoroutine(VolumeFade(voidKnight.GetComponent<AudioSource>(), 1.1f));
+                boopTimer = 10;
+                Log("playing boop! " + gameObject.name);
+            }
+        }
+
         private void GenerateSoundEffects()
         {
-            //soundFXClip[1] = new AudioClip();
-            //soundFXClip[0] = AudioClip.Create("fireball1", AUDIO_SAMPLE_HZ * 2, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
-            soundFXClip[1] = AudioClip.Create("fireball2meme", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
-            //soundFXClip[1].SetData(generateFBSound(AUDIO_SAMPLE_HZ * 10), 0);
-            soundFXClip[1].SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 10), 0);
-            //soundFXClip[2] = AudioClip.Create("fireball3", AUDIO_SAMPLE_HZ * 5, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
-            //soundFXClip[3] = AudioClip.Create("fireball4", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false, generateFBSound);
+            soundFXClip[0] = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
+            soundFXClip[0].SetData(generateFBSound((int)(AUDIO_SAMPLE_HZ * 1.0) + 30000), 0);
 
+            soundFXClip[1] = AudioClip.Create("laser1", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
+            soundFXClip[1].SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 10), 0);
+
+            soundFXClip[2] = AudioClip.Create("shieldwavy", AUDIO_SAMPLE_HZ * 3, 1, AUDIO_SAMPLE_HZ, false);
+            soundFXClip[2].SetData(generateShieldSound(AUDIO_SAMPLE_HZ * 3), 0);
+
+        }
+
+        private float[] generateShieldSound(int length)
+        {
+            float[] fx = new float[length];
+
+            fx = generateNoiseAtHZ(0.06, 127.666, fx, 0, fx.Length);
+            fx = generateNoiseAtHZ(0.01, 128, fx, 0, fx.Length);
+            //fx = generateWhiteNoise(0.03, 0, fx.Length, fx);
+            fx = normalizeVolume(fx);
+            return fx;
         }
 
         private float[] generatePinkNoise(float volume, float[] fx)
@@ -223,13 +260,20 @@ namespace redwing
         {
             try
             {
-                //fx = generateNoise(0.9, 100.0, 10000, 15.0, fx);
-                //fx = generatePinkNoise(0.7f, fx);
-                //fx = generateNoiseAtHZ(1.2, 160, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(1.0, 100, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(1.5, 50, fx, 0, fx.Length);
-                fx = generateWhiteNoise(1.0, 0, fx.Length, fx);
-                fx = generateNoiseAtHZ(2.0, 4000, fx, 0, fx.Length);
+                float[] fx2 = new float[fx.Length];
+                fx2 = generateWhiteNoise(2.0, 0, fx2.Length, fx2);
+                fx2 = lowPassFilter(170, fx2);
+                
+                fx = highPitchExplosionSound(1.0, fx);
+
+                fx = normalizeVolume(fx);
+                
+                for (int i = 0; i < fx.Length; i++)
+                {
+                    fx[i] = fx[i] + fx2[i];
+                }
+
+                fx = fadeAudio(0.0, fx.Length - 34000, fx.Length - 30000, fx);
 
                 fx = normalizeVolume(fx);
                 Log("Made fireball sound without error");
@@ -281,8 +325,90 @@ namespace redwing
             }
         }
 
+        // this is stupid and can't possibly work.
+        private float[] stupidLowPassFilter(float[] fx)
+        {
+            float f = 0;
+            float f2 = 0;
+            for (int i = 0; i < fx.Length; i++)
+            {
+                f = fx[i];
+                fx[i] = f2 + fx[i];
+                f2 = f;
+            }
+
+            return fx;
+        }
+
+
+        // code mostly stolen from here: https://www.codeproject.com/tips/1092012/a-butterworth-filter-in-csharp
+        // which is using a very permissive license that I can modify.
+        // how the fuck does this work.
         private float[] lowPassFilter(double frequency, float[] fx)
         {
+
+            //double Samplingrate = 1 / (double)AUDIO_SAMPLE_HZ;
+            long dF2 = fx.Length - 1;        // The data range is set with dF2
+            float[] Dat2 = new float[dF2 + 4]; // Array with 3 extra points front and back
+            float[] data = fx; // Ptr., changes passed data
+
+            // Copy indata to Dat2
+            for (long r = 0; r < dF2; r++)
+            {
+                Dat2[2 + r] = fx[r];
+            }
+            Dat2[1] = Dat2[0] = fx[0];
+            Dat2[dF2 + 3] = Dat2[dF2 + 2] = fx[dF2];
+            Log("Allocation complete without error");
+
+            double wc = Math.Tan(frequency * Math.PI / ((double)AUDIO_SAMPLE_HZ) );
+            double k1 = 1.414213562 * wc; // Sqrt(2) * wc
+            double k2 = wc * wc;
+            double a = k2 / (1 + k1 + k2);
+            double b = 2 * a;
+            double c = a;
+            double k3 = b / k2;
+            double d = -2 * a + k3;
+            double e = 1 - (2 * a) - k3;
+
+            // RECURSIVE TRIGGERS - ENABLE filter is performed (first, last points constant)
+            float[] DatYt = new float[dF2 + 4];
+            DatYt[1] = DatYt[0] = fx[0];
+            for (long s = 2; s < dF2 + 2; s++)
+            {
+                DatYt[s] = (float)(a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2]
+                           + d * DatYt[s - 1] + e * DatYt[s - 2]);
+            }
+            DatYt[dF2 + 3] = DatYt[dF2 + 2] = DatYt[dF2 + 1];
+
+            Log("Recursive triggers complete");
+
+            // FORWARD filter
+            float[] DatZt = new float[dF2 + 2];
+            DatZt[dF2] = DatYt[dF2 + 2];
+            DatZt[dF2 + 1] = DatYt[dF2 + 3];
+            for (long t = -dF2 + 1; t <= 0; t++)
+            {
+                DatZt[-t] = (float)(a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4]
+                            + d * DatZt[-t + 1] + e * DatZt[-t + 2]);
+            }
+            Log("Recursive triggers complete");
+
+            // Calculated points copied for return
+            for (long p = 0; p < dF2; p++)
+            {
+                data[p] = DatZt[p];
+            }
+
+            return fx;
+        }
+
+        private float[] amplifyAudio(double volume, float[] fx)
+        {
+            for (int i = 0; i < fx.Length; i++)
+            {
+                fx[i] *= (float) volume;
+            }
 
             return fx;
         }
@@ -311,24 +437,51 @@ namespace redwing
         }
 
 
-        private float[] generateExplosionSound(double volume, float[] fx)
+        private float[] highPitchExplosionSound(double volume, float[] fx)
         {
+            // we ideally make the original super loud to avoid having to do boosting.
+            fx = generateWhiteNoise(volume, 0, fx.Length, fx);
+            fx = fadeAudio(0.0, 0, fx.Length, fx);
             float[] pass1 = speedUpEffect(1.5, fx);
             pass1 = fadeAudio(0.0, 0, (int) (pass1.Length / 1.5), pass1);
             float[] pass2 = speedUpEffect(1.5, pass1);
             pass2 = fadeAudio(0.0, 0, (int)(pass2.Length / 2.25), pass2);
             float[] pass3 = speedUpEffect(1.5, pass2);
 
+            //18dB
             fx = lowPassFilter(100.0, fx);
-            pass1 = lowPassFilter(200.0, pass1);
-            pass2 = lowPassFilter(400.0, pass2);
-            
+            fx = stupidLowPassFilter(fx);
+            fx = amplifyAudio(4.8, fx);
+
+            //fx = lowPassFilter(100.0, fx);
+            //fx = amplifyAudio(1.5, fx);
+            //pass1 = lowPassFilter(200.0, pass1);
+            //pass1 = lowPassFilter(200.0, pass1);
+            // 22dB
+            pass1 = stupidLowPassFilter(pass1);
+            pass1 = stupidLowPassFilter(pass1);
+            pass1 = amplifyAudio(3.2, pass1);
+
+            // 16dB
+            pass2 = stupidLowPassFilter(pass2);
+            //pass2 = lowPassFilter(400.0, pass2);
+            pass2 = amplifyAudio(2.6, pass2);
+
+            // 14dB
+            pass3 = lowPassFilter(800.0, pass3);
+            pass3 = amplifyAudio(3.4, pass3);
 
             // merge effects
+
+            
             for (int i = 0; i < fx.Length; i++)
             {
                 fx[i] = fx[i] + pass1[i] + pass2[i] + pass3[i];
             }
+            fx = amplifyAudio(2.0, fx);
+
+
+            fx = fadeAudio(0.0, (int)(fx.Length / 1.5), fx.Length, fx);
 
             return fx;
         }
@@ -344,7 +497,8 @@ namespace redwing
                 {
                     double fadeAmount = (i - startTime) / ((double)(endFade - startTime));
                     // weighted avg
-                    float actualVolume = (float) ((1.0 - fadeAmount) + fadeAmount * fadeVolume);
+                    double weightedVol = ((1.0 - fadeAmount) + fadeAmount * fadeVolume);
+                    float actualVolume = (float)(Math.Pow(weightedVol, 2.0));
 
                     fx[i] *= actualVolume;
                 }
@@ -505,6 +659,8 @@ namespace redwing
                 {
                     fx[i] /= maxVolume;
                 }
+                Log("Normalized volume by reducing it by a factor of " + maxVolume);
+                Log("This means <" + Math.Log10(maxVolume) / Math.Log10(2.0) + " bits of entropy out of 16 lost");
             } else
             {
                 Log("No volume normalization needed, max volume is only: " + maxVolume);
@@ -592,14 +748,14 @@ namespace redwing
         public void Update()
         {
             //sceneTimer++;
-            if (currentImg == 0 && voidKnight != null)
+            if (voidKnight == null)
             {
-                Log("Playing audio...");
-                AudioSource.PlayClipAtPoint(soundFXClip[1], voidKnight.transform.position);
-                currentImg = 1;
-            } else if (voidKnight == null)
+                voidKnight = HeroController.instance;
+            }
+
+            if (boopTimer > 0)
             {
-                voidKnight = GameObject.Find("Knight");
+                boopTimer--;
             }
 
             attackCooldownUpdate();
