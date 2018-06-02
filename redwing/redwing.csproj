@@ -65,7 +65,7 @@
     <Compile Include="Redwing.cs" />
     <Compile Include="Greymoth.cs" />
     <Compile Include="RedwingFlameGen.cs" />
-    <Compile Include="RedwingFSMs.cs" />
+    <Compile Include="RedwingGOs.cs" />
     <Compile Include="RedwingSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

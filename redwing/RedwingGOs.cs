@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace redwing
 {
-    class RedwingFSMs : MonoBehaviour
+    class RedwingGOs : MonoBehaviour
     {
         public static Texture2D[] fireBalls;
         public static Texture2D[] fireTrails;

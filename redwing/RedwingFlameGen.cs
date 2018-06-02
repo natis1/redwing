@@ -49,8 +49,8 @@ namespace redwing
         private PlayMakerFSM sharpShadowFSM;
 
 
-        private readonly int FBTEXTURE_WIDTH = 800;
-        private readonly int FBTEXTURE_HEIGHT = 800;
+        private readonly int FBTEXTURE_WIDTH = 150;
+        private readonly int FBTEXTURE_HEIGHT = 150;
 
         private readonly int FTTEXTURE_WIDTH = 600;
         private readonly int FTTEXTURE_HEIGHT = 300;
@@ -105,10 +105,10 @@ namespace redwing
             Log("BUILD IMAGE SUCCESS ATTEMPTING TO SAVE");
             GenerateSoundEffects();
 
-            RedwingFSMs.fireBalls = fireBalls;
-            RedwingFSMs.fireLasers = fireSpikes;
-            RedwingFSMs.firePillars = firePillars;
-            RedwingFSMs.fireTrails = fireTrails;
+            RedwingGOs.fireBalls = fireBalls;
+            RedwingGOs.fireLasers = fireSpikes;
+            RedwingGOs.firePillars = firePillars;
+            RedwingGOs.fireTrails = fireTrails;
 
 
             //Log("Music made! attempting to play");
@@ -707,7 +707,7 @@ namespace redwing
                 {
                     if (fbTime <= 0.0)
                     {
-                        RedwingFSMs a = new RedwingFSMs();
+                        RedwingGOs a = new RedwingGOs();
                         a.AddFireballs();
                         fbTime = FB_COOLDOWN;
                     }
@@ -758,7 +758,7 @@ namespace redwing
             if (voidKnight == null)
             {
                 voidKnight = GameObject.Find("Knight");
-                RedwingFSMs.voidKnight = voidKnight;
+                RedwingGOs.voidKnight = voidKnight;
             }
 
             if (boopTimer > 0)
