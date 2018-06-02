@@ -44,7 +44,7 @@ namespace redwing
 
         
 
-        private HeroController voidKnight;
+        private GameObject voidKnight;
         private GameObject sharpShadow;
         private PlayMakerFSM sharpShadowFSM;
 
@@ -105,12 +105,18 @@ namespace redwing
             Log("BUILD IMAGE SUCCESS ATTEMPTING TO SAVE");
             GenerateSoundEffects();
 
+            RedwingFSMs.fireBalls = fireBalls;
+            RedwingFSMs.fireLasers = fireSpikes;
+            RedwingFSMs.firePillars = firePillars;
+            RedwingFSMs.fireTrails = fireTrails;
+
+
             //Log("Music made! attempting to play");
             //ModHooks.Instance.SlashHitHook += BoopOnHit;
             
             GameManager.instance.StartCoroutine(GetHeroFSMs());
 
-            //ModHooks.Instance.DashPressedHook += checkFireBalls;
+            ModHooks.Instance.DashPressedHook += checkFireBalls;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += Reset;
             //ModHooks.Instance.OnGetEventSenderHook += FireSoul;
         }
@@ -701,7 +707,8 @@ namespace redwing
                 {
                     if (fbTime <= 0.0)
                     {
-                        spawnFireballs();
+                        RedwingFSMs a = new RedwingFSMs();
+                        a.AddFireballs();
                         fbTime = FB_COOLDOWN;
                     }
                 } else
@@ -750,7 +757,8 @@ namespace redwing
             //sceneTimer++;
             if (voidKnight == null)
             {
-                voidKnight = HeroController.instance;
+                voidKnight = GameObject.Find("Knight");
+                RedwingFSMs.voidKnight = voidKnight;
             }
 
             if (boopTimer > 0)
