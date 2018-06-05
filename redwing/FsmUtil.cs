@@ -22,7 +22,7 @@ namespace FsmUtil
             return dest;
         }
 
-        private static FieldInfo fsmStringParamsField;
+        private static readonly FieldInfo fsmStringParamsField;
         static FsmUtil()
         {
             FieldInfo[] fieldInfo = typeof(HutongGames.PlayMaker.ActionData).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

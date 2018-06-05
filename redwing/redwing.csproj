@@ -34,13 +34,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\mods\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\mods\Assembly-CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="ModCommon, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\mods\ModCommon.dll</HintPath>
     </Reference>
+    <Reference Include="ModCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\mods\ModCommon.dll</HintPath>
+    </Reference>
     <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\mods\PlayMaker.dll</HintPath>
+    </Reference>
+    <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\mods\PlayMaker.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,9 +61,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\mods\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\mods\UnityEngine.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\mods\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\mods\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -71,9 +86,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>@echo on
-SET MOD_DEST="Z:\Grimm\"
-echo Copying mod
-copy "$(TargetPath)" %25MOD_DEST%25</PostBuildEvent>
+    <PostBuildEvent>echo "Copying mod"
+cp "$(TargetPath)" "/home/eli/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data/Managed/Mods"</PostBuildEvent>
   </PropertyGroup>
 </Project>

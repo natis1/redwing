@@ -4,7 +4,7 @@ namespace redwing
 {
     public class VersionInfo
     {
-        readonly public static int SettingsVer = 1;
+        public static readonly int SettingsVer = 1;
     }
 
     public class redwingGlobalSettings : IModSettings

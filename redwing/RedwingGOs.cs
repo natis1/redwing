@@ -27,7 +27,7 @@ namespace redwing
         public readonly float TRANSFORM_XOFFSET = 2.77f;
 
         GameObject FireballSpawn;
-        GameObject[] FireballsGO = new GameObject[7];
+        readonly GameObject[] FireballsGO = new GameObject[7];
 
         GameObject shield;
         GameObject[] lasers = new GameObject[16];

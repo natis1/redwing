@@ -7,103 +7,105 @@ using ModCommon;
 using HutongGames.PlayMaker;
 using System.Collections;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace redwing
 {
-    class RedwingFlameGen : MonoBehaviour
+    class redwing_flame_gen : MonoBehaviour
     {
-        Texture2D[] fireBalls = new Texture2D[10];
-        Texture2D[] fireTrails = new Texture2D[10];
-        Texture2D[] firePillars = new Texture2D[10];
-        Texture2D[] fireSpikes = new Texture2D[16];
-
-        AudioSource soundPlayer;
-        AudioClip[] soundFXClip = new AudioClip[3];
-        private readonly int TESTING_CLIP = 2;
-        int boopTimer;
+        private readonly Texture2D[] fireBalls = new Texture2D[10];
+        private readonly Texture2D[] fireTrails = new Texture2D[10];
+        private readonly Texture2D[] firePillars = new Texture2D[10];
+        private readonly Texture2D[] fireSpikes = new Texture2D[16];
+        
+        
+        private readonly AudioClip[] soundFxClip = new AudioClip[3];
+        private const int TESTING_CLIP = 2;
+        private int boopTimer;
 
 
         //float[][] soundEffects = new float[4][];
 
         // bullshit number picked because all the cool kids are doing it
-        private readonly int AUDIO_SAMPLE_HZ = 44100;
+        private const int AUDIO_SAMPLE_HZ = 44100;
 
 
-        long[] pink_Rows = new long[30];
-        long pink_RunningSum;   /* Used to optimize summing of generators. */
-        float pink_Scalar;       /* Used to scale within range of -1.0 to +1.0 */
-        int pink_IndexMask = (1 << 30) - 1;
-        int pink_Index;
+        private readonly long[] pinkRows = new long[30];
+        private long pinkRunningSum;   /* Used to optimize summing of generators. */
+        private float pinkScalar;       /* Used to scale within range of -1.0 to +1.0 */
+        private const int PINK_INDEX_MASK = (1 << 30) - 1;
+
+        private int pinkIndex;
         //private readonly 
 
 
 
         public GameObject plane;
         public GameObject canvas;
-        System.Random rng;
+        private System.Random rng;
 
         
 
         private GameObject voidKnight;
         private GameObject sharpShadow;
-        private PlayMakerFSM sharpShadowFSM;
+        private PlayMakerFSM sharpShadowFsm;
 
 
-        private readonly int FBTEXTURE_WIDTH = 150;
-        private readonly int FBTEXTURE_HEIGHT = 150;
+        private const int FBTEXTURE_WIDTH = 150;
+        private const int FBTEXTURE_HEIGHT = 150;
 
-        private readonly int FTTEXTURE_WIDTH = 600;
-        private readonly int FTTEXTURE_HEIGHT = 300;
+        private const int FTTEXTURE_WIDTH = 600;
+        private const int FTTEXTURE_HEIGHT = 300;
 
-        private readonly int FPTEXTURE_WIDTH = 500;
-        private readonly int FPTEXTURE_HEIGHT = 1080;
+        private const int FPTEXTURE_WIDTH = 500;
+        private const int FPTEXTURE_HEIGHT = 1080;
 
-        private readonly int FSTEXTURE_WIDTH = 40;
-        private readonly int FSTEXTURE_HEIGHT = 500;
+        private const int FSTEXTURE_WIDTH = 40;
+        private const int FSTEXTURE_HEIGHT = 500;
 
-        public readonly double OPACITY_MASK = 1.0;
+        private const double OPACITY_MASK = 1.0;
 
         public int sceneTimer;
         public int currentImg;
 
-        private readonly double FB_COOLDOWN = 3.0f;
+        private readonly double fbCooldown = 3.0f;
         private double fbTime = 0.0;
 
         // pick a factor of 360
-        private readonly int INTERPOLATE_DEGREES = 18;
+        private const int INTERPOLATE_DEGREES = 18;
 
         // pick a factor of FTTEXTURE_WIDTH
-        private readonly int FT_INTERPOLATE_PIXELS = 60;
+        private const int FT_INTERPOLATE_PIXELS = 60;
 
         // pick a factor of FPTEXTURE_HEIGHT
-        private readonly int FP_INTERPOLATE_PIXELS = 40;
+        private const int FP_INTERPOLATE_PIXELS = 40;
 
         // pick a factor of FSTEXTURE_HEIGHT
-        private readonly int FS_INTERPOLATE_PIXELS = 50;
+        private const int FS_INTERPOLATE_PIXELS = 50;
 
         //public readonly Color[] flameIntensityCurve = { Color.red, new Color(1f, 0.3f, 0f), Color.yellow, Color.white };
 
         // What are the fire colors anyway?
-        public readonly Color[] flameIntensityCurve = { Color.red, Color.yellow, Color.white, Color.white };
+        private readonly Color[] flameIntensityCurve = { Color.red, Color.yellow, Color.white, Color.white };
 
         // At what point do you switch from color X to color Y.
-        public readonly double[] flameIntensityThresholds = { 0.4, 0.7, 2.5, 2.6 };
+        private readonly double[] flameIntensityThresholds = { 0.4, 0.7, 2.5, 2.6 };
 
 
         public void OnDestroy()
         {
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= Reset;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= (arg0, arg1) => Reset();
             ModHooks.Instance.DashPressedHook -= checkFireBalls;
-            ModHooks.Instance.OnGetEventSenderHook -= FireSoul;
+            ModHooks.Instance.OnGetEventSenderHook -= fireSoul;
         }
 
         public void Start()
         {
             rng = new System.Random();
-            Log("ATTEMPTING TO BUILD IMAGE");
-            GenerateFlameTextures();
-            Log("BUILD IMAGE SUCCESS ATTEMPTING TO SAVE");
-            GenerateSoundEffects();
+            log("ATTEMPTING TO BUILD IMAGE");
+            generateFlameTextures();
+            log("BUILD IMAGE SUCCESS ATTEMPTING TO SAVE");
+            generateSoundEffects();
 
             RedwingGOs.fireBalls = fireBalls;
             RedwingGOs.fireLasers = fireSpikes;
@@ -114,22 +116,22 @@ namespace redwing
             //Log("Music made! attempting to play");
             //ModHooks.Instance.SlashHitHook += BoopOnHit;
             
-            GameManager.instance.StartCoroutine(GetHeroFSMs());
+            GameManager.instance.StartCoroutine(getHeroFsMs());
 
             ModHooks.Instance.DashPressedHook += checkFireBalls;
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += Reset;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (arg0, arg1) => Reset();
             //ModHooks.Instance.OnGetEventSenderHook += FireSoul;
         }
 
-        private GameObject FireSoul(GameObject go, Fsm fsm)
+        private GameObject fireSoul(GameObject go, Fsm fsm)
         {
-            Log("event sent. game object is: " + go.name + " and the fsm is: " + fsm.Name);
+            log("event sent. game object is: " + go.name + " and the fsm is: " + fsm.Name);
             if (go == sharpShadow)
             {
                 PlayMakerFSM hm = FSMUtility.LocateFSM(fsm.GameObject, "health_manager") ?? FSMUtility.LocateFSM(fsm.GameObject, "health_manager_enemy");
                 if (!Equals(hm, null))
                 {
-                    Log("You hit an enemy with sharp shadow. Wow. Awesome...");
+                    log("You hit an enemy with sharp shadow. Wow. Awesome...");
                 }
             }
             return go;
@@ -139,47 +141,45 @@ namespace redwing
 
         //for testing only
 
-        IEnumerator VolumeFade(AudioSource _AudioSource, float waitTime)
+        private static IEnumerator volumeFade(AudioSource audioSource, float waitTime)
         {
-            float _StartTime = Time.time;
-            waitTime = waitTime + _StartTime;
-            while (_StartTime < waitTime)
+            float startTime = Time.time;
+            waitTime = waitTime + startTime;
+            while (startTime < waitTime)
             {
-                _StartTime = Time.time;
+                startTime = Time.time;
                 yield return null;
             }
-            _AudioSource.Stop();
+            audioSource.Stop();
 
         }
 
 
-
-        void BoopOnHit(Collider2D otherCollider, GameObject gameObject)
+        private void boopOnHit(Collider2D otherCollider, GameObject gameObject)
         {
             if (voidKnight == null || voidKnight != HeroController.instance)
                 return;
 
 
-            if (boopTimer <= 0)
-            {
-                voidKnight.GetComponent<AudioSource>().volume = 1.0f;
-                voidKnight.GetComponent<AudioSource>().PlayOneShot(soundFXClip[TESTING_CLIP]);
-                StartCoroutine(VolumeFade(voidKnight.GetComponent<AudioSource>(), 1.1f));
-                boopTimer = 10;
-                Log("playing boop! " + gameObject.name);
-            }
+            if (boopTimer > 0) return;
+            
+            voidKnight.GetComponent<AudioSource>().volume = 1.0f;
+            voidKnight.GetComponent<AudioSource>().PlayOneShot(soundFxClip[TESTING_CLIP]);
+            StartCoroutine(volumeFade(voidKnight.GetComponent<AudioSource>(), 1.1f));
+            boopTimer = 10;
+            log("playing boop! " + gameObject.name);
         }
 
-        private void GenerateSoundEffects()
+        private void generateSoundEffects()
         {
-            soundFXClip[0] = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
-            soundFXClip[0].SetData(generateFBSound((int)(AUDIO_SAMPLE_HZ * 1.0) + 30000), 0);
+            soundFxClip[0] = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
+            soundFxClip[0].SetData(generateFbSound((int)(AUDIO_SAMPLE_HZ * 1.0) + 30000), 0);
 
-            soundFXClip[1] = AudioClip.Create("laser1", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
-            soundFXClip[1].SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 10), 0);
+            soundFxClip[1] = AudioClip.Create("laser1", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
+            soundFxClip[1].SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 10), 0);
 
-            soundFXClip[2] = AudioClip.Create("shieldwavy", AUDIO_SAMPLE_HZ * 3, 1, AUDIO_SAMPLE_HZ, false);
-            soundFXClip[2].SetData(generateShieldSound(AUDIO_SAMPLE_HZ * 3), 0);
+            soundFxClip[2] = AudioClip.Create("shieldwavy", AUDIO_SAMPLE_HZ * 3, 1, AUDIO_SAMPLE_HZ, false);
+            soundFxClip[2].SetData(generateShieldSound(AUDIO_SAMPLE_HZ * 3), 0);
 
         }
 
@@ -187,8 +187,8 @@ namespace redwing
         {
             float[] fx = new float[length];
 
-            fx = generateNoiseAtHZ(0.06, 127.666, fx, 0, fx.Length);
-            fx = generateNoiseAtHZ(0.01, 128, fx, 0, fx.Length);
+            fx = generateNoiseAtHz(0.06, 127.666, fx, 0, fx.Length);
+            fx = generateNoiseAtHz(0.01, 128, fx, 0, fx.Length);
             //fx = generateWhiteNoise(0.03, 0, fx.Length, fx);
             fx = normalizeVolume(fx);
             return fx;
@@ -196,9 +196,9 @@ namespace redwing
 
         private float[] generatePinkNoise(float volume, float[] fx)
         {
-            pink_Index = 0;
-            pink_Scalar = 1.0f / (31.0f * (1 << (24 - 1)));
-            pink_RunningSum = 0;
+            pinkIndex = 0;
+            pinkScalar = 1.0f / (31.0f * (1 << (24 - 1)));
+            pinkRunningSum = 0;
 
             try
             {
@@ -208,7 +208,7 @@ namespace redwing
                 }
             } catch (Exception e)
             {
-                Log("Error building pink noise " + e);
+                log("Error building pink noise " + e);
             }
 
 
@@ -217,35 +217,33 @@ namespace redwing
 
         private float generatePinkValue()
         {
-            float f;
-            long sum;
             long newRandom;
-            pink_Index = (pink_Index++) & pink_IndexMask;
-            if (pink_Index != 0)
+            pinkIndex = (pinkIndex++) & PINK_INDEX_MASK;
+            if (pinkIndex != 0)
             {
                 int numZeros = 0;
-                int n = pink_Index;
+                int n = pinkIndex;
                 while ( (n & 1) == 0)
                 {
                     n = n >> 1;
                     numZeros++;
                 }
 
-                pink_RunningSum -= pink_Rows[numZeros];
+                pinkRunningSum -= pinkRows[numZeros];
                 newRandom = rng.Next(int.MinValue, int.MaxValue);
                 newRandom = (newRandom << 32);
                 newRandom = newRandom | (long)rng.Next(int.MinValue, int.MaxValue);
-                pink_RunningSum += newRandom;
-                pink_Rows[numZeros] = newRandom;
+                pinkRunningSum += newRandom;
+                pinkRows[numZeros] = newRandom;
 
             }
 
             newRandom = rng.Next(int.MinValue, int.MaxValue);
             newRandom = (newRandom << 32);
             newRandom = newRandom | (long)rng.Next(int.MinValue, int.MaxValue);
-            sum = pink_RunningSum + newRandom;
+            long sum = pinkRunningSum + newRandom;
 
-            f = pink_Scalar * sum;
+            float f = pinkScalar * sum;
             if (f > 1.0)
             {
                 f = 1.0f;
@@ -256,13 +254,13 @@ namespace redwing
             return f;
         }
 
-        private float[] generateFBSound(int length)
+        private float[] generateFbSound(int length)
         {
             float[] fx = new float[length];
-            return generateFBSound(fx);
+            return generateFbSound(fx);
         }
 
-        private float[] generateFBSound (float[] fx)
+        private float[] generateFbSound (float[] fx)
         {
             try
             {
@@ -282,12 +280,12 @@ namespace redwing
                 fx = fadeAudio(0.0, fx.Length - 34000, fx.Length - 30000, fx);
 
                 fx = normalizeVolume(fx);
-                Log("Made fireball sound without error");
+                log("Made fireball sound without error");
 
                 return fx;
             } catch (Exception e)
             {
-                Log("Unable to make sound because " + e);
+                log("Unable to make sound because " + e);
                 return null;
             }
         }
@@ -315,30 +313,29 @@ namespace redwing
                 fx = generateSawtooth(4.0, 250, fx, 0, fx.Length);
                 //fx = generateNoiseAtHZ(2.0, 4000, fx, 0, fx.Length);
                 //fx = generateNoiseAtHZ(1.0, 2000, fx, 0, fx.Length);
-                ///fx = generateNoiseAtHZ(2.0, 1000, fx, 0, fx.Length);
+                //fx = generateNoiseAtHZ(2.0, 1000, fx, 0, fx.Length);
                 //fx = generateNoiseAtHZ(1.0, 500, fx, 0, fx.Length);
                 //fx = generateNoiseAtHZ(2.0, 250, fx, 0, fx.Length);
 
                 fx = normalizeVolume(fx);
-                Log("Made fireball sound without error");
+                log("Made fireball sound without error");
 
                 return fx;
             }
             catch (Exception e)
             {
-                Log("Unable to make sound because " + e);
+                log("Unable to make sound because " + e);
                 return null;
             }
         }
 
         // this is stupid and can't possibly work.
-        private float[] stupidLowPassFilter(float[] fx)
+        private static float[] stupidLowPassFilter(float[] fx)
         {
-            float f = 0;
             float f2 = 0;
             for (int i = 0; i < fx.Length; i++)
             {
-                f = fx[i];
+                float f = fx[i];
                 fx[i] = f2 + fx[i];
                 f2 = f;
             }
@@ -355,17 +352,17 @@ namespace redwing
 
             //double Samplingrate = 1 / (double)AUDIO_SAMPLE_HZ;
             long dF2 = fx.Length - 1;        // The data range is set with dF2
-            float[] Dat2 = new float[dF2 + 4]; // Array with 3 extra points front and back
+            float[] dat2 = new float[dF2 + 4]; // Array with 3 extra points front and back
             float[] data = fx; // Ptr., changes passed data
 
             // Copy indata to Dat2
             for (long r = 0; r < dF2; r++)
             {
-                Dat2[2 + r] = fx[r];
+                dat2[2 + r] = fx[r];
             }
-            Dat2[1] = Dat2[0] = fx[0];
-            Dat2[dF2 + 3] = Dat2[dF2 + 2] = fx[dF2];
-            Log("Allocation complete without error");
+            dat2[1] = dat2[0] = fx[0];
+            dat2[dF2 + 3] = dat2[dF2 + 2] = fx[dF2];
+            log("Allocation complete without error");
 
             double wc = Math.Tan(frequency * Math.PI / ((double)AUDIO_SAMPLE_HZ) );
             double k1 = 1.414213562 * wc; // Sqrt(2) * wc
@@ -378,32 +375,32 @@ namespace redwing
             double e = 1 - (2 * a) - k3;
 
             // RECURSIVE TRIGGERS - ENABLE filter is performed (first, last points constant)
-            float[] DatYt = new float[dF2 + 4];
-            DatYt[1] = DatYt[0] = fx[0];
+            float[] datYt = new float[dF2 + 4];
+            datYt[1] = datYt[0] = fx[0];
             for (long s = 2; s < dF2 + 2; s++)
             {
-                DatYt[s] = (float)(a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2]
-                           + d * DatYt[s - 1] + e * DatYt[s - 2]);
+                datYt[s] = (float)(a * dat2[s] + b * dat2[s - 1] + c * dat2[s - 2]
+                           + d * datYt[s - 1] + e * datYt[s - 2]);
             }
-            DatYt[dF2 + 3] = DatYt[dF2 + 2] = DatYt[dF2 + 1];
+            datYt[dF2 + 3] = datYt[dF2 + 2] = datYt[dF2 + 1];
 
-            Log("Recursive triggers complete");
+            log("Recursive triggers complete");
 
             // FORWARD filter
-            float[] DatZt = new float[dF2 + 2];
-            DatZt[dF2] = DatYt[dF2 + 2];
-            DatZt[dF2 + 1] = DatYt[dF2 + 3];
+            float[] datZt = new float[dF2 + 2];
+            datZt[dF2] = datYt[dF2 + 2];
+            datZt[dF2 + 1] = datYt[dF2 + 3];
             for (long t = -dF2 + 1; t <= 0; t++)
             {
-                DatZt[-t] = (float)(a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4]
-                            + d * DatZt[-t + 1] + e * DatZt[-t + 2]);
+                datZt[-t] = (float)(a * datYt[-t + 2] + b * datYt[-t + 3] + c * datYt[-t + 4]
+                            + d * datZt[-t + 1] + e * datZt[-t + 2]);
             }
-            Log("Recursive triggers complete");
+            log("Recursive triggers complete");
 
             // Calculated points copied for return
             for (long p = 0; p < dF2; p++)
             {
-                data[p] = DatZt[p];
+                data[p] = datZt[p];
             }
 
             return fx;
@@ -421,7 +418,7 @@ namespace redwing
 
         private float[] speedUpEffect(double speed, float[] fx)
         {
-            float[] speededFX = new float[fx.Length];
+            float[] speededFx = new float[fx.Length];
 
             for (int i = 0; i < fx.Length; i++)
             {
@@ -430,7 +427,7 @@ namespace redwing
                 double weighting = realPosition % 1.0;
                 if (positionRoundedDown + 1 < fx.Length)
                 {
-                    speededFX[i] = (float)(((1.0 - weighting) * fx[positionRoundedDown]) + (weighting * fx[positionRoundedDown + 1]));
+                    speededFx[i] = (float)(((1.0 - weighting) * fx[positionRoundedDown]) + (weighting * fx[positionRoundedDown + 1]));
 
                 }
                 else
@@ -439,7 +436,7 @@ namespace redwing
                 }
             }
 
-            return speededFX;
+            return speededFx;
         }
 
 
@@ -518,7 +515,7 @@ namespace redwing
             }
             catch (Exception e)
             {
-                Log("Unable to fade out audio. probably because out of bounds " + e);
+                log("Unable to fade out audio. probably because out of bounds " + e);
             }
 
             return fx;
@@ -536,7 +533,7 @@ namespace redwing
             }
             catch (Exception e)
             {
-                Log("Unable to generate white noise from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
+                log("Unable to generate white noise from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
             }
 
             return fx;
@@ -580,7 +577,7 @@ namespace redwing
                 }
             } catch (Exception e)
             {
-                Log("Unable to generate sawtooth from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
+                log("Unable to generate sawtooth from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
             }
 
             return fx;
@@ -598,13 +595,13 @@ namespace redwing
             double realVolume = volume * freqInterval / (freqMax - freqMin + freqInterval);
             for (double i = freqMin; i <= freqMax; i += freqInterval)
             {
-                fx = generateNoiseAtHZ(realVolume, i, fx, startTime, endTime);
+                fx = generateNoiseAtHz(realVolume, i, fx, startTime, endTime);
             }
 
             return fx;
         }
 
-        private float[] generateNoiseAtHZ (double volume, double freq, float[] fx, int startTime, int endTime)
+        private float[] generateNoiseAtHz (double volume, double freq, float[] fx, int startTime, int endTime)
         {
             // get number of samples that a pitch lasts
             double pitchTime = AUDIO_SAMPLE_HZ / freq;
@@ -632,7 +629,7 @@ namespace redwing
             }
             catch (Exception e)
             {
-                Log("Unable to generate noise from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
+                log("Unable to generate noise from time " + startTime + " to " + endTime + " probably because out of bounds " + e);
             }
             return fx;
         }
@@ -665,11 +662,11 @@ namespace redwing
                 {
                     fx[i] /= maxVolume;
                 }
-                Log("Normalized volume by reducing it by a factor of " + maxVolume);
-                Log("This means <" + Math.Log10(maxVolume) / Math.Log10(2.0) + " bits of entropy out of 16 lost");
+                log("Normalized volume by reducing it by a factor of " + maxVolume);
+                log("This means <" + Math.Log10(maxVolume) / Math.Log10(2.0) + " bits of entropy out of 16 lost");
             } else
             {
-                Log("No volume normalization needed, max volume is only: " + maxVolume);
+                log("No volume normalization needed, max volume is only: " + maxVolume);
             }
             return fx;
         }
@@ -700,23 +697,19 @@ namespace redwing
         private void checkFireBalls()
         {
             float cooldown = (float) HeroController.instance.GetType().GetField("dashCooldownTimer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(HeroController.instance);
-            if (cooldown <= 0)
+            if (!(cooldown <= 0)) return;
+            
+            HeroActions direction = GameManager.instance.inputHandler.inputActions;
+            if (direction.up.IsPressed && !direction.down.IsPressed && !direction.left.IsPressed && !direction.right.IsPressed)
             {
-                HeroActions direction = GameManager.instance.inputHandler.inputActions;
-                if (direction.up.IsPressed && !direction.down.IsPressed && !direction.left.IsPressed && !direction.right.IsPressed)
-                {
-                    if (fbTime <= 0.0)
-                    {
-                        RedwingGOs a = new RedwingGOs();
-                        a.AddFireballs();
-                        fbTime = FB_COOLDOWN;
-                    }
-                } else
-                {
-                    spawnFireTrail();
-                }
-
-
+                if (!(fbTime <= 0.0)) return;
+                
+                RedwingGOs a = new RedwingGOs();
+                a.AddFireballs();
+                fbTime = fbCooldown;
+            } else
+            {
+                spawnFireTrail();
             }
 
 
@@ -724,31 +717,30 @@ namespace redwing
 
         private void spawnFireTrail()
         {
-            Log("I should be spawning a fire trail right now");
+            log("I should be spawning a fire trail right now");
         }
 
 
         private void spawnFireballs()
         {
-            Log("I should be spawning fireballs right now");
+            log("I should be spawning fireballs right now");
         }
 
 
-        IEnumerator GetHeroFSMs()
+        private IEnumerator getHeroFsMs()
         {
             while (HeroController.instance == null)
                 yield return new WaitForEndOfFrame();
 
-            if (sharpShadow == null || sharpShadow.tag != "Sharp Shadow")
+            // ReSharper disable once InvertIf because idk it also looks dumb here.
+            if (sharpShadow == null || !sharpShadow.CompareTag("Sharp Shadow"))
                 foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll<GameObject>())
                 {
-                    if (gameObject != null && gameObject.tag == "Sharp Shadow")
-                    {
-                        sharpShadow = gameObject;
-                        sharpShadowFSM = FSMUtility.LocateFSM(sharpShadow, "damages_enemy");
+                    if (gameObject == null || !gameObject.CompareTag("Sharp Shadow")) continue;
+                    sharpShadow = gameObject;
+                    sharpShadowFsm = FSMUtility.LocateFSM(sharpShadow, "damages_enemy");
 
-                        Log("Found sharpshadow");
-                    }
+                    log("Found sharpshadow");
                 }
         }
 
@@ -768,32 +760,29 @@ namespace redwing
 
             attackCooldownUpdate();
 
-            if (sceneTimer % 30 == 0)
+            if (sceneTimer % 30 != 0) return;
+            if (currentImg < 10)
             {
-                
-                if (currentImg < 10)
-                {
-                    canvas.GetComponent<Image>().sprite = Sprite.Create(fireBalls[currentImg], new Rect(0, 0, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), new Vector2(0, 0));
-                } else if (currentImg < 20)
-                {
-                    canvas.GetComponent<Image>().sprite = Sprite.Create(firePillars[currentImg - 10], new Rect(0, 0, FPTEXTURE_WIDTH, FPTEXTURE_HEIGHT), new Vector2(0, 0));
-                } else if (currentImg < 30)
-                {
-                    canvas.GetComponent<Image>().sprite = Sprite.Create(fireTrails[currentImg - 20], new Rect(0, 0, FTTEXTURE_WIDTH, FTTEXTURE_HEIGHT), new Vector2(0, 0));
-                } else
-                {
-                    canvas.GetComponent<Image>().sprite = Sprite.Create(fireSpikes[currentImg - 30], new Rect(0, 0, FSTEXTURE_WIDTH, FSTEXTURE_HEIGHT), new Vector2(0, 0));
-                }
-                currentImg++;
-
-                if (currentImg >= 46)
-                {
-                    currentImg = 0;
-                }
-                canvas.SetActive(true);
+                canvas.GetComponent<Image>().sprite = Sprite.Create(fireBalls[currentImg], new Rect(0, 0, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), new Vector2(0, 0));
+            } else if (currentImg < 20)
+            {
+                canvas.GetComponent<Image>().sprite = Sprite.Create(firePillars[currentImg - 10], new Rect(0, 0, FPTEXTURE_WIDTH, FPTEXTURE_HEIGHT), new Vector2(0, 0));
+            } else if (currentImg < 30)
+            {
+                canvas.GetComponent<Image>().sprite = Sprite.Create(fireTrails[currentImg - 20], new Rect(0, 0, FTTEXTURE_WIDTH, FTTEXTURE_HEIGHT), new Vector2(0, 0));
+            } else
+            {
+                canvas.GetComponent<Image>().sprite = Sprite.Create(fireSpikes[currentImg - 30], new Rect(0, 0, FSTEXTURE_WIDTH, FSTEXTURE_HEIGHT), new Vector2(0, 0));
             }
+            currentImg++;
 
-            
+            if (currentImg >= 46)
+            {
+                currentImg = 0;
+            }
+            canvas.SetActive(true);
+
+
         }
 
         private void attackCooldownUpdate()
@@ -809,11 +798,11 @@ namespace redwing
 
         }
 
-        private void Reset(Scene arg0, LoadSceneMode arg1)
+        private void Reset()
         {
             sceneTimer = 1;
             currentImg = 0;
-            Log("PLACING BUILD IMAGE SOMEWHERE");
+            log("PLACING BUILD IMAGE SOMEWHERE");
 
             
             //PlaceTextureSomewhere();
@@ -822,7 +811,7 @@ namespace redwing
         }
 
 
-        public void PlaceTextureSomewhere()
+        public void placeTextureSomewhere()
         {
 
             plane = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));            
@@ -834,87 +823,89 @@ namespace redwing
 
         }
 
-        public Mesh CreateMesh(float width, float height)
+        public Mesh createMesh(float width, float height)
         {
-            Mesh m = new Mesh();
-            m.name = "ScriptedMesh";
-            m.vertices = new Vector3[]
+            Mesh m = new Mesh
             {
-                new Vector3(-width, -height, 0.01f),
-                new Vector3(width, -height, 0.01f),
-                new Vector3(width, height, 0.01f),
-                new Vector3(-width, height, 0.01f)
+                name = "ScriptedMesh",
+                vertices = new Vector3[]
+                {
+                    new Vector3(-width, -height, 0.01f),
+                    new Vector3(width, -height, 0.01f),
+                    new Vector3(width, height, 0.01f),
+                    new Vector3(-width, height, 0.01f)
+                },
+                uv = new Vector2[]
+                {
+                    new Vector2(0, 0),
+                    new Vector2(0, 1),
+                    new Vector2(1, 1),
+                    new Vector2(1, 0)
+                },
+                triangles = new int[] {0, 1, 2, 0, 2, 3}
             };
-            m.uv = new Vector2[]
-            {
-                new Vector2 (0, 0),
-                new Vector2 (0, 1),
-                new Vector2(1, 1),
-                new Vector2 (1, 0)
-            };
-            m.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
             m.RecalculateNormals();
             return m;
         }
 
-        public void GenerateFlameTextures()
+        private void generateFlameTextures()
         {
 
             try
             {
                 for (int i = 0; i < fireBalls.Length; i++)
                 {
-                    fireBalls[i] = GenerateFireball();
+                    fireBalls[i] = generateFireball();
                     fireBalls[i].Apply();
                 }
             } catch (Exception e)
             {
-                Log("Unable to build fireballs. Error " + e);
+                log("Unable to build fireballs. Error " + e);
             }
 
             try
             {
                 for (int i = 0; i < fireTrails.Length; i++)
                 {
-                    fireTrails[i] = GenerateFireTrail();
+                    fireTrails[i] = generateFireTrail();
                     fireTrails[i].Apply();
                 }
             } catch (Exception e)
             {
-                Log("Unable to build fire trails. Error " + e);
+                log("Unable to build fire trails. Error " + e);
             }
 
             try
             {
                 for (int i = 0; i < firePillars.Length; i++)
                 {
-                    firePillars[i] = GenerateFirePillar();
+                    firePillars[i] = generateFirePillar();
                     firePillars[i].Apply();
                 }
             } catch (Exception e)
             {
-                Log("Unable to build fire pillars. Error " + e);
+                log("Unable to build fire pillars. Error " + e);
             }
 
             try
             {
                 for (int i = 0; i < fireSpikes.Length; i++)
                 {
-                    fireSpikes[i] = GenerateFireSpike();
+                    fireSpikes[i] = generateFireSpike();
                     fireSpikes[i].Apply();
                 }
             }
             catch (Exception e)
             {
-                Log("Unable to build fire spikes. Error " + e);
+                log("Unable to build fire spikes. Error " + e);
             }
 
-            Log("Built all flame textures.");
+            log("Built all flame textures.");
 
             
         }
 
-        public Texture2D GenerateFireSpike()
+        private Texture2D generateFireSpike()
         {
             Texture2D fs = new Texture2D(FSTEXTURE_WIDTH, FSTEXTURE_HEIGHT);
             double[] horzIntensity20 = new double[FSTEXTURE_HEIGHT];
@@ -924,46 +915,40 @@ namespace redwing
             // RNG phase
             for (int i = 0; i < FSTEXTURE_HEIGHT; i++)
             {
-                if (i % FS_INTERPOLATE_PIXELS == 0)
-                {
-                    horzIntensity20[i] = rng.NextDouble();
+                if (i % FS_INTERPOLATE_PIXELS != 0) continue;
+                horzIntensity20[i] = rng.NextDouble();
 
-                    horzOpacity20[i] = 0.5f;
-                    //horzOpacity20[i] = rng.NextDouble();
+                horzOpacity20[i] = 0.5f;
+                //horzOpacity20[i] = rng.NextDouble();
 
-                    // because c# sucks NextDouble can't return arbitrary numbers
-                    // so apply a transformation to map verticalIntensity150 -> 0-0.2
-                    // and verticalOpacity150 -> -1 - 0
-                    //horzOpacity20[i] = horzOpacity20[i] * 0.2 - 0.6;
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map verticalIntensity150 -> 0-0.2
+                // and verticalOpacity150 -> -1 - 0
+                //horzOpacity20[i] = horzOpacity20[i] * 0.2 - 0.6;
 
-                    horzIntensity20[i] = (horzIntensity20[i] * 0.2);
-                }
+                horzIntensity20[i] = (horzIntensity20[i] * 0.2);
             }
 
             // Interpolation phase
             for (int i = 0; i < FSTEXTURE_HEIGHT - FS_INTERPOLATE_PIXELS; i++)
             {
-                if (i % FS_INTERPOLATE_PIXELS != 0)
-                {
-                    int offset = i % FS_INTERPOLATE_PIXELS;
-                    double avgWeighting = (double)offset / (double)FS_INTERPOLATE_PIXELS;
+                if (i % FS_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FS_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FS_INTERPOLATE_PIXELS;
 
-                    horzIntensity20[i] = horzIntensity20[i - offset + FS_INTERPOLATE_PIXELS] * avgWeighting + horzIntensity20[i - offset] * (1.0 - avgWeighting);
-                    horzOpacity20[i] = horzOpacity20[i - offset + FS_INTERPOLATE_PIXELS] * avgWeighting + horzOpacity20[i - offset] * (1.0 - avgWeighting);
-                }
+                horzIntensity20[i] = horzIntensity20[i - offset + FS_INTERPOLATE_PIXELS] * avgWeighting + horzIntensity20[i - offset] * (1.0 - avgWeighting);
+                horzOpacity20[i] = horzOpacity20[i - offset + FS_INTERPOLATE_PIXELS] * avgWeighting + horzOpacity20[i - offset] * (1.0 - avgWeighting);
             }
 
             // Interpolation phase pt 2 (for wrap around)
             for (int i = FSTEXTURE_HEIGHT - FS_INTERPOLATE_PIXELS; i < FSTEXTURE_HEIGHT; i++)
             {
-                if (i % FS_INTERPOLATE_PIXELS != 0)
-                {
-                    int offset = i % FS_INTERPOLATE_PIXELS;
-                    double avgWeighting = (double)offset / (double)FS_INTERPOLATE_PIXELS;
+                if (i % FS_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FS_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FS_INTERPOLATE_PIXELS;
 
-                    horzIntensity20[i] = horzIntensity20[0] * avgWeighting + horzIntensity20[i - offset] * (1.0 - avgWeighting);
-                    horzOpacity20[i] = horzOpacity20[0] * avgWeighting + horzOpacity20[i - offset] * (1.0 - avgWeighting);
-                }
+                horzIntensity20[i] = horzIntensity20[0] * avgWeighting + horzIntensity20[i - offset] * (1.0 - avgWeighting);
+                horzOpacity20[i] = horzOpacity20[0] * avgWeighting + horzOpacity20[i - offset] * (1.0 - avgWeighting);
             }
 
 
@@ -980,7 +965,7 @@ namespace redwing
             return fs;
         }
 
-        public Texture2D GenerateFirePillar()
+        private Texture2D generateFirePillar()
         {
             Texture2D fp = new Texture2D(FPTEXTURE_WIDTH, FPTEXTURE_HEIGHT);
             double[] horzIntensity150 = new double[FPTEXTURE_HEIGHT];
@@ -990,44 +975,38 @@ namespace redwing
             // RNG phase
             for (int i = 0; i < FPTEXTURE_HEIGHT; i++)
             {
-                if (i % FP_INTERPOLATE_PIXELS == 0)
-                {
-                    horzIntensity150[i] = rng.NextDouble();
-                    horzOpacity150[i] = rng.NextDouble();
+                if (i % FP_INTERPOLATE_PIXELS != 0) continue;
+                horzIntensity150[i] = rng.NextDouble();
+                horzOpacity150[i] = rng.NextDouble();
 
-                    // because c# sucks NextDouble can't return arbitrary numbers
-                    // so apply a transformation to map verticalIntensity150 -> 0-0.2
-                    // and verticalOpacity150 -> -1 - 0
-                    horzOpacity150[i] = horzOpacity150[i] * 0.2 - 0.6;
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map verticalIntensity150 -> 0-0.2
+                // and verticalOpacity150 -> -1 - 0
+                horzOpacity150[i] = horzOpacity150[i] * 0.2 - 0.6;
 
-                    horzIntensity150[i] = (horzIntensity150[i] * 0.2);
-                }
+                horzIntensity150[i] = (horzIntensity150[i] * 0.2);
             }
 
             // Interpolation phase
             for (int i = 0; i < FPTEXTURE_HEIGHT - FP_INTERPOLATE_PIXELS; i++)
             {
-                if (i % FP_INTERPOLATE_PIXELS != 0)
-                {
-                    int offset = i % FP_INTERPOLATE_PIXELS;
-                    double avgWeighting = (double)offset / (double)FP_INTERPOLATE_PIXELS;
+                if (i % FP_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FP_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FP_INTERPOLATE_PIXELS;
 
-                    horzIntensity150[i] = horzIntensity150[i - offset + FP_INTERPOLATE_PIXELS] * avgWeighting + horzIntensity150[i - offset] * (1.0 - avgWeighting);
-                    horzOpacity150[i] = horzOpacity150[i - offset + FP_INTERPOLATE_PIXELS] * avgWeighting + horzOpacity150[i - offset] * (1.0 - avgWeighting);
-                }
+                horzIntensity150[i] = horzIntensity150[i - offset + FP_INTERPOLATE_PIXELS] * avgWeighting + horzIntensity150[i - offset] * (1.0 - avgWeighting);
+                horzOpacity150[i] = horzOpacity150[i - offset + FP_INTERPOLATE_PIXELS] * avgWeighting + horzOpacity150[i - offset] * (1.0 - avgWeighting);
             }
 
             // Interpolation phase pt 2 (for wrap around)
             for (int i = FPTEXTURE_HEIGHT - FP_INTERPOLATE_PIXELS; i < FPTEXTURE_HEIGHT; i++)
             {
-                if (i % FP_INTERPOLATE_PIXELS != 0)
-                {
-                    int offset = i % FP_INTERPOLATE_PIXELS;
-                    double avgWeighting = (double)offset / (double)FP_INTERPOLATE_PIXELS;
+                if (i % FP_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FP_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FP_INTERPOLATE_PIXELS;
 
-                    horzIntensity150[i] = horzIntensity150[0] * avgWeighting + horzIntensity150[i - offset] * (1.0 - avgWeighting);
-                    horzOpacity150[i] = horzOpacity150[0] * avgWeighting + horzOpacity150[i - offset] * (1.0 - avgWeighting);
-                }
+                horzIntensity150[i] = horzIntensity150[0] * avgWeighting + horzIntensity150[i - offset] * (1.0 - avgWeighting);
+                horzOpacity150[i] = horzOpacity150[0] * avgWeighting + horzOpacity150[i - offset] * (1.0 - avgWeighting);
             }
 
 
@@ -1044,7 +1023,7 @@ namespace redwing
             return fp;
         }
 
-        public Texture2D GenerateFireTrail()
+        private Texture2D generateFireTrail()
         {
             Texture2D ft = new Texture2D(FTTEXTURE_WIDTH, FTTEXTURE_HEIGHT);
             double[] verticalIntensity150 = new double[FTTEXTURE_WIDTH];
@@ -1069,27 +1048,23 @@ namespace redwing
             // Interpolation phase
             for (int i = 0; i < FTTEXTURE_WIDTH - FT_INTERPOLATE_PIXELS; i++)
             {
-                if (i % FT_INTERPOLATE_PIXELS != 0)
-                {
-                    int offset = i % FT_INTERPOLATE_PIXELS;
-                    double avgWeighting = (double)offset / (double)FT_INTERPOLATE_PIXELS;
+                if (i % FT_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FT_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FT_INTERPOLATE_PIXELS;
 
-                    verticalIntensity150[i] = verticalIntensity150[i - offset + FT_INTERPOLATE_PIXELS] * avgWeighting + verticalIntensity150[i - offset] * (1.0 - avgWeighting);
-                    verticalOpacity150[i] = verticalOpacity150[i - offset + FT_INTERPOLATE_PIXELS] * avgWeighting + verticalOpacity150[i - offset] * (1.0 - avgWeighting);
-                }
+                verticalIntensity150[i] = verticalIntensity150[i - offset + FT_INTERPOLATE_PIXELS] * avgWeighting + verticalIntensity150[i - offset] * (1.0 - avgWeighting);
+                verticalOpacity150[i] = verticalOpacity150[i - offset + FT_INTERPOLATE_PIXELS] * avgWeighting + verticalOpacity150[i - offset] * (1.0 - avgWeighting);
             }
 
             // Interpolation phase pt 2 (for wrap around)
             for (int i = FTTEXTURE_WIDTH - FT_INTERPOLATE_PIXELS; i < FTTEXTURE_WIDTH; i++)
             {
-                if (i % FT_INTERPOLATE_PIXELS != 0)
-                {
-                    int offset = i % FT_INTERPOLATE_PIXELS;
-                    double avgWeighting = (double)offset / (double)FT_INTERPOLATE_PIXELS;
+                if (i % FT_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FT_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FT_INTERPOLATE_PIXELS;
 
-                    verticalIntensity150[i] = verticalIntensity150[0] * avgWeighting + verticalIntensity150[i - offset] * (1.0 - avgWeighting);
-                    verticalOpacity150[i] = verticalOpacity150[0] * avgWeighting + verticalOpacity150[i - offset] * (1.0 - avgWeighting);
-                }
+                verticalIntensity150[i] = verticalIntensity150[0] * avgWeighting + verticalIntensity150[i - offset] * (1.0 - avgWeighting);
+                verticalOpacity150[i] = verticalOpacity150[0] * avgWeighting + verticalOpacity150[i - offset] * (1.0 - avgWeighting);
             }
 
 
@@ -1105,7 +1080,7 @@ namespace redwing
             return ft;
         }
 
-        public Texture2D GenerateFireball()
+        private Texture2D generateFireball()
         {
             Texture2D fb = new Texture2D(FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
             double[] radialIntensity400 = new double[360];
@@ -1114,29 +1089,25 @@ namespace redwing
             // Generation
             for (int i = 0; i < 360 - INTERPOLATE_DEGREES; i++)
             {
-                if (i % INTERPOLATE_DEGREES == 0)
-                {
-                    radialIntensity400[i] = rng.NextDouble();
-                    radialOpacity400[i] = rng.NextDouble();
+                if (i % INTERPOLATE_DEGREES != 0) continue;
+                radialIntensity400[i] = rng.NextDouble();
+                radialOpacity400[i] = rng.NextDouble();
 
-                    // because c# sucks NextDouble can't return arbitrary numbers
-                    // so apply a transformation to map radialIntensity400 -> 0 - 0.2
-                    // and radialOpacity400 -> -0.25 - -0.1
-                    radialIntensity400[i] = (radialIntensity400[i] * 0.2);
-                    radialOpacity400[i] = (radialOpacity400[i] * 0.15) - 0.25;
-                }
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map radialIntensity400 -> 0 - 0.2
+                // and radialOpacity400 -> -0.25 - -0.1
+                radialIntensity400[i] = (radialIntensity400[i] * 0.2);
+                radialOpacity400[i] = (radialOpacity400[i] * 0.15) - 0.25;
             }
             // Interpolation (to avoid really crazy looking balls)
             for (int i = 0; i < 360 - INTERPOLATE_DEGREES; i++)
             {
-                if (i % INTERPOLATE_DEGREES != 0)
-                {
-                    int offset = i % INTERPOLATE_DEGREES;
-                    double avgWeighting = (double)offset / (double)INTERPOLATE_DEGREES;
+                if (i % INTERPOLATE_DEGREES == 0) continue;
+                int offset = i % INTERPOLATE_DEGREES;
+                double avgWeighting = (double)offset / (double)INTERPOLATE_DEGREES;
 
-                    radialIntensity400[i] = radialIntensity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
-                    radialOpacity400[i] = radialOpacity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
-                }
+                radialIntensity400[i] = radialIntensity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
+                radialOpacity400[i] = radialOpacity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
             }
             // Interpolation (but it wraps around)
             for (int i = 360 - INTERPOLATE_DEGREES; i < 360; i++)
@@ -1161,9 +1132,10 @@ namespace redwing
             return fb;
         }
 
-        public Color getFireColor(double distance, double intensity400, double opacity400, int intensInterpolateDist, int opacInterpDist)
+        private Color getFireColor(double distance, double intensity400, double opacity400, int intensInterpolateDist, int opacInterpDist)
         {
             double intensity = getRealIntensity(distance, intensity400, intensInterpolateDist);
+            // ReSharper disable once UseObjectOrCollectionInitializer because it looks dumb
             Color c = new Color();
 
             c.a = (float)getRealOpacity(distance, opacity400, opacInterpDist);
@@ -1196,7 +1168,7 @@ namespace redwing
             return c;
         }
 
-        public double getRealOpacity(double distance, double opacity400, int interpolateDistance)
+        private double getRealOpacity(double distance, double opacity400, int interpolateDistance)
         {
             if (distance < 0.0)
             {
@@ -1217,7 +1189,7 @@ namespace redwing
             return opactReal;
         }
 
-        public double getRealIntensity(double distance, double intensity400, int interpolateDistance)
+        private static double getRealIntensity(double distance, double intensity400, int interpolateDistance)
         {
             if (distance < 0.0)
             {
@@ -1235,7 +1207,7 @@ namespace redwing
             return intenReal;
         }
 
-        public double getDistance(int x, int y)
+        private double getDistance(int x, int y)
         {
             int relX = x - (FBTEXTURE_WIDTH / 2 );
             int relY = y - (FBTEXTURE_HEIGHT / 2);
@@ -1243,24 +1215,17 @@ namespace redwing
             return Math.Sqrt( (double) (relX * relX) + (double) (relY * relY) );
         }
 
-        
 
-        public int getNearestAngel(int x, int y)
+        private int getNearestAngel(int x, int y)
         {
-            int angel = 0;
+            int angel;
 
             int relX = x - (FBTEXTURE_WIDTH / 2);
             int relY = y - (FBTEXTURE_HEIGHT / 2);
 
             if (relX == 0)
             {
-                if (relY >= 0)
-                {
-                    return 90;
-                } else
-                {
-                    return 270;
-                }
+                return relY >= 0 ? 90 : 270;
             } else
             {
                 angel = (int) ( Math.Atan2(relY, relX) * 180.0 / Math.PI);
@@ -1274,13 +1239,14 @@ namespace redwing
             return angel;
         }
 
-        public void BuildDashFireFSM()
+        public void buildDashFireFsm()
         {
 
         }
 
-        public void Log(String str)
+        private static void log([NotNull] string str)
         {
+            if (str == null) throw new ArgumentNullException(nameof(str));
             Modding.Logger.Log("[Redwing] " + str);
         }
     }
