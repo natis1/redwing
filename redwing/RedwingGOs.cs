@@ -24,6 +24,8 @@ namespace redwing
 
         public static int FBDamage = 10;
 
+        public readonly float TRANSFORM_XOFFSET = 0.77f;
+
         GameObject FireballSpawn;
         GameObject[] FireballsGO = new GameObject[7];
 
@@ -48,19 +50,30 @@ namespace redwing
                 return;
             }
             FireballSpawn = new GameObject("redwingFireballSpawner");
-            FireballSpawn.transform.position = voidKnight.transform.position;
+            FireballSpawn.transform.position = RedwingGOs.voidKnight.GetComponent<BoxCollider2D>().bounds.center;
+            Vector3 fbSpawnPos = FireballSpawn.transform.position;
+            fbSpawnPos.x = fbSpawnPos.x - TRANSFORM_XOFFSET;
+
+
             FireballSpawn.SetActive(true);
             for (int i = 0; i < 7; i++)
             {
-                FireballsGO[i] = new GameObject("redwingFB" + i, typeof(DamageEnemies), typeof(SpriteRenderer), typeof(Rigidbody2D));
+                FireballsGO[i] = new GameObject("redwingFB" + i, typeof(RedwingFireballBehavior), typeof(DamageEnemies), typeof(SpriteRenderer), typeof(Rigidbody2D));
+                FireballsGO[i].transform.localPosition = FireballSpawn.transform.position;
                 FireballsGO[i].transform.parent = FireballSpawn.transform;
                 SetupFireballPhysics(FireballsGO[i].GetComponent<Rigidbody2D>(), i);
                 SetupFireballDamage(FireballsGO[i].GetComponent<DamageEnemies>());
                 SetupFireballSprite(FireballsGO[i].GetComponent<SpriteRenderer>(), i);
+                SetupCustomObject(FireballsGO[i].GetComponent<RedwingFireballBehavior>(), i);
                 FireballsGO[i].SetActive(true);
             }
             Log("Spawned in fireballs");
             
+        }
+
+        private void SetupCustomObject(RedwingFireballBehavior behavior, int i)
+        {
+            behavior.fireball = FireballsGO[i];
         }
 
         public void SetupFireballSprite(SpriteRenderer sprite, int i)
