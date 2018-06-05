@@ -7,10 +7,10 @@ using System.Text;
 
 namespace FsmUtil
 {
-    static class FsmUtil
+    internal static class fsm_util
     {
 
-        public static T[] RemoveAt<T>(this T[] source, int index)
+        public static T[] removeAt<T>(this T[] source, int index)
         {
             T[] dest = new T[source.Length - 1];
             if (index > 0)
@@ -22,21 +22,21 @@ namespace FsmUtil
             return dest;
         }
 
-        private static readonly FieldInfo fsmStringParamsField;
-        static FsmUtil()
+        private static readonly FieldInfo FSM_STRING_PARAMS_FIELD;
+        static fsm_util()
         {
-            FieldInfo[] fieldInfo = typeof(HutongGames.PlayMaker.ActionData).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo[] fieldInfo = typeof(ActionData).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             for (int j = 0; j < fieldInfo.Length; j++)
             {
                 if (fieldInfo[j].Name == "fsmStringParams")
                 {
-                    fsmStringParamsField = fieldInfo[j];
+                    FSM_STRING_PARAMS_FIELD = fieldInfo[j];
                     break;
                 }
             }
         }
 
-        public static void RemoveAction(PlayMakerFSM fsm, string stateName, int index)
+        public static void removeAction(PlayMakerFSM fsm, string stateName, int index)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
@@ -48,7 +48,7 @@ namespace FsmUtil
                     Array.Resize(ref actions, actions.Length + 1);
                     Modding.Logger.Log("[FSM UTIL] " + actions[0].GetType().ToString());
 
-                    actions.RemoveAt(index);
+                    actions.removeAt(index);
 
                     fsm.FsmStates[i].Actions = actions;
 
@@ -56,7 +56,7 @@ namespace FsmUtil
             }
         }
 
-        public static FsmState GetState(PlayMakerFSM fsm, string stateName)
+        public static FsmState getState(PlayMakerFSM fsm, string stateName)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
@@ -71,7 +71,7 @@ namespace FsmUtil
             return null;
         }
 
-        public static FsmStateAction GetAction(PlayMakerFSM fsm, string stateName, int index)
+        public static FsmStateAction getAction(PlayMakerFSM fsm, string stateName, int index)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
@@ -90,7 +90,7 @@ namespace FsmUtil
         }
 
 
-        public static void AddAction(PlayMakerFSM fsm, string stateName, FsmStateAction action)
+        public static void addAction(PlayMakerFSM fsm, string stateName, FsmStateAction action)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
@@ -108,7 +108,7 @@ namespace FsmUtil
             }
         }
 
-        public static void ChangeTransition(PlayMakerFSM fsm, string stateName, string eventName, string toState)
+        public static void changeTransition(PlayMakerFSM fsm, string stateName, string eventName, string toState)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
@@ -125,7 +125,7 @@ namespace FsmUtil
             }
         }
 
-        public static void RemoveTransitions(PlayMakerFSM fsm, List<string> states, List<string> transitions)
+        public static void removeTransitions(PlayMakerFSM fsm, List<string> states, List<string> transitions)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
@@ -148,14 +148,14 @@ namespace FsmUtil
             }
         }
 
-        public static void ReplaceStringVariable(PlayMakerFSM fsm, List<string> states, Dictionary<string, string> dict)
+        public static void replaceStringVariable(PlayMakerFSM fsm, List<string> states, Dictionary<string, string> dict)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
                 bool found = false;
                 if (states.Contains(fsm.FsmStates[i].Name))
                 {
-                    foreach (FsmString str in (List<FsmString>)fsmStringParamsField.GetValue(fsm.FsmStates[i].ActionData))
+                    foreach (FsmString str in (List<FsmString>)FSM_STRING_PARAMS_FIELD.GetValue(fsm.FsmStates[i].ActionData))
                     {
                         List<FsmString> val = new List<FsmString>();
                         if (dict.ContainsKey(str.Value))
@@ -170,7 +170,7 @@ namespace FsmUtil
 
                         if (val.Count > 0)
                         {
-                            fsmStringParamsField.SetValue(fsm.FsmStates[i].ActionData, val);
+                            FSM_STRING_PARAMS_FIELD.SetValue(fsm.FsmStates[i].ActionData, val);
                         }
                     }
                     if (found)
@@ -181,14 +181,14 @@ namespace FsmUtil
             }
         }
 
-        public static void ReplaceStringVariable(PlayMakerFSM fsm, string state, Dictionary<string, string> dict)
+        public static void replaceStringVariable(PlayMakerFSM fsm, string state, Dictionary<string, string> dict)
         {
             for (int i = 0; i < fsm.FsmStates.Length; i++)
             {
                 bool found = false;
                 if (fsm.FsmStates[i].Name == state || state == "")
                 {
-                    foreach (FsmString str in (List<FsmString>)fsmStringParamsField.GetValue(fsm.FsmStates[i].ActionData))
+                    foreach (FsmString str in (List<FsmString>)FSM_STRING_PARAMS_FIELD.GetValue(fsm.FsmStates[i].ActionData))
                     {
                         List<FsmString> val = new List<FsmString>();
                         if (dict.ContainsKey(str.Value))
@@ -203,7 +203,7 @@ namespace FsmUtil
 
                         if (val.Count > 0)
                         {
-                            fsmStringParamsField.SetValue(fsm.FsmStates[i].ActionData, val);
+                            FSM_STRING_PARAMS_FIELD.SetValue(fsm.FsmStates[i].ActionData, val);
                         }
                     }
                     if (found)
@@ -214,7 +214,7 @@ namespace FsmUtil
             }
         }
 
-        public static void ReplaceStringVariable(PlayMakerFSM fsm, string state, string src, string dst)
+        public static void replaceStringVariable(PlayMakerFSM fsm, string state, string src, string dst)
         {
             Modding.Logger.Log(string.Format("[FSM UTIL] Replacing FSM Strings"));
             for (int i = 0; i < fsm.FsmStates.Length; i++)
@@ -223,7 +223,7 @@ namespace FsmUtil
                 if (fsm.FsmStates[i].Name == state || state == "")
                 {
                     Modding.Logger.Log(string.Format("[FSM UTIL] Found FsmState with name \"{0}\" ", fsm.FsmStates[i].Name));
-                    foreach (FsmString str in (List<FsmString>)fsmStringParamsField.GetValue(fsm.FsmStates[i].ActionData))
+                    foreach (FsmString str in (List<FsmString>)FSM_STRING_PARAMS_FIELD.GetValue(fsm.FsmStates[i].ActionData))
                     {
                         List<FsmString> val = new List<FsmString>();
                         Modding.Logger.Log(string.Format("[FSM UTIL] Found FsmString with value \"{0}\" ", str));
@@ -240,7 +240,7 @@ namespace FsmUtil
 
                         if (val.Count > 0)
                         {
-                            fsmStringParamsField.SetValue(fsm.FsmStates[i].ActionData, val);
+                            FSM_STRING_PARAMS_FIELD.SetValue(fsm.FsmStates[i].ActionData, val);
                         }
                     }
                     if (found)

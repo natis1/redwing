@@ -44,7 +44,7 @@ namespace redwing
     {
         public ResourceManagerData resourceData;
 
-        Dictionary<string, UnityEngine.Object> resources;
+        private Dictionary<string, UnityEngine.Object> resources;
 
         public static void AddResource(ResourceElement data)
         {
@@ -94,12 +94,12 @@ namespace redwing
             return (T)Instance.resources[scene + name];
         }
 
-        void Preload(List<ResourceScene> scenes)
+        private void Preload(List<ResourceScene> scenes)
         {
             Instance.StartCoroutine(ResourceManager.Instance.DoPreload(scenes));
         }
 
-        IEnumerator DoPreload(List<ResourceScene> scenes)
+        private IEnumerator DoPreload(List<ResourceScene> scenes)
         {
             resources = new Dictionary<string, UnityEngine.Object>();
             foreach (var rs in scenes)
@@ -168,7 +168,7 @@ namespace redwing
             WriteDataToFile(path, this);
         }
 
-        void Serialize(GameObject go)
+        private void Serialize(GameObject go)
         {
             name = go.name;
             tag = go.tag;
@@ -198,7 +198,7 @@ namespace redwing
             }
         }
 
-        ComponentData Create(Component c)
+        private ComponentData Create(Component c)
         {
             Type componentType = c.GetType();
             string componentDataTypeName = "SL." + componentType.Name + "Data";
@@ -327,7 +327,7 @@ namespace redwing
         [XmlArray("childrenData")]
         public List<GameObjectData> childrenData;
 
-        static bool WriteDataToFile<T>(string path, T settings) where T : class
+        private static bool WriteDataToFile<T>(string path, T settings) where T : class
         {
             //get the derived types and add them to the xml serializer
             var knownTypes = Assembly.GetAssembly(typeof(ComponentData)).GetTypes().Where(
@@ -354,7 +354,7 @@ namespace redwing
             return result;
         }
 
-        static bool ReadDataFromFile<T>(string path, out T settings) where T : class
+        private static bool ReadDataFromFile<T>(string path, out T settings) where T : class
         {
             settings = null;
 
@@ -433,7 +433,7 @@ namespace redwing
     [XmlRoot("AudioSourceData")]
     public class RedAudioSerial : ComponentData
     {
-        string ClipPath
+        private string ClipPath
         {
             get
             {
@@ -572,8 +572,7 @@ namespace redwing
         [XmlElement("clip")]
         public string clip;
 
-        [XmlIgnore]
-        float[] cachedClipData;
+        [XmlIgnore] private float[] cachedClipData;
 
         [XmlElement("audioMixer")]
         public ResourceElement audioMixer;
