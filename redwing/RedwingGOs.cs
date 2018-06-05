@@ -24,7 +24,7 @@ namespace redwing
 
         public static int FBDamage = 10;
 
-        public readonly float TRANSFORM_XOFFSET = 0.77f;
+        public readonly float TRANSFORM_XOFFSET = 2.77f;
 
         GameObject FireballSpawn;
         GameObject[] FireballsGO = new GameObject[7];
@@ -49,7 +49,7 @@ namespace redwing
             {
                 return;
             }
-            FireballSpawn = new GameObject("redwingFireballSpawner");
+            FireballSpawn = new GameObject("redwingFireballSpawner", typeof(RedwingFireballSpawnerBehavior));
             FireballSpawn.transform.position = RedwingGOs.voidKnight.GetComponent<BoxCollider2D>().bounds.center;
             Vector3 fbSpawnPos = FireballSpawn.transform.position;
             fbSpawnPos.x = fbSpawnPos.x - TRANSFORM_XOFFSET;
@@ -58,13 +58,14 @@ namespace redwing
             FireballSpawn.SetActive(true);
             for (int i = 0; i < 7; i++)
             {
-                FireballsGO[i] = new GameObject("redwingFB" + i, typeof(RedwingFireballBehavior), typeof(DamageEnemies), typeof(SpriteRenderer), typeof(Rigidbody2D));
+                FireballsGO[i] = new GameObject("redwingFB" + i, typeof(DamageEnemies), typeof(SpriteRenderer), typeof(IgnoreHeroCollision), typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(RedwingFireballBehavior));
                 FireballsGO[i].transform.localPosition = FireballSpawn.transform.position;
                 FireballsGO[i].transform.parent = FireballSpawn.transform;
-                SetupFireballPhysics(FireballsGO[i].GetComponent<Rigidbody2D>(), i);
+                SetupFireballPhysics(FireballsGO[i].GetComponent<Rigidbody2D>(), FireballsGO[i].GetComponent<BoxCollider2D>(), i);
                 SetupFireballDamage(FireballsGO[i].GetComponent<DamageEnemies>());
                 SetupFireballSprite(FireballsGO[i].GetComponent<SpriteRenderer>(), i);
                 SetupCustomObject(FireballsGO[i].GetComponent<RedwingFireballBehavior>(), i);
+                
                 FireballsGO[i].SetActive(true);
             }
             Log("Spawned in fireballs");
@@ -92,34 +93,39 @@ namespace redwing
 
         }
 
-        public void SetupFireballPhysics(Rigidbody2D physics, int i)
+        public void SetupFireballPhysics(Rigidbody2D physics, BoxCollider2D collide, int i)
         {
             physics.mass = 1.0f;
             physics.drag = 0.0f;
             physics.angularVelocity = 0.05f;
-            physics.isKinematic = true;
+            physics.isKinematic = false;
+
+            collide.size = new Vector2(1.0f, 1.0f);
+            
+            
+            
             switch (i)
             {
                 case 0:
                     physics.velocity = new Vector2(0, 6f);
                     break;
                 case 1:
-                    physics.velocity = new Vector2(1f, 6f);
-                    break;
-                case 2:
-                    physics.velocity = new Vector2(-1f, 6f);
-                    break;
-                case 3:
                     physics.velocity = new Vector2(2f, 6f);
                     break;
-                case 4:
+                case 2:
                     physics.velocity = new Vector2(-2f, 6f);
                     break;
+                case 3:
+                    physics.velocity = new Vector2(4f, 6f);
+                    break;
+                case 4:
+                    physics.velocity = new Vector2(-4f, 6f);
+                    break;
                 case 5:
-                    physics.velocity = new Vector2(3f, 6f);
+                    physics.velocity = new Vector2(6f, 6f);
                     break;
                 case 6:
-                    physics.velocity = new Vector2(-3f, 6f);
+                    physics.velocity = new Vector2(-6f, 6f);
                     break;
             }
             

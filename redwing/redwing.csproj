@@ -64,6 +64,7 @@
     <Compile Include="RedAudioSerial.cs" />
     <Compile Include="Redwing.cs" />
     <Compile Include="Greymoth.cs" />
+    <Compile Include="RedwingFireballBehavior.cs" />
     <Compile Include="RedwingFlameGen.cs" />
     <Compile Include="RedwingGOs.cs" />
     <Compile Include="RedwingSettings.cs" />
