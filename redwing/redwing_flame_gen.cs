@@ -930,7 +930,7 @@ namespace redwing
             {
                 for (int i = 0; i < fireballMagmas.Length; i++)
                 {
-                    fireballMagmas[i] = generateFireballMagma();
+                    fireballMagmas[i] = generateFireballMagma(i);
                     fireballMagmas[i].Apply();
                 }
             }
@@ -945,7 +945,7 @@ namespace redwing
         }
         
         
-        private Texture2D generateFireballMagma()
+        private Texture2D generateFireballMagma(int index)
         {
             Texture2D fbm = new Texture2D(FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
             double[] vertIntensity150 = new double[FBTEXTURE_WIDTH];
@@ -963,7 +963,7 @@ namespace redwing
                 // so apply a transformation to map verticalIntensity150 -> 0-0.2
                 // and verticalOpacity150 -> -1 - -0.7
                 vertOpacity150[i] = (vertOpacity150[i] * 0.3) - 1.0f;
-                vertIntensity150[i] = (vertIntensity150[i] * 0.2);
+                vertIntensity150[i] = (vertIntensity150[i] * 0.2) - 1.5f * index;
             }
             
             // Interpolation phase
@@ -979,7 +979,7 @@ namespace redwing
             }
 
             // Interpolation phase pt 2 (for wrap around)
-            for (int i = FBTEXTURE_WIDTH - FB_MAGMA_INTERPOLATE_PIXELS; i < FSTEXTURE_HEIGHT; i++)
+            for (int i = FBTEXTURE_WIDTH - FB_MAGMA_INTERPOLATE_PIXELS; i < FBTEXTURE_WIDTH; i++)
             {
                 if (i % FB_MAGMA_INTERPOLATE_PIXELS == 0) continue;
                 int offset = i % FB_MAGMA_INTERPOLATE_PIXELS;
@@ -992,10 +992,18 @@ namespace redwing
             // Actually set the colors
             for (int x = 0; x < FBTEXTURE_WIDTH; x++)
             {
+                int xDistance = x - FBTEXTURE_WIDTH / 2;
+                if (xDistance < 0)
+                {
+                    xDistance = -xDistance;
+                }
                 for (int y = 0; y < FBTEXTURE_HEIGHT; y++)
                 {
+                    int netDistance = (int) Math.Sqrt((xDistance * xDistance) + (y * y));
+                    
                     fbm.SetPixel(x, y, getFireColor
-                        ((y), vertIntensity150[x], vertOpacity150[x], FBTEXTURE_WIDTH, FBTEXTURE_WIDTH));
+                        ((netDistance), vertIntensity150[x], vertOpacity150[x], FBTEXTURE_WIDTH,
+                        (FBTEXTURE_WIDTH - (int) (FBTEXTURE_WIDTH * index * 0.0834))));
                 }
             }
 

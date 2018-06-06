@@ -154,18 +154,18 @@ namespace redwing
             float animTime = 0f;
             int frame = 0;
             int oldFrame = -1;
+            
             while (frame < fireballMagmas.Length)
             {
                 if (frame > oldFrame)
                 {
                     Rect r = new Rect(0, 0, FIREBALL_WIDTH, FIREBALL_HEIGHT);
                     fireballSprite.sprite = Sprite.Create(fireballMagmas[frame], r, Vector2.zero);
-                    fireballSprite.enabled = true;
-                    fireballSprite.color = Color.white;
                     oldFrame = frame;
                 }
-
-                float timePerFrame = 1 / MAGMA_FRAMERATE;
+                
+                
+                const float timePerFrame = 1 / MAGMA_FRAMERATE;
                 animTime += Time.deltaTime;
                 frame = (int) (animTime / timePerFrame);
 
@@ -175,8 +175,7 @@ namespace redwing
             log("Despawned because animation is done. Current frame is " + frame);
             Destroy(fireball);
             
-
-
+            yield return null;
         }
         
         private static void log(string str)
