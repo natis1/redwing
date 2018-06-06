@@ -113,6 +113,7 @@ namespace redwing
                         {
                             timePassed = Time.deltaTime;
                             selfPosition.x += xVelocity * timePassed;
+                            selfTranform.localPosition = selfPosition;
                             currentTime += timePassed;
                             yield return null;
                         }
@@ -242,7 +243,7 @@ namespace redwing
     {
         public GameObject self;
         public SpriteRenderer selfSprite;
-        private const float LIFETIME = 1.5f;
+        private const float LIFETIME = 0.5f;
         
         public void Start()
         {
