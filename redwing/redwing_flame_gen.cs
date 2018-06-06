@@ -15,6 +15,7 @@ namespace redwing
     {
         private readonly Texture2D[] fireBalls = new Texture2D[10];
         private readonly Texture2D[] fireballMagmas = new Texture2D[12];
+        private readonly Texture2D[] fireballMagmaBalls = new Texture2D[4];
         
         private readonly Texture2D[] fireTrails = new Texture2D[10];
         private readonly Texture2D[] firePillars = new Texture2D[10];
@@ -44,7 +45,7 @@ namespace redwing
 
         public GameObject plane;
         public GameObject canvas;
-        private System.Random rng;
+        public static System.Random rng;
 
         
 
@@ -65,7 +66,8 @@ namespace redwing
         private const int FSTEXTURE_WIDTH = 40;
         private const int FSTEXTURE_HEIGHT = 500;
         
-        
+        public const int FBMBTEXTURE_WIDTH = 50;
+        public const int FBMBTEXTURE_HEIGHT = 50;
 
         private const double OPACITY_MASK = 1.0;
 
@@ -122,6 +124,7 @@ namespace redwing
             redwing_game_objects.firePillars = firePillars;
             redwing_game_objects.fireTrails = fireTrails;
             redwing_game_objects.fireballMagmas = fireballMagmas;
+            redwing_game_objects.fireballMagmaFireballs = fireballMagmaBalls;
 
             redwing_game_objects.soundFxClip = soundFxClip;
 
@@ -938,6 +941,19 @@ namespace redwing
             {
                 log("Unable to build fireball magmas. Error " + e);
             }
+            
+            try
+            {
+                for (int i = 0; i < fireballMagmaBalls.Length; i++)
+                {
+                    fireballMagmaBalls[i] = generateFireballMagmaFireball();
+                    fireballMagmaBalls[i].Apply();
+                }
+            }
+            catch (Exception e)
+            {
+                log("Unable to build fireball magmas. Error " + e);
+            }
 
             log("Built all flame textures.");
 
@@ -997,6 +1013,9 @@ namespace redwing
                 {
                     xDistance = -xDistance;
                 }
+
+                xDistance = (int)(xDistance * (2.5 - (( 2.0 * index) / 12.0)));
+                
                 for (int y = 0; y < FBTEXTURE_HEIGHT; y++)
                 {
                     int netDistance = (int) Math.Sqrt((xDistance * xDistance) + (y * y));
@@ -1185,6 +1204,58 @@ namespace redwing
             }
             return ft;
         }
+        
+        private Texture2D generateFireballMagmaFireball()
+        {
+            Texture2D fb = new Texture2D(FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT);
+            double[] radialIntensity400 = new double[360];
+            double[] radialOpacity400 = new double[360];
+
+            // Generation
+            for (int i = 0; i < 360 - INTERPOLATE_DEGREES; i++)
+            {
+                if (i % INTERPOLATE_DEGREES != 0) continue;
+                radialIntensity400[i] = rng.NextDouble();
+                radialOpacity400[i] = rng.NextDouble();
+
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map radialIntensity400 -> 0 - 0.2
+                // and radialOpacity400 -> -0.25 - -0.1
+                radialIntensity400[i] = (radialIntensity400[i] * 0.2);
+                radialOpacity400[i] = (radialOpacity400[i] * 1.15) - 0.25;
+            }
+            // Interpolation (to avoid really crazy looking balls)
+            for (int i = 0; i < 360 - INTERPOLATE_DEGREES; i++)
+            {
+                if (i % INTERPOLATE_DEGREES == 0) continue;
+                int offset = i % INTERPOLATE_DEGREES;
+                double avgWeighting = (double)offset / (double)INTERPOLATE_DEGREES;
+
+                radialIntensity400[i] = radialIntensity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
+                radialOpacity400[i] = radialOpacity400[i - offset + INTERPOLATE_DEGREES] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
+            }
+            // Interpolation (but it wraps around)
+            for (int i = 360 - INTERPOLATE_DEGREES; i < 360; i++)
+            {
+                int offset = i % INTERPOLATE_DEGREES;
+                double avgWeighting = (double)offset / (double)INTERPOLATE_DEGREES;
+
+                radialIntensity400[i] = radialIntensity400[0] * avgWeighting + radialIntensity400[i - offset] * (1.0 - avgWeighting);
+                radialOpacity400[i] = radialOpacity400[0] * avgWeighting + radialOpacity400[i - offset] * (1.0 - avgWeighting);
+
+            }
+            // Actually set the colors
+            for (int x = 0; x < FBMBTEXTURE_HEIGHT; x++)
+            {
+                for (int y = 0; y < FBMBTEXTURE_WIDTH; y++)
+                {
+                    int angel = getNearestAngel(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT);
+                    fb.SetPixel(x, y, getFireColor
+                        (getDistance(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT), radialIntensity400[angel], radialOpacity400[angel], FBMBTEXTURE_WIDTH/2, FBMBTEXTURE_HEIGHT/2));
+                }
+            }
+            return fb;
+        }
 
         private Texture2D generateFireball()
         {
@@ -1230,9 +1301,9 @@ namespace redwing
             {
                 for (int y = 0; y < FBTEXTURE_HEIGHT; y++)
                 {
-                    int angel = getNearestAngel(x, y);
+                    int angel = getNearestAngel(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
                     fb.SetPixel(x, y, getFireColor
-                        (getDistance(x, y), radialIntensity400[angel], radialOpacity400[angel], FBTEXTURE_HEIGHT/2, FBTEXTURE_HEIGHT/2));
+                        (getDistance(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), radialIntensity400[angel], radialOpacity400[angel], FBTEXTURE_HEIGHT/2, FBTEXTURE_HEIGHT/2));
                 }
             }
             return fb;
@@ -1313,21 +1384,21 @@ namespace redwing
             return intenReal;
         }
 
-        private double getDistance(int x, int y)
+        private double getDistance(int x, int y, int width, int height)
         {
-            int relX = x - (FBTEXTURE_WIDTH / 2 );
-            int relY = y - (FBTEXTURE_HEIGHT / 2);
+            int relX = x - (width / 2 );
+            int relY = y - (height / 2);
 
             return Math.Sqrt( (double) (relX * relX) + (double) (relY * relY) );
         }
 
 
-        private int getNearestAngel(int x, int y)
+        private int getNearestAngel(int x, int y, int width, int height)
         {
             int angel;
 
-            int relX = x - (FBTEXTURE_WIDTH / 2);
-            int relY = y - (FBTEXTURE_HEIGHT / 2);
+            int relX = x - (width / 2);
+            int relY = y - (height / 2);
 
             if (relX == 0)
             {

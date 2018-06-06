@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace redwing
@@ -30,7 +31,7 @@ namespace redwing
     internal class redwing_fireball_behavior : MonoBehaviour
     {
         public readonly float lifespan = 1.5f;
-
+        
         public float xVelocity;
         public float yVelocity;
 
@@ -39,8 +40,8 @@ namespace redwing
 
         public const float G_FORCE = -1.5f;
         public const float TERMINAL_VELOCITY_Y = 100f;
-        public const int CARTOON_FLOAT_FRAMES = 8;
-        private const float MAGMA_FRAMERATE = 5f;
+        public const float CARTOON_FLOAT_TIME = 0.3f;
+        private const float MAGMA_FRAMERATE = 15f;
 
         private const int FIREBALL_WIDTH = 150;
         private const int FIREBALL_HEIGHT = 150;
@@ -48,6 +49,12 @@ namespace redwing
         public bool doPhysics;
         public bool despawnBall;
         public Texture2D[] fireballMagmas;
+        public Texture2D[] fireballMagmaFireballs;
+
+        public int fireballMagmaFireballWidth;
+        public int fireballMagmaFireballHeight;
+
+        private GameObject[] ballObjs = new GameObject[4];
 
 
         public void Start()
@@ -89,12 +96,11 @@ namespace redwing
             }
             
             float currentTime = 0f;
-            int cartoonFrames = CARTOON_FLOAT_FRAMES;
             while (doPhysics && currentTime < lifespan)
             {
                 float timePassed = Time.deltaTime;
                 float actualYForce = ((G_FORCE) * (TERMINAL_VELOCITY_Y + yVelocity) / TERMINAL_VELOCITY_Y);
-                currentTime += Time.deltaTime;
+                currentTime += timePassed;
 
                 if (yVelocity > 0f)
                 {
@@ -102,18 +108,19 @@ namespace redwing
                     if (yVelocity <= 0f)
                     {
                         yVelocity = 0f;
+                        float cartoonStartTime = currentTime;
+                        while (currentTime - cartoonStartTime < CARTOON_FLOAT_TIME)
+                        {
+                            timePassed = Time.deltaTime;
+                            selfPosition.x += xVelocity * timePassed;
+                            currentTime += timePassed;
+                            yield return null;
+                        }
                     }
                 }
                 else
                 {
-                    if (cartoonFrames > 0)
-                    {
-                        cartoonFrames--;
-                    }
-                    else
-                    {
-                        yVelocity += actualYForce;
-                    }
+                    yVelocity += actualYForce;
                 }
 
                 selfPosition.x += xVelocity * timePassed;
@@ -141,11 +148,54 @@ namespace redwing
 
         public void OnTriggerEnter2D(Collider2D hitbox)
         {
-            if (!hitbox.IsTouchingLayers(11) && !hitbox.IsTouchingLayers(8)) return;
+            if (!hitbox.IsTouchingLayers(11)) return;
             
-            log("Hit a layer 11 or layer 8 object");
+            log("Hit a layer 11 object");
             doPhysics = false;
+            int balls = redwing_flame_gen.rng.Next(0, 4);
+            generateFireballMagmaBalls(balls);
             StartCoroutine(magmaFadeAnimation(0));
+        }
+
+        private void generateFireballMagmaBalls(int balls)
+        {
+            if (balls == 0) return;
+            
+            log("building " + balls + " fireballs");
+            for (int i = 0; i < balls; i++)
+            {
+                ballObjs[i] = new GameObject("FireballMagmaFireball" + i, typeof(Rigidbody2D), typeof(BoxCollider2D),
+                    typeof(redwing_fireball_magma_fireball_behavior), typeof(SpriteRenderer),
+                    typeof(IgnoreHeroCollision));
+                ballObjs[i].transform.localPosition = selfTranform.position;
+                ballObjs[i].transform.parent = fireball.transform;
+                log("Ball position x is " + ballObjs[i].transform.position.x + " and localposition x " +
+                                   "is " + ballObjs[i].transform.localPosition.x);
+                
+                redwing_fireball_magma_fireball_behavior a = ballObjs[i].
+                    GetComponent<redwing_fireball_magma_fireball_behavior>();
+                a.self = ballObjs[i];
+                a.selfSprite = ballObjs[i].GetComponent<SpriteRenderer>();
+                Rigidbody2D b = ballObjs[i].GetComponent<Rigidbody2D>();
+                b.velocity = new Vector2( ( (float)(redwing_flame_gen.rng.NextDouble() - 0.5) * 5f),
+                    (float)(redwing_flame_gen.rng.NextDouble() * 2.5 + 2f));
+                b.mass = 0.005f;
+                b.isKinematic = true;
+                
+                
+                BoxCollider2D c = ballObjs[i].GetComponent<BoxCollider2D>();
+                c.density = 0.005f;
+                c.size = Vector2.zero;
+                
+                Rect r = new Rect(0, 0, fireballMagmaFireballWidth, fireballMagmaFireballHeight);
+                SpriteRenderer d = ballObjs[i].GetComponent<SpriteRenderer>();
+                d.sprite = Sprite.Create(fireballMagmaFireballs[i], r, Vector2.zero);
+                d.enabled = true;
+                d.color = Color.white;
+                
+                ballObjs[i].SetActive(true);
+
+            }
         }
 
         private IEnumerator magmaFadeAnimation(int directionToFade)
@@ -186,5 +236,33 @@ namespace redwing
 
         public GameObject fireball;
         public SpriteRenderer fireballSprite;
+    }
+
+    internal class redwing_fireball_magma_fireball_behavior : MonoBehaviour
+    {
+        public GameObject self;
+        public SpriteRenderer selfSprite;
+        private const float LIFETIME = 1.5f;
+        
+        public void Start()
+        {
+            StartCoroutine(fade());
+        }
+
+        private IEnumerator fade()
+        {
+            float life = 0f;
+            while (life < LIFETIME)
+            {
+                life += Time.deltaTime;
+                Color selfSpriteColor = selfSprite.color;
+                selfSpriteColor.a = 1.0f - (float) (life / LIFETIME);
+                selfSprite.color = selfSpriteColor;
+                yield return null;
+            }
+            Modding.Logger.Log("Destroying ball because life ran out. life is " + life);
+            Destroy(self);
+        }
+
     }
 }

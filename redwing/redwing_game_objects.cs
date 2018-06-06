@@ -7,6 +7,7 @@ namespace redwing
     {
         public static Texture2D[] fireBalls;
         public static Texture2D[] fireballMagmas;
+        public static Texture2D[] fireballMagmaFireballs;
         
         public static Texture2D[] fireTrails;
         public static Texture2D[] firePillars;
@@ -117,7 +118,9 @@ namespace redwing
             behavior.yVelocity = 50f;
             behavior.fireballMagmas = fireballMagmas;
             behavior.doPhysics = true;
-
+            behavior.fireballMagmaFireballs = fireballMagmaFireballs;
+            behavior.fireballMagmaFireballHeight = redwing_flame_gen.FBMBTEXTURE_HEIGHT;
+            behavior.fireballMagmaFireballWidth = redwing_flame_gen.FBMBTEXTURE_WIDTH;
 
         }
 
