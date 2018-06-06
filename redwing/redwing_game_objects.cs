@@ -6,6 +6,8 @@ namespace redwing
     internal class redwing_game_objects
     {
         public static Texture2D[] fireBalls;
+        public static Texture2D[] fireballMagmas;
+        
         public static Texture2D[] fireTrails;
         public static Texture2D[] firePillars;
         public static Texture2D[] fireLasers;
@@ -47,13 +49,17 @@ namespace redwing
             fireballSpawn.SetActive(true);
             for (int i = 0; i < 7; i++)
             {
-                fireballsGo[i] = new GameObject("redwingFB" + i, typeof(DamageEnemies), typeof(SpriteRenderer), typeof(BoxCollider2D), typeof(redwing_fireball_behavior));
+                fireballsGo[i] = new GameObject("redwingFB" + i, typeof(DamageEnemies), typeof(SpriteRenderer),
+                    typeof(BoxCollider2D), typeof(redwing_fireball_behavior), typeof(IgnoreHeroCollision),
+                    typeof(Rigidbody2D));
                 fireballsGo[i].layer = 169;
                 fireballsGo[i].transform.localPosition = fireballSpawn.transform.position;
                 fireballsGo[i].transform.parent = fireballSpawn.transform;
                 setupFireballDamage(fireballsGo[i].GetComponent<DamageEnemies>());
                 setupFireballSprite(fireballsGo[i].GetComponent<SpriteRenderer>(), i);
-                setupCustomObject(fireballsGo[i].GetComponent<redwing_fireball_behavior>(), fireballsGo[i].GetComponent<BoxCollider2D>(), i);
+                setupCustomObject(fireballsGo[i].GetComponent<redwing_fireball_behavior>(),
+                    fireballsGo[i].GetComponent<BoxCollider2D>(), i);
+                setupFireballPhysics(fireballsGo[i].GetComponent<Rigidbody2D>());
                 
                 fireballsGo[i].SetActive(true);
             }
@@ -65,10 +71,12 @@ namespace redwing
         {
             behavior.fireball = fireballsGo[i];
             collide.size = new Vector2(1.0f, 1.0f);
+            collide.isTrigger = true;
             
             behavior.selfTranform = fireballsGo[i].transform;
             Vector3 selfPos = behavior.selfTranform.localPosition;
-            
+
+            behavior.fireballSprite = fireballsGo[i].GetComponent<SpriteRenderer>();
             
             switch (i)
             {
@@ -107,6 +115,7 @@ namespace redwing
             behavior.selfTranform.localPosition = selfPos;
             behavior.selfPosition = selfPos;
             behavior.yVelocity = 50f;
+            behavior.fireballMagmas = fireballMagmas;
             behavior.doPhysics = true;
 
 
@@ -128,47 +137,9 @@ namespace redwing
 
         }
 
-        private static void setupFireballPhysics(Rigidbody2D physics, BoxCollider2D collide, int i)
+        private static void setupFireballPhysics(Rigidbody2D physics)
         {
-            physics.mass = 1.0f;
-            physics.drag = 0.0f;
-            physics.angularVelocity = 0.05f;
             physics.isKinematic = true;
-
-            //collide.size = new Vector2(1.0f, 1.0f);
-            //collide.isActiveAndEnabled = false;
-
-            
-            
-            
-            switch (i)
-            {
-                case 0:
-                    physics.velocity = new Vector2(0, 6f);
-                    break;
-                case 1:
-                    physics.velocity = new Vector2(2f, 6f);
-                    break;
-                case 2:
-                    physics.velocity = new Vector2(-2f, 6f);
-                    break;
-                case 3:
-                    physics.velocity = new Vector2(4f, 6f);
-                    break;
-                case 4:
-                    physics.velocity = new Vector2(-4f, 6f);
-                    break;
-                case 5:
-                    physics.velocity = new Vector2(6f, 6f);
-                    break;
-                case 6:
-                    physics.velocity = new Vector2(-6f, 6f);
-                    break;
-                default:
-                    physics.velocity = new Vector2(0f, 0f);
-                    
-                    break;
-            }
             
         }
 

@@ -14,6 +14,8 @@ namespace redwing
     internal class redwing_flame_gen : MonoBehaviour
     {
         private readonly Texture2D[] fireBalls = new Texture2D[10];
+        private readonly Texture2D[] fireballMagmas = new Texture2D[12];
+        
         private readonly Texture2D[] fireTrails = new Texture2D[10];
         private readonly Texture2D[] firePillars = new Texture2D[10];
         private readonly Texture2D[] fireSpikes = new Texture2D[16];
@@ -62,6 +64,8 @@ namespace redwing
 
         private const int FSTEXTURE_WIDTH = 40;
         private const int FSTEXTURE_HEIGHT = 500;
+        
+        
 
         private const double OPACITY_MASK = 1.0;
 
@@ -83,6 +87,10 @@ namespace redwing
         // pick a factor of FSTEXTURE_HEIGHT
         private const int FS_INTERPOLATE_PIXELS = 50;
 
+        private const int FB_MAGMA_INTERPOLATE_PIXELS = 15;
+
+        
+        
         //public readonly Color[] flameIntensityCurve = { Color.red, new Color(1f, 0.3f, 0f), Color.yellow, Color.white };
 
         // What are the fire colors anyway?
@@ -113,6 +121,9 @@ namespace redwing
             redwing_game_objects.fireLasers = fireSpikes;
             redwing_game_objects.firePillars = firePillars;
             redwing_game_objects.fireTrails = fireTrails;
+            redwing_game_objects.fireballMagmas = fireballMagmas;
+
+            redwing_game_objects.soundFxClip = soundFxClip;
 
 
             //Log("Music made! attempting to play");
@@ -914,10 +925,82 @@ namespace redwing
             {
                 log("Unable to build fire spikes. Error " + e);
             }
+            
+            try
+            {
+                for (int i = 0; i < fireballMagmas.Length; i++)
+                {
+                    fireballMagmas[i] = generateFireballMagma();
+                    fireballMagmas[i].Apply();
+                }
+            }
+            catch (Exception e)
+            {
+                log("Unable to build fireball magmas. Error " + e);
+            }
 
             log("Built all flame textures.");
 
             
+        }
+        
+        
+        private Texture2D generateFireballMagma()
+        {
+            Texture2D fbm = new Texture2D(FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
+            double[] vertIntensity150 = new double[FBTEXTURE_WIDTH];
+            double[] vertOpacity150 = new double[FBTEXTURE_WIDTH];
+            
+            // RNG phase
+            for (int i = 0; i < FBTEXTURE_WIDTH; i++)
+            {
+                if (i % FB_MAGMA_INTERPOLATE_PIXELS != 0) continue;
+
+                vertIntensity150[i] = rng.NextDouble();
+                vertOpacity150[i] = rng.NextDouble();
+                
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map verticalIntensity150 -> 0-0.2
+                // and verticalOpacity150 -> -1 - -0.7
+                vertOpacity150[i] = (vertOpacity150[i] * 0.3) - 1.0f;
+                vertIntensity150[i] = (vertIntensity150[i] * 0.2);
+            }
+            
+            // Interpolation phase
+            
+            for (int i = 0; i < FBTEXTURE_WIDTH - FB_MAGMA_INTERPOLATE_PIXELS; i++)
+            {
+                if (i % FB_MAGMA_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FB_MAGMA_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FB_MAGMA_INTERPOLATE_PIXELS;
+
+                vertIntensity150[i] = vertIntensity150[i - offset + FB_MAGMA_INTERPOLATE_PIXELS] * avgWeighting + vertIntensity150[i - offset] * (1.0 - avgWeighting);
+                vertOpacity150[i] = vertOpacity150[i - offset + FB_MAGMA_INTERPOLATE_PIXELS] * avgWeighting + vertOpacity150[i - offset] * (1.0 - avgWeighting);
+            }
+
+            // Interpolation phase pt 2 (for wrap around)
+            for (int i = FBTEXTURE_WIDTH - FB_MAGMA_INTERPOLATE_PIXELS; i < FSTEXTURE_HEIGHT; i++)
+            {
+                if (i % FB_MAGMA_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FB_MAGMA_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FB_MAGMA_INTERPOLATE_PIXELS;
+
+                vertIntensity150[i] = vertIntensity150[0] * avgWeighting + vertIntensity150[i - offset] * (1.0 - avgWeighting);
+                vertOpacity150[i] = vertOpacity150[0] * avgWeighting + vertOpacity150[i - offset] * (1.0 - avgWeighting);
+            }
+            
+            // Actually set the colors
+            for (int x = 0; x < FBTEXTURE_WIDTH; x++)
+            {
+                for (int y = 0; y < FBTEXTURE_HEIGHT; y++)
+                {
+                    fbm.SetPixel(x, y, getFireColor
+                        ((y), vertIntensity150[x], vertOpacity150[x], FBTEXTURE_WIDTH, FBTEXTURE_WIDTH));
+                }
+            }
+
+
+            return fbm;
         }
 
         private Texture2D generateFireSpike()
@@ -938,7 +1021,7 @@ namespace redwing
 
                 // because c# sucks NextDouble can't return arbitrary numbers
                 // so apply a transformation to map verticalIntensity150 -> 0-0.2
-                // and verticalOpacity150 -> -1 - 0
+                // and verticalOpacity150 -> 0.5
                 //horzOpacity20[i] = horzOpacity20[i] * 0.2 - 0.6;
 
                 horzIntensity20[i] = (horzIntensity20[i] * 0.2);
