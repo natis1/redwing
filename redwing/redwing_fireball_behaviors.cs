@@ -34,8 +34,10 @@ namespace redwing
         
         public float xVelocity;
         public float yVelocity;
+        public float rotationalVelocity;
 
         public Transform selfTranform;
+        public Transform realSelfTransform;
         public Vector3 selfPosition;
 
         public const float G_FORCE = -1.5f;
@@ -55,6 +57,8 @@ namespace redwing
         public int fireballMagmaFireballHeight;
 
         private GameObject[] ballObjs = new GameObject[4];
+
+        public BoxCollider2D hitboxForPivot;
 
 
         public void Start()
@@ -99,8 +103,13 @@ namespace redwing
             while (doPhysics && currentTime < lifespan)
             {
                 float timePassed = Time.deltaTime;
+                float qpu = (float) (timePassed / 4.0);
+                
                 float actualYForce = ((G_FORCE) * (TERMINAL_VELOCITY_Y + yVelocity) / TERMINAL_VELOCITY_Y);
                 currentTime += timePassed;
+                
+                log("real transform is pos " + realSelfTransform.position.x + ", " + realSelfTransform.position.y);
+                log("real transform is localpos " + realSelfTransform.localPosition.x + ", " + realSelfTransform.localPosition.y);
 
                 if (yVelocity > 0f)
                 {
@@ -112,8 +121,17 @@ namespace redwing
                         while (currentTime - cartoonStartTime < CARTOON_FLOAT_TIME)
                         {
                             timePassed = Time.deltaTime;
-                            selfPosition.x += xVelocity * timePassed;
-                            selfTranform.localPosition = selfPosition;
+                            qpu = (float) (timePassed / 4.0);
+                            
+                            for (int i = 0; i < 4; i++)
+                            {
+                                if (!doPhysics) continue;
+                                selfPosition.x += xVelocity * qpu;
+                                
+                                selfTranform.position = selfPosition;
+                                realSelfTransform.localPosition = Vector3.zero;
+                            }
+
                             currentTime += timePassed;
                             yield return null;
                         }
@@ -124,10 +142,16 @@ namespace redwing
                     yVelocity += actualYForce;
                 }
 
-                selfPosition.x += xVelocity * timePassed;
-                selfPosition.y += yVelocity * timePassed;
-                selfTranform.localPosition = selfPosition;
-                
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!doPhysics) continue;
+                    selfPosition.x += xVelocity * qpu;
+                    selfPosition.y += yVelocity * qpu;
+                    
+                    selfTranform.position = selfPosition;
+                    realSelfTransform.localPosition = Vector3.zero;
+                }
+
                 yield return null;
             }
         }
@@ -151,11 +175,67 @@ namespace redwing
         {
             if (!hitbox.IsTouchingLayers(11)) return;
             
-            log("Hit a layer 11 object");
+            log("Hit a layer 11 object with on trigger enter");
+            
+            
+            
+        }
+
+        private void OnCollisionEnter2D(Collision2D other)
+        {
+            if (!other.otherCollider.IsTouchingLayers(11)) return;
+            
+            log("Wow oncollisionenter2d isn't a myth it actually runs");
             doPhysics = false;
+            
+            float RectWidth = this.GetComponent<Collider2D>().bounds.size.x;
+            float RectHeight = this.GetComponent<Collider2D>().bounds.size.y;
+            
+            Vector2 contactPt = other.contacts[0].point;
+            Vector2 center = other.collider.bounds.center;
+
+            int direction = 0;
+            if (contactPt.y > center.y && //checks that circle is on top of rectangle
+                (contactPt.x < center.x + RectWidth / 2.0 && contactPt.x > center.x - RectWidth / 2.0))
+            {
+                moveFireballBy(0f, contactPt.y - center.y);
+                direction = 0;
+            }
+            else if (contactPt.y < center.y &&
+                     (contactPt.x < center.x + RectWidth / 2.0 && contactPt.x > center.x - RectWidth / 2.0))
+            {
+                moveFireballBy(0f, contactPt.y - center.y);
+                direction = 2;
+            }
+            else if (contactPt.x > center.x &&
+                     (contactPt.y < center.y + RectHeight / 2.0 && contactPt.y > center.y - RectHeight / 2.0))
+            {
+                moveFireballBy(contactPt.x - center.x, 0f);
+                direction = 3;
+            }
+            else if (contactPt.x < center.x &&
+                     (contactPt.y < center.y + RectHeight / 2.0 && contactPt.y > center.y - RectHeight / 2.0))
+            {
+                moveFireballBy(contactPt.x - center.x, 0f);
+                direction = 1;
+            }
+            
+            // 0 = bottom. 1 = left. 2 = top. 3 = right
+
+            fireballPhysics.angularVelocity = 0f;
+            fireballPhysics.rotation = (float) (direction * 90);
+            
             int balls = redwing_flame_gen.rng.Next(0, 4);
+            
+            StartCoroutine(magmaFadeAnimation(direction));
             generateFireballMagmaBalls(balls);
-            StartCoroutine(magmaFadeAnimation(0));
+        }
+
+        private void moveFireballBy(float xDif, float yDif)
+        {
+            selfPosition.x += xDif;
+            selfPosition.y += yDif;
+            selfTranform.position = selfPosition;
         }
 
         private void generateFireballMagmaBalls(int balls)
@@ -237,6 +317,7 @@ namespace redwing
 
         public GameObject fireball;
         public SpriteRenderer fireballSprite;
+        public Rigidbody2D fireballPhysics;
     }
 
     internal class redwing_fireball_magma_fireball_behavior : MonoBehaviour

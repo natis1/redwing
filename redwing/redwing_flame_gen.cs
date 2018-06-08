@@ -54,8 +54,8 @@ namespace redwing
         private PlayMakerFSM sharpShadowFsm;
 
 
-        private const int FBTEXTURE_WIDTH = 150;
-        private const int FBTEXTURE_HEIGHT = 150;
+        public const int FBTEXTURE_WIDTH = 150;
+        public const int FBTEXTURE_HEIGHT = 150;
 
         private const int FTTEXTURE_WIDTH = 600;
         private const int FTTEXTURE_HEIGHT = 300;

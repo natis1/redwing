@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using ModCommon;
+using UnityEngine;
 
 
 namespace redwing
@@ -29,6 +31,9 @@ namespace redwing
 
         private GameObject fireballSpawn;
         private readonly GameObject[] fireballsGo = new GameObject[7];
+        
+        // Seriously. Fuck you Unity. I literally just want spinning fireballs.
+        private readonly GameObject[] fireballPivotGOs = new GameObject[7];
 
         private GameObject shield;
         private GameObject[] lasers = new GameObject[16];
@@ -41,8 +46,11 @@ namespace redwing
                 return;
             }
             fireballSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_fireball_spawner_behavior));
-            fireballSpawn.transform.position = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
-            Vector3 fbSpawnPos = fireballSpawn.transform.position;
+            //fireballSpawn.transform.position = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
+            
+            Vector3 fbSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
+            //log("FB spawn position xyz is " + fbSpawnPos.x + ", " + fbSpawnPos.y + ", " + fbSpawnPos.z);
+            
             fbSpawnPos.x = fbSpawnPos.x - TRANSFORM_XOFFSET;
             fireballSpawn.transform.position = fbSpawnPos;
 
@@ -50,12 +58,25 @@ namespace redwing
             fireballSpawn.SetActive(true);
             for (int i = 0; i < 7; i++)
             {
+                
+                fireballPivotGOs[i] = new GameObject("redwingFBPivot" + i);
+                fireballPivotGOs[i].transform.parent = fireballSpawn.transform;
+                fireballPivotGOs[i].transform.position = Vector3.zero;
+                fireballPivotGOs[i].transform.localPosition = Vector3.zero;
+                
+                
                 fireballsGo[i] = new GameObject("redwingFB" + i, typeof(DamageEnemies), typeof(SpriteRenderer),
                     typeof(BoxCollider2D), typeof(redwing_fireball_behavior), typeof(IgnoreHeroCollision),
                     typeof(Rigidbody2D));
                 fireballsGo[i].layer = 169;
-                fireballsGo[i].transform.localPosition = fireballSpawn.transform.position;
-                fireballsGo[i].transform.parent = fireballSpawn.transform;
+                
+                
+                
+                fireballsGo[i].transform.parent = fireballPivotGOs[i].transform;
+                fireballsGo[i].transform.position = Vector3.zero;
+                fireballsGo[i].transform.localPosition = Vector3.zero;
+                
+                
                 setupFireballDamage(fireballsGo[i].GetComponent<DamageEnemies>());
                 setupFireballSprite(fireballsGo[i].GetComponent<SpriteRenderer>(), i);
                 setupCustomObject(fireballsGo[i].GetComponent<redwing_fireball_behavior>(),
@@ -72,12 +93,15 @@ namespace redwing
         {
             behavior.fireball = fireballsGo[i];
             collide.size = new Vector2(1.0f, 1.0f);
-            collide.isTrigger = true;
+            collide.isTrigger = false;
             
-            behavior.selfTranform = fireballsGo[i].transform;
-            Vector3 selfPos = behavior.selfTranform.localPosition;
+            behavior.selfTranform = fireballPivotGOs[i].transform;
+            behavior.realSelfTransform = fireballsGo[i].transform;
+            
+            Vector3 selfPos = behavior.selfTranform.position;
 
             behavior.fireballSprite = fireballsGo[i].GetComponent<SpriteRenderer>();
+            behavior.fireballPhysics = fireballsGo[i].GetComponent<Rigidbody2D>();
             
             switch (i)
             {
@@ -113,9 +137,14 @@ namespace redwing
                     break;
             }
 
-            behavior.selfTranform.localPosition = selfPos;
+            behavior.selfTranform.position = selfPos;
+
+            //fireballsGo[i].transform.localPosition = ;
+            
             behavior.selfPosition = selfPos;
             behavior.yVelocity = 50f;
+            behavior.hitboxForPivot = collide;
+                
             behavior.fireballMagmas = fireballMagmas;
             behavior.doPhysics = true;
             behavior.fireballMagmaFireballs = fireballMagmaFireballs;
@@ -127,9 +156,10 @@ namespace redwing
         private static void setupFireballSprite(SpriteRenderer sprite, int i)
         {
             Rect r = new Rect(0, 0, fireballLength, fireballLength);
-            sprite.sprite = Sprite.Create(fireBalls[i], r, Vector2.zero);
+            sprite.sprite = Sprite.Create(fireBalls[i], r, new Vector2(0.5f, 0.5f));
             sprite.enabled = true;
             sprite.color = Color.white;
+            
         }
 
         private static void setupFireballDamage(DamageEnemies hitbox)
@@ -142,8 +172,10 @@ namespace redwing
 
         private static void setupFireballPhysics(Rigidbody2D physics)
         {
-            physics.isKinematic = true;
-            
+            physics.isKinematic = false;
+            physics.gravityScale = 0f; // we in space
+            physics.angularVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
+
         }
 
         private static void log(string str)
