@@ -6,7 +6,7 @@ namespace redwing
 {
     internal class redwing_fireball_spawner_behavior : MonoBehaviour
     {
-        public readonly float lifespan = 1.75f;
+        public readonly float lifespan = 3.0f;
 
         public void Start()
         {
@@ -30,23 +30,25 @@ namespace redwing
 
     internal class redwing_fireball_behavior : MonoBehaviour
     {
-        public readonly float lifespan = 1.5f;
+        public readonly float lifespan = 2.25f;
         
         public float xVelocity;
         public float yVelocity;
         public float rotationalVelocity;
 
         public Transform selfTranform;
-        public Transform realSelfTransform;
         public Vector3 selfPosition;
 
         public const float G_FORCE = -1.5f;
-        public const float TERMINAL_VELOCITY_Y = 100f;
+        public const float TERMINAL_VELOCITY_Y = 15f;
         public const float CARTOON_FLOAT_TIME = 0.3f;
         private const float MAGMA_FRAMERATE = 15f;
 
         private const int FIREBALL_WIDTH = 150;
         private const int FIREBALL_HEIGHT = 150;
+
+        public float maxHeight = 8f;
+        public float maxySpeed = 30f;
         
         public bool doPhysics;
         public bool despawnBall;
@@ -70,14 +72,14 @@ namespace redwing
 
         private IEnumerator ballAppear()
         {
-            Vector3 ballSize = fireball.transform.localScale;
+            Vector3 ballSize = this.transform.localScale;
             float currentTime = 0f;
             while (currentTime < 0.2f)
             {
                 float alpha = currentTime * 5f;
                 currentTime += Time.deltaTime;
                 
-                fireball.transform.localScale = ballSize * alpha;
+                this.transform.localScale = ballSize * alpha;
                 
                 Color fireballSpriteColor = fireballSprite.color;
                 fireballSpriteColor.a = alpha;
@@ -89,7 +91,7 @@ namespace redwing
             Color spriteColor = fireballSprite.color;
             spriteColor.a = 1.0f;
             fireballSprite.color = spriteColor;
-            fireball.transform.localScale = ballSize;
+            this.transform.localScale = ballSize;
         }
 
         private IEnumerator cartoonPhysics()
@@ -98,60 +100,53 @@ namespace redwing
             {
                 yield return null;
             }
-            
+
+            bool gFall = false;
             float currentTime = 0f;
+            float currentHeight = 0f;
+            
             while (doPhysics && currentTime < lifespan)
             {
                 float timePassed = Time.deltaTime;
-                float qpu = (float) (timePassed / 4.0);
                 
-                float actualYForce = ((G_FORCE) * (TERMINAL_VELOCITY_Y + yVelocity) / TERMINAL_VELOCITY_Y);
-                currentTime += timePassed;
-                
-                log("real transform is pos " + realSelfTransform.position.x + ", " + realSelfTransform.position.y);
-                log("real transform is localpos " + realSelfTransform.localPosition.x + ", " + realSelfTransform.localPosition.y);
-
-                if (yVelocity > 0f)
+                //float actualYForce = ((G_FORCE) * (TERMINAL_VELOCITY_Y + yVelocity) / TERMINAL_VELOCITY_Y);
+                if (gFall)
                 {
+                    float actualYForce = ((G_FORCE) * (TERMINAL_VELOCITY_Y + yVelocity) / TERMINAL_VELOCITY_Y);
                     yVelocity += actualYForce;
-                    if (yVelocity <= 0f)
-                    {
-                        yVelocity = 0f;
-                        float cartoonStartTime = currentTime;
-                        while (currentTime - cartoonStartTime < CARTOON_FLOAT_TIME)
-                        {
-                            timePassed = Time.deltaTime;
-                            qpu = (float) (timePassed / 4.0);
-                            
-                            for (int i = 0; i < 4; i++)
-                            {
-                                if (!doPhysics) continue;
-                                selfPosition.x += xVelocity * qpu;
-                                
-                                selfTranform.position = selfPosition;
-                                realSelfTransform.localPosition = Vector3.zero;
-                            }
-
-                            currentTime += timePassed;
-                            yield return null;
-                        }
-                    }
                 }
                 else
                 {
-                    yVelocity += actualYForce;
+                    yVelocity = (float) ((maxySpeed) * (1.0 - currentHeight / (1.2 * maxHeight)));
                 }
 
-                for (int i = 0; i < 4; i++)
+
+                currentTime += timePassed;
+
+                if (yVelocity > 0f && currentHeight >= maxHeight)
                 {
-                    if (!doPhysics) continue;
-                    selfPosition.x += xVelocity * qpu;
-                    selfPosition.y += yVelocity * qpu;
-                    
-                    selfTranform.position = selfPosition;
-                    realSelfTransform.localPosition = Vector3.zero;
+                    yVelocity = 0f;
+                    float cartoonStartTime = currentTime;
+                    gFall = true;
+                    while (currentTime - cartoonStartTime < CARTOON_FLOAT_TIME)
+                    {
+                        timePassed = Time.deltaTime;
+                        selfPosition.x += xVelocity * timePassed;
+                        selfTranform.position = selfPosition;
+                        fireball.transform.Rotate(0f, 0f, rotationalVelocity);
+                        currentTime += timePassed;
+                        yield return null;
+                    }
                 }
-
+                
+                
+                selfPosition.x += xVelocity * timePassed;
+                selfPosition.y += yVelocity * timePassed;
+                currentHeight += yVelocity * timePassed;
+                
+                selfTranform.position = selfPosition;
+                fireball.transform.Rotate(0f, 0f, rotationalVelocity);
+                
                 yield return null;
             }
         }
@@ -173,69 +168,110 @@ namespace redwing
 
         public void OnTriggerEnter2D(Collider2D hitbox)
         {
-            if (!hitbox.IsTouchingLayers(11)) return;
+            log("Hit a layer " + hitbox.gameObject.layer + " object with name " + hitbox.name);
             
-            log("Hit a layer 11 object with on trigger enter");
+            if (hitbox.gameObject.layer != 8) return;
             
+            log("Hit a layer 8 object with on trigger enter. obj name is " + hitbox.name);
             
-            
-        }
-
-        private void OnCollisionEnter2D(Collision2D other)
-        {
-            if (!other.otherCollider.IsTouchingLayers(11)) return;
-            
-            log("Wow oncollisionenter2d isn't a myth it actually runs");
             doPhysics = false;
+            //center of the object. if we above it and within the bounds we hit it from the top
+            //Vector2 centerMeme = hitbox.bounds.center;
+
+            Vector2 topRightBound = hitbox.bounds.max;
+            Vector2 bottomLeftBound = hitbox.bounds.min;
+
+            Vector2 ourTopRight = hitboxForPivot.bounds.max;
+            Vector2 ourBottomLeft = hitboxForPivot.bounds.min;
             
-            float RectWidth = this.GetComponent<Collider2D>().bounds.size.x;
-            float RectHeight = this.GetComponent<Collider2D>().bounds.size.y;
+            // hitbox pushing done by finding the easiest direction to push the fireball to get it
+            // outside the wall.
             
-            Vector2 contactPt = other.contacts[0].point;
-            Vector2 center = other.collider.bounds.center;
+            
+            float pushUpDistance = topRightBound.y - ourBottomLeft.y;
+            float pushDownDistance = ourTopRight.y - bottomLeftBound.y;
+
+            float pushRightDistance = topRightBound.x - ourBottomLeft.x;
+            float pushLeftDistance = ourTopRight.x - bottomLeftBound.x;
+            
+            
+            float RectWidth = hitboxForPivot.bounds.size.x;
+            float RectHeight = hitboxForPivot.bounds.size.y;
+            
+            
+            Vector2 contactPt = Vector2.zero;
+            
+            try
+            {
+                Physics.Raycast(transform.position, transform.forward, out RaycastHit hit);
+                contactPt = hit.point;
+            }
+            catch (Exception e)
+            {
+                log("Error raycasting " + e);
+            }
+
+            
+            Vector2 center = hitbox.bounds.center;
+
+            //Vector2 myCenter = other.otherCollider.bounds.center;
 
             int direction = 0;
             if (contactPt.y > center.y && //checks that circle is on top of rectangle
                 (contactPt.x < center.x + RectWidth / 2.0 && contactPt.x > center.x - RectWidth / 2.0))
             {
-                moveFireballBy(0f, contactPt.y - center.y);
+                //float moveBallYBy = myCenter.y
+                //moveFireballBy(0f, contactPt.y - center.y);
                 direction = 0;
             }
             else if (contactPt.y < center.y &&
                      (contactPt.x < center.x + RectWidth / 2.0 && contactPt.x > center.x - RectWidth / 2.0))
             {
-                moveFireballBy(0f, contactPt.y - center.y);
+                //moveFireballBy(0f, contactPt.y - center.y);
                 direction = 2;
             }
             else if (contactPt.x > center.x &&
                      (contactPt.y < center.y + RectHeight / 2.0 && contactPt.y > center.y - RectHeight / 2.0))
             {
-                moveFireballBy(contactPt.x - center.x, 0f);
+                //moveFireballBy(contactPt.x - center.x, 0f);
                 direction = 3;
             }
             else if (contactPt.x < center.x &&
                      (contactPt.y < center.y + RectHeight / 2.0 && contactPt.y > center.y - RectHeight / 2.0))
             {
-                moveFireballBy(contactPt.x - center.x, 0f);
+                //moveFireballBy(contactPt.x - center.x, 0f);
                 direction = 1;
             }
             
-            // 0 = bottom. 1 = left. 2 = top. 3 = right
-
-            fireballPhysics.angularVelocity = 0f;
-            fireballPhysics.rotation = (float) (direction * 90);
+            /*
+            int direction = 0;
+            if (pushUpDistance <= pushDownDistance && pushUpDistance <= pushRightDistance &&
+                pushUpDistance <= pushLeftDistance)
+            {
+                direction = 0;
+                moveFireballBy(0f, pushUpDistance);
+            } else if (pushDownDistance <= pushRightDistance && pushDownDistance <= pushLeftDistance)
+            {
+                direction = 2;
+                moveFireballBy(0f, -pushDownDistance);
+            } else if (pushRightDistance <= pushLeftDistance)
+            {
+                direction = 1;
+                moveFireballBy(pushRightDistance, 0f);
+            }
+            else
+            {
+                direction = 3;
+                moveFireballBy(-pushLeftDistance, 0f);
+            }*/
             
+            fireball.transform.rotation = Quaternion.identity;
+            fireball.transform.Rotate(new Vector3(0f, 0f, (float) (direction * 90)));
             int balls = redwing_flame_gen.rng.Next(0, 4);
             
             StartCoroutine(magmaFadeAnimation(direction));
             generateFireballMagmaBalls(balls);
-        }
-
-        private void moveFireballBy(float xDif, float yDif)
-        {
-            selfPosition.x += xDif;
-            selfPosition.y += yDif;
-            selfTranform.position = selfPosition;
+            
         }
 
         private void generateFireballMagmaBalls(int balls)
@@ -270,7 +306,7 @@ namespace redwing
                 
                 Rect r = new Rect(0, 0, fireballMagmaFireballWidth, fireballMagmaFireballHeight);
                 SpriteRenderer d = ballObjs[i].GetComponent<SpriteRenderer>();
-                d.sprite = Sprite.Create(fireballMagmaFireballs[i], r, Vector2.zero);
+                d.sprite = Sprite.Create(fireballMagmaFireballs[i], r, new Vector2(0.5f, 0.5f));
                 d.enabled = true;
                 d.color = Color.white;
                 
@@ -291,7 +327,7 @@ namespace redwing
                 if (frame > oldFrame)
                 {
                     Rect r = new Rect(0, 0, FIREBALL_WIDTH, FIREBALL_HEIGHT);
-                    fireballSprite.sprite = Sprite.Create(fireballMagmas[frame], r, Vector2.zero);
+                    fireballSprite.sprite = Sprite.Create(fireballMagmas[frame], r, new Vector2(0.5f, 0.5f));
                     oldFrame = frame;
                 }
                 

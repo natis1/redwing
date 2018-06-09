@@ -27,7 +27,7 @@ namespace redwing
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
         public static int fbDamage = 10;
 
-        private const float TRANSFORM_XOFFSET = 0.69f;
+        //private const float TRANSFORM_XOFFSET = 0.69f;
 
         private GameObject fireballSpawn;
         private readonly GameObject[] fireballsGo = new GameObject[7];
@@ -51,7 +51,7 @@ namespace redwing
             Vector3 fbSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
             //log("FB spawn position xyz is " + fbSpawnPos.x + ", " + fbSpawnPos.y + ", " + fbSpawnPos.z);
             
-            fbSpawnPos.x = fbSpawnPos.x - TRANSFORM_XOFFSET;
+            fbSpawnPos.x = fbSpawnPos.x;
             fireballSpawn.transform.position = fbSpawnPos;
 
 
@@ -59,30 +59,26 @@ namespace redwing
             for (int i = 0; i < 7; i++)
             {
                 
-                fireballPivotGOs[i] = new GameObject("redwingFBPivot" + i);
+                fireballPivotGOs[i] = new GameObject("redwingFBPivot" + i, typeof(BoxCollider2D),
+                    typeof(IgnoreHeroCollision), typeof(Rigidbody2D), typeof(DamageEnemies),
+                    typeof(redwing_fireball_behavior));
                 fireballPivotGOs[i].transform.parent = fireballSpawn.transform;
-                fireballPivotGOs[i].transform.position = Vector3.zero;
+                //fireballPivotGOs[i].transform.position = Vector3.zero;
                 fireballPivotGOs[i].transform.localPosition = Vector3.zero;
+                fireballPivotGOs[i].layer = 169;
                 
-                
-                fireballsGo[i] = new GameObject("redwingFB" + i, typeof(DamageEnemies), typeof(SpriteRenderer),
-                    typeof(BoxCollider2D), typeof(redwing_fireball_behavior), typeof(IgnoreHeroCollision),
-                    typeof(Rigidbody2D));
-                fireballsGo[i].layer = 169;
-                
-                
-                
+                fireballsGo[i] = new GameObject("redwingFB" + i, typeof(SpriteRenderer));
                 fireballsGo[i].transform.parent = fireballPivotGOs[i].transform;
-                fireballsGo[i].transform.position = Vector3.zero;
+                //fireballsGo[i].transform.position = Vector3.zero;
                 fireballsGo[i].transform.localPosition = Vector3.zero;
                 
-                
-                setupFireballDamage(fireballsGo[i].GetComponent<DamageEnemies>());
+                setupFireballDamage(fireballPivotGOs[i].GetComponent<DamageEnemies>());
                 setupFireballSprite(fireballsGo[i].GetComponent<SpriteRenderer>(), i);
-                setupCustomObject(fireballsGo[i].GetComponent<redwing_fireball_behavior>(),
-                    fireballsGo[i].GetComponent<BoxCollider2D>(), i);
-                setupFireballPhysics(fireballsGo[i].GetComponent<Rigidbody2D>());
+                setupFireballPhysics(fireballPivotGOs[i].GetComponent<Rigidbody2D>());
+                setupCustomObject(fireballPivotGOs[i].GetComponent<redwing_fireball_behavior>(),
+                    fireballPivotGOs[i].GetComponent<BoxCollider2D>(), i);
                 
+                fireballPivotGOs[i].SetActive(true);
                 fireballsGo[i].SetActive(true);
             }
             log("Spawned in fireballs");
@@ -92,16 +88,19 @@ namespace redwing
         private void setupCustomObject(redwing_fireball_behavior behavior, BoxCollider2D collide, int i)
         {
             behavior.fireball = fireballsGo[i];
-            collide.size = new Vector2(1.0f, 1.0f);
-            collide.isTrigger = false;
+            
+            collide.isTrigger = true;
             
             behavior.selfTranform = fireballPivotGOs[i].transform;
-            behavior.realSelfTransform = fireballsGo[i].transform;
             
             Vector3 selfPos = behavior.selfTranform.position;
 
             behavior.fireballSprite = fireballsGo[i].GetComponent<SpriteRenderer>();
-            behavior.fireballPhysics = fireballsGo[i].GetComponent<Rigidbody2D>();
+            behavior.fireballPhysics = fireballPivotGOs[i].GetComponent<Rigidbody2D>();
+            collide.size = behavior.fireballSprite.bounds.size;
+            Vector2 spriteSize = behavior.fireballSprite.bounds.size;
+            collide.offset = new Vector2(spriteSize.x / 2, 0);
+            behavior.rotationalVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
             
             switch (i)
             {
@@ -142,7 +141,7 @@ namespace redwing
             //fireballsGo[i].transform.localPosition = ;
             
             behavior.selfPosition = selfPos;
-            behavior.yVelocity = 50f;
+            behavior.yVelocity = 30f;
             behavior.hitboxForPivot = collide;
                 
             behavior.fireballMagmas = fireballMagmas;
@@ -172,9 +171,11 @@ namespace redwing
 
         private static void setupFireballPhysics(Rigidbody2D physics)
         {
-            physics.isKinematic = false;
+            physics.isKinematic = true;
             physics.gravityScale = 0f; // we in space
-            physics.angularVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
+            log("Fireball physics name is " + physics.transform.name);
+            //physics.transform.name = "meme";
+            //physics.angularVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
 
         }
 
