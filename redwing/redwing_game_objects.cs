@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using UnityEngine;
 
@@ -16,7 +18,7 @@ namespace redwing
         public static Texture2D[] fireLasers;
         public static AudioClip[] soundFxClip;
 
-        public static GameObject voidKnight;
+        public GameObject voidKnight;
         
         // ReSharper disable once ConvertToConstant.Global
         // ReSharper disable once MemberCanBePrivate.Global
@@ -26,6 +28,24 @@ namespace redwing
         // ReSharper disable once MemberCanBePrivate.Global
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
         public static int fbDamage = 10;
+        
+        // ReSharper disable once ConvertToConstant.Global
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once FieldCanBeMadeReadOnly.Global
+        public static int laserX = 40;
+        
+        // ReSharper disable once ConvertToConstant.Global
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once FieldCanBeMadeReadOnly.Global
+        public static int laserY = 500;
+        
+        // ReSharper disable once ConvertToConstant.Global
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once FieldCanBeMadeReadOnly.Global
+        public static int laserDamage = 30;
+
+        private const float rotationAmount = (float) (360.0 / 16.0);
+        
 
         //private const float TRANSFORM_XOFFSET = 0.69f;
 
@@ -34,11 +54,60 @@ namespace redwing
         
         // Seriously. Fuck you Unity. I literally just want spinning fireballs.
         private readonly GameObject[] fireballPivotGOs = new GameObject[7];
-
+        
+        
         private GameObject shield;
         private GameObject[] lasers = new GameObject[16];
         
+
+        public void addLasers()
+        {
+            if (voidKnight == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < 16; i++)
+            {
+                lasers[i] = new GameObject("redwingLaser" + i, typeof(SpriteRenderer), typeof(Rigidbody2D),
+                    typeof(BoxCollider2D), typeof(DamageEnemies), typeof(redwing_laser_behaviors));
+                lasers[i].transform.parent = voidKnight.transform;
+                lasers[i].transform.localPosition = Vector3.zero;
+                lasers[i].layer = 170;
+                lasers[i].transform.localScale = new Vector3(4f, 4f, 4f);
+                Rigidbody2D laserPhysics = lasers[i].GetComponent<Rigidbody2D>();
+                laserPhysics.isKinematic = true;
+                
+                Rect r = new Rect(0, 0, laserX, laserY);
+                SpriteRenderer s = lasers[i].GetComponent<SpriteRenderer>();
+                s.sprite = Sprite.Create(fireLasers[i], r, new Vector2(0.5f, 0f));
+                s.enabled = true;
+                s.color = Color.white;
+                BoxCollider2D laserPassthrough = lasers[i].GetComponent<BoxCollider2D>();
+                laserPassthrough.isTrigger = true;
+                laserPassthrough.size = s.bounds.size;
+                Vector2 spriteSize = s.bounds.size;
+                laserPassthrough.offset = new Vector2(spriteSize.x / 2, 0);
+                
+                DamageEnemies dmg = lasers[i].GetComponent<DamageEnemies>();
+                dmg.damageDealt = laserDamage;
+                dmg.attackType = AttackTypes.Generic;
+
+                float rotationMod = (float)(redwing_flame_gen.rng.NextDouble() * rotationAmount);
+                
+                lasers[i].transform.Rotate(0f, 0f, rotationAmount * i + rotationMod);
+
+                
+
+
+            }
+            
+            
+        }
+
         
+
+
         public void addFireballs()
         {
             if (voidKnight == null)
@@ -75,7 +144,7 @@ namespace redwing
                 setupFireballDamage(fireballPivotGOs[i].GetComponent<DamageEnemies>());
                 setupFireballSprite(fireballsGo[i].GetComponent<SpriteRenderer>(), i);
                 setupFireballPhysics(fireballPivotGOs[i].GetComponent<Rigidbody2D>());
-                setupCustomObject(fireballPivotGOs[i].GetComponent<redwing_fireball_behavior>(),
+                setupCustomFireballObject(fireballPivotGOs[i].GetComponent<redwing_fireball_behavior>(),
                     fireballPivotGOs[i].GetComponent<BoxCollider2D>(), i);
                 
                 fireballPivotGOs[i].SetActive(true);
@@ -85,7 +154,7 @@ namespace redwing
             
         }
 
-        private void setupCustomObject(redwing_fireball_behavior behavior, BoxCollider2D collide, int i)
+        private void setupCustomFireballObject(redwing_fireball_behavior behavior, BoxCollider2D collide, int i)
         {
             behavior.fireball = fireballsGo[i];
             

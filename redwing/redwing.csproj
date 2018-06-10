@@ -44,7 +44,7 @@
     <Reference Include="ModCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\mods\mods\ModCommon.dll</HintPath>
     </Reference>
-    <Reference  Include="PlayMaker, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\mods\PlayMaker.dll</HintPath>
     </Reference>
@@ -81,6 +81,8 @@
     <Compile Include="redwing_fireball_behaviors.cs" />
     <Compile Include="redwing_flame_gen.cs" />
     <Compile Include="redwing_game_objects.cs" />
+    <Compile Include="redwing_hooks.cs" />
+    <Compile Include="redwing_laser_behaviors.cs" />
     <Compile Include="redwing_settings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

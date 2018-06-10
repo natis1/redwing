@@ -49,9 +49,8 @@ namespace redwing
 
         
 
-        private GameObject voidKnight;
-        private GameObject sharpShadow;
-        private PlayMakerFSM sharpShadowFsm;
+        
+        
 
 
         public const int FBTEXTURE_WIDTH = 150;
@@ -63,8 +62,8 @@ namespace redwing
         private const int FPTEXTURE_WIDTH = 500;
         private const int FPTEXTURE_HEIGHT = 1080;
 
-        private const int FSTEXTURE_WIDTH = 40;
-        private const int FSTEXTURE_HEIGHT = 500;
+        private const int FSTEXTURE_WIDTH = 80;
+        private const int FSTEXTURE_HEIGHT = 1500;
         
         public const int FBMBTEXTURE_WIDTH = 50;
         public const int FBMBTEXTURE_HEIGHT = 50;
@@ -74,8 +73,8 @@ namespace redwing
         public int sceneTimer;
         public int currentImg;
 
-        private const double FB_COOLDOWN = 3.0f;
-        private double fbTime;
+        
+        
 
         // pick a factor of 360
         private const int INTERPOLATE_DEGREES = 18;
@@ -102,14 +101,7 @@ namespace redwing
         private readonly double[] flameIntensityThresholds = { 0.4, 0.7, 2.5, 2.6 };
 
 
-        public void OnDestroy()
-        {
-            // ReSharper disable once EventUnsubscriptionViaAnonymousDelegate not much can
-            // do about this one
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= (arg0, arg1) => Reset();
-            ModHooks.Instance.DashPressedHook -= checkFireBalls;
-            ModHooks.Instance.OnGetEventSenderHook -= fireSoul;
-        }
+        
 
         public void Start()
         {
@@ -128,30 +120,9 @@ namespace redwing
 
             redwing_game_objects.soundFxClip = soundFxClip;
 
-
-            //Log("Music made! attempting to play");
-            //ModHooks.Instance.SlashHitHook += BoopOnHit;
-            
-            GameManager.instance.StartCoroutine(getHeroFsMs());
-
-            ModHooks.Instance.DashPressedHook += checkFireBalls;
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (arg0, arg1) => Reset();
-            //ModHooks.Instance.OnGetEventSenderHook += FireSoul;
         }
 
-        private GameObject fireSoul(GameObject go, Fsm fsm)
-        {
-            log("event sent. game object is: " + go.name + " and the fsm is: " + fsm.Name);
-            if (go == sharpShadow)
-            {
-                PlayMakerFSM hm = FSMUtility.LocateFSM(fsm.GameObject, "health_manager") ?? FSMUtility.LocateFSM(fsm.GameObject, "health_manager_enemy");
-                if (!Equals(hm, null))
-                {
-                    log("You hit an enemy with sharp shadow. Wow. Awesome...");
-                }
-            }
-            return go;
-        }
+        
 
 
 
@@ -169,24 +140,7 @@ namespace redwing
             audioSource.Stop();
 
         }
-
-
-        // ReSharper disable once UnusedParameter.Local because unity
-        private void boopOnHit(Collider2D otherCollider, Object boopTarget)
-        {
-            if (voidKnight == null || voidKnight != instance)
-                return;
-
-
-            if (boopTimer > 0) return;
-            
-            voidKnight.GetComponent<AudioSource>().volume = 1.0f;
-            voidKnight.GetComponent<AudioSource>().PlayOneShot(soundFxClip[TESTING_CLIP]);
-            StartCoroutine(volumeFade(voidKnight.GetComponent<AudioSource>(), 1.1f));
-            boopTimer = 10;
-            log("playing boop! " + boopTarget.name);
-        }
-
+        
         private void generateSoundEffects()
         {
             soundFxClip[0] = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
@@ -429,7 +383,6 @@ namespace redwing
             {
                 fx[i] *= (float) volume;
             }
-
             return fx;
         }
 
@@ -711,134 +664,7 @@ namespace redwing
             return fx;
         }
 
-        private void checkFireBalls()
-        {
-            float cooldown;
-            try
-            {
-                // ReSharper disable once PossibleNullReferenceException because in try catch thing.
-                cooldown = (float) instance.GetType()
-                    .GetField("dashCooldownTimer", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(instance);
-            }
-            catch (Exception e)
-            {
-                cooldown = 0.5f;
-                log("Failed to set cooldown by reflection because " + e);
-            }
-
-            if (!(cooldown <= 0)) return;
-
-            HeroActions direction = GameManager.instance.inputHandler.inputActions;
-            if (direction.up.IsPressed && !direction.down.IsPressed && !direction.left.IsPressed && !direction.right.IsPressed)
-            {
-                if (!(fbTime <= 0.0)) return;
-                
-                redwing_game_objects a = new redwing_game_objects();
-                a.addFireballs();
-                fbTime = FB_COOLDOWN;
-            } else
-            {
-                spawnFireTrail();
-            }
-
-
-        }
-
-        private static void spawnFireTrail()
-        {
-            log("I should be spawning a fire trail right now");
-        }
-
-
-        private void spawnFireballs()
-        {
-            log("I should be spawning fireballs right now");
-        }
-
-
-        private IEnumerator getHeroFsMs()
-        {
-            while (instance == null)
-                yield return new WaitForEndOfFrame();
-
-            // ReSharper disable once InvertIf because idk it also looks dumb here.
-            if (sharpShadow == null || !sharpShadow.CompareTag("Sharp Shadow"))
-                foreach (GameObject ssGameObject in Resources.FindObjectsOfTypeAll<GameObject>())
-                {                    
-                    if (ssGameObject == null || !ssGameObject.CompareTag("Sharp Shadow")) continue;
-                    sharpShadow = ssGameObject;
-                    sharpShadowFsm = FSMUtility.LocateFSM(sharpShadow, "damages_enemy");
-
-                    log("Found sharpshadow");
-                }
-        }
-
-        public void Update()
-        {
-            //sceneTimer++;
-            if (voidKnight == null)
-            {
-                voidKnight = GameObject.Find("Knight");
-                redwing_game_objects.voidKnight = voidKnight;
-            }
-
-            if (boopTimer > 0)
-            {
-                boopTimer--;
-            }
-
-            attackCooldownUpdate();
-
-            if (sceneTimer % 30 != 0) return;
-            if (currentImg < 10)
-            {
-                canvas.GetComponent<Image>().sprite = Sprite.Create(fireBalls[currentImg], new Rect(0, 0, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), new Vector2(0, 0));
-            } else if (currentImg < 20)
-            {
-                canvas.GetComponent<Image>().sprite = Sprite.Create(firePillars[currentImg - 10], new Rect(0, 0, FPTEXTURE_WIDTH, FPTEXTURE_HEIGHT), new Vector2(0, 0));
-            } else if (currentImg < 30)
-            {
-                canvas.GetComponent<Image>().sprite = Sprite.Create(fireTrails[currentImg - 20], new Rect(0, 0, FTTEXTURE_WIDTH, FTTEXTURE_HEIGHT), new Vector2(0, 0));
-            } else
-            {
-                canvas.GetComponent<Image>().sprite = Sprite.Create(fireSpikes[currentImg - 30], new Rect(0, 0, FSTEXTURE_WIDTH, FSTEXTURE_HEIGHT), new Vector2(0, 0));
-            }
-            currentImg++;
-
-            if (currentImg >= 46)
-            {
-                currentImg = 0;
-            }
-            canvas.SetActive(true);
-
-
-        }
-
-        private void attackCooldownUpdate()
-        {
-            if (fbTime > 0.0)
-            {
-                fbTime -= Time.deltaTime;
-            } else
-            {
-                fbTime = 0.0;
-            }
-
-
-        }
-
-        private void Reset()
-        {
-            sceneTimer = 1;
-            currentImg = 0;
-            log("PLACING BUILD IMAGE SOMEWHERE");
-
-            
-            //PlaceTextureSomewhere();
-
-
-        }
-
+        
 
         public void placeTextureSomewhere()
         {
@@ -1080,10 +906,26 @@ namespace redwing
             // Actually set the colors
             for (int x = 0; x < FSTEXTURE_WIDTH; x++)
             {
+                double realDistance = x - (FSTEXTURE_WIDTH / 2.0);
+                if (realDistance < 0.0)
+                {
+                    realDistance *= -1;
+                }
                 for (int y = 0; y < FSTEXTURE_HEIGHT; y++)
                 {
-                    fs.SetPixel(x, y, getFireColor
-                        ((x - FSTEXTURE_WIDTH / 2), horzIntensity20[y], horzOpacity20[y], FSTEXTURE_WIDTH / 2, FSTEXTURE_WIDTH / 2));
+                    if (y > 150)
+                    {
+                        fs.SetPixel(x, y, getFireColor
+                        ((realDistance), horzIntensity20[y], horzOpacity20[y], FSTEXTURE_WIDTH / 2,
+                            FSTEXTURE_WIDTH / 2));
+                    }
+                    else
+                    {
+                        fs.SetPixel(x, y, getFireColor
+                        ((int)( ((double)y / 150.0) * (double)realDistance), horzIntensity20[y], horzOpacity20[y], FSTEXTURE_WIDTH / 2,
+                            FSTEXTURE_WIDTH / 2));
+                    }
+                    
                 }
             }
 

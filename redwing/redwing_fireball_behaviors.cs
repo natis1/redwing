@@ -61,7 +61,10 @@ namespace redwing
         private GameObject[] ballObjs = new GameObject[4];
 
         public BoxCollider2D hitboxForPivot;
-
+        
+        private bool botLeftCollide, botRightCollide, topLeftCollide, topRightCollide;
+        private bool isDoingHitboxStuff;
+        private bool stopAppear;
 
         public void Start()
         {
@@ -74,7 +77,7 @@ namespace redwing
         {
             Vector3 ballSize = this.transform.localScale;
             float currentTime = 0f;
-            while (currentTime < 0.2f)
+            while (currentTime < 0.2f && !stopAppear)
             {
                 float alpha = currentTime * 5f;
                 currentTime += Time.deltaTime;
@@ -88,6 +91,7 @@ namespace redwing
                 yield return null;
             }
 
+            if (stopAppear) yield break;
             Color spriteColor = fireballSprite.color;
             spriteColor.a = 1.0f;
             fireballSprite.color = spriteColor;
@@ -163,84 +167,58 @@ namespace redwing
 
             if (!despawnBall) yield break;
             Modding.Logger.Log("[REDWING] Despawning fb because time ran out I guess");
+            
             Destroy(fireball);
+            Destroy(this.gameObject);
+            
         }
 
-        public void OnTriggerEnter2D(Collider2D hitbox)
+        
+        /*
+        private void OnCollisionEnter2D(Collision2D other)
         {
-            log("Hit a layer " + hitbox.gameObject.layer + " object with name " + hitbox.name);
             
-            if (hitbox.gameObject.layer != 8) return;
+            if (other.collider.gameObject.layer != 8) return;
             
-            log("Hit a layer 8 object with on trigger enter. obj name is " + hitbox.name);
+            log("Hit a layer 8 object with on trigger enter. obj name is " + other.collider.name);
             
             doPhysics = false;
-            //center of the object. if we above it and within the bounds we hit it from the top
-            //Vector2 centerMeme = hitbox.bounds.center;
-
-            Vector2 topRightBound = hitbox.bounds.max;
-            Vector2 bottomLeftBound = hitbox.bounds.min;
-
-            Vector2 ourTopRight = hitboxForPivot.bounds.max;
-            Vector2 ourBottomLeft = hitboxForPivot.bounds.min;
-            
-            // hitbox pushing done by finding the easiest direction to push the fireball to get it
-            // outside the wall.
-            
-            
-            float pushUpDistance = topRightBound.y - ourBottomLeft.y;
-            float pushDownDistance = ourTopRight.y - bottomLeftBound.y;
-
-            float pushRightDistance = topRightBound.x - ourBottomLeft.x;
-            float pushLeftDistance = ourTopRight.x - bottomLeftBound.x;
+            hitboxForPivot.isTrigger = true;
             
             
             float RectWidth = hitboxForPivot.bounds.size.x;
             float RectHeight = hitboxForPivot.bounds.size.y;
             
+            //other.otherCollider.bounds.max
             
-            Vector2 contactPt = Vector2.zero;
             
-            try
-            {
-                Physics.Raycast(transform.position, transform.forward, out RaycastHit hit);
-                contactPt = hit.point;
-            }
-            catch (Exception e)
-            {
-                log("Error raycasting " + e);
-            }
-
+            //other.collider.OverlapPoint(Vector2.down);
             
-            Vector2 center = hitbox.bounds.center;
+            Vector2 contactPoint = other.contacts[0].point;
+            Vector2 bottomLeft = other.collider.bounds.min;
+            Vector2 topRight = other.collider.bounds.max;
+            
+            float pushUpDistance = topRight.y - contactPoint.y;
+            float pushDownDistance = contactPoint.y - bottomLeft.y;
 
-            //Vector2 myCenter = other.otherCollider.bounds.center;
-
-            int direction = 0;
-            if (contactPt.y > center.y && //checks that circle is on top of rectangle
-                (contactPt.x < center.x + RectWidth / 2.0 && contactPt.x > center.x - RectWidth / 2.0))
+            float pushRightDistance = topRight.x - contactPoint.x;
+            float pushLeftDistance = contactPoint.x - bottomLeft.x;
+            int direction;
+            
+            if (pushUpDistance <= pushDownDistance && pushUpDistance <= pushRightDistance &&
+                pushUpDistance <= pushLeftDistance)
             {
-                //float moveBallYBy = myCenter.y
-                //moveFireballBy(0f, contactPt.y - center.y);
                 direction = 0;
-            }
-            else if (contactPt.y < center.y &&
-                     (contactPt.x < center.x + RectWidth / 2.0 && contactPt.x > center.x - RectWidth / 2.0))
+            } else if (pushDownDistance <= pushRightDistance && pushDownDistance <= pushLeftDistance)
             {
-                //moveFireballBy(0f, contactPt.y - center.y);
                 direction = 2;
-            }
-            else if (contactPt.x > center.x &&
-                     (contactPt.y < center.y + RectHeight / 2.0 && contactPt.y > center.y - RectHeight / 2.0))
+            } else if (pushRightDistance <= pushLeftDistance)
             {
-                //moveFireballBy(contactPt.x - center.x, 0f);
-                direction = 3;
-            }
-            else if (contactPt.x < center.x &&
-                     (contactPt.y < center.y + RectHeight / 2.0 && contactPt.y > center.y - RectHeight / 2.0))
-            {
-                //moveFireballBy(contactPt.x - center.x, 0f);
                 direction = 1;
+            }
+            else
+            {
+                direction = 3;
             }
             
             /*
@@ -263,15 +241,235 @@ namespace redwing
             {
                 direction = 3;
                 moveFireballBy(-pushLeftDistance, 0f);
-            }*/
+            }
             
             fireball.transform.rotation = Quaternion.identity;
-            fireball.transform.Rotate(new Vector3(0f, 0f, (float) (direction * 90)));
+            fireball.transform.Rotate(new Vector3(0f, 0f, (float) (direction * 90.0)));
             int balls = redwing_flame_gen.rng.Next(0, 4);
             
             StartCoroutine(magmaFadeAnimation(direction));
             generateFireballMagmaBalls(balls);
+
             
+        }
+        
+        */
+
+        public void OnTriggerEnter2D(Collider2D hitbox)
+        {
+            
+            if (hitbox.gameObject.layer != 8) return;
+            
+            log("Hit a layer 8 object with on trigger enter. obj name is " + hitbox.name);
+            
+            doPhysics = false;
+            
+            //center of the object. if we above it and within the bounds we hit it from the top
+            //Vector2 centerMeme = hitbox.bounds.center;
+
+
+            const float epsilon = 0.2f;
+            
+            Vector2 ourTopRight = hitboxForPivot.bounds.max;
+            Vector2 ourBottomLeft = hitboxForPivot.bounds.min;
+            //ourTopRight = new Vector2(ourTopRight.x + epsilon, ourTopRight.y + epsilon);
+            //ourBottomLeft = new Vector2(ourBottomLeft.x - epsilon, ourBottomLeft.y - epsilon);
+            
+            Vector2 ourTopLeft = new Vector2(ourBottomLeft.x, ourTopRight.y);
+            Vector2 ourBottomRight = new Vector2(ourTopRight.x, ourBottomLeft.y);
+
+            Vector2 otherTopRight = hitbox.bounds.max;
+            Vector2 otherBotLeft = hitbox.bounds.min;
+            
+            /*
+            Bounds topLeftFakeCollider = new Bounds
+            {
+                center = ourTopLeft,
+                size = new Vector3(epsilon, epsilon, 1000f)
+            };
+            Bounds botLeftFakeCollider = new Bounds
+            {
+                center = ourBottomLeft,
+                size = new Vector3(epsilon, epsilon, 1000f)
+            };
+            Bounds topRightFakeCollider = new Bounds
+            {
+                center = ourTopRight,
+                size = new Vector3(epsilon, epsilon, 1000f)
+            };
+            Bounds botRightFakeCollider = new Bounds
+            {
+                center = ourBottomRight,
+                size = new Vector3(epsilon, epsilon, 1000f)
+            };*/
+
+            /*
+            if (!botLeftCollide)
+            {
+                //hitboxForPivot.
+                //botLeftCollide = hitbox.IsTouching();
+
+            }*/
+
+            float br = getDistanceBetweenVectors(ourBottomRight, hitbox.closestPoint(ourBottomRight));
+            float tr = getDistanceBetweenVectors(ourTopRight, hitbox.closestPoint(ourTopRight));
+            float tl = getDistanceBetweenVectors(ourTopLeft, hitbox.closestPoint(ourTopLeft));
+            float bl = getDistanceBetweenVectors(ourBottomLeft, hitbox.closestPoint(ourBottomLeft));
+                
+            if (!botRightCollide)
+            {
+                if (br < epsilon)
+                {
+                    botRightCollide = true;
+                }
+            }
+
+            if (!topRightCollide)
+            {
+                if (tr < epsilon)
+                {
+                    topRightCollide = true;
+                }
+            }
+
+            if (!topLeftCollide)
+            {
+                if (tl < epsilon)
+                {
+                    topLeftCollide = true;
+                }
+            }
+
+            if (!botLeftCollide)
+            {
+                if (bl < epsilon)
+                {
+                    botLeftCollide = true;
+                }
+            }
+            
+            /*
+            if (!topRightCollide && topLeftCollide)
+            {
+                selfPosition.x += tl;
+            } 
+            else if (topRightCollide && !topLeftCollide)
+            {
+                selfPosition.x -= tr;
+            } else if (!botLeftCollide && !botRightCollide)
+            {
+                selfPosition.y -= tr;
+            }
+            else if (botRightCollide)
+            {
+                selfPosition.y += br;
+            } else if (botLeftCollide)
+            {
+                selfPosition.y += bl;
+            }*/
+            
+            //if (!botLeftCollide)
+            //    botLeftCollide = hitbox.OverlapPoint()
+            /*
+            if (ourBottomLeft.y >= otherBotLeft.y && ourBottomLeft.y <= otherTopRight.y &&
+                ourBottomLeft.x >= otherBotLeft.x && ourBottomLeft.x <= otherTopRight.x)
+                botLeftCollide = true;
+           
+
+            if (ourTopRight.y >= otherBotLeft.y && ourTopRight.y <= otherTopRight.y &&
+                ourTopRight.x >= otherBotLeft.x && ourTopRight.x <= otherTopRight.x)
+                topRightCollide = true;
+
+
+            if (ourTopLeft.y >= otherBotLeft.y && ourTopLeft.y <= otherTopRight.y &&
+                ourTopLeft.x >= otherBotLeft.x && ourTopLeft.x <= otherTopRight.x)
+                topLeftCollide = true;
+
+            if (ourBottomRight.y >= otherBotLeft.y && ourBottomRight.y <= otherTopRight.y &&
+                ourBottomRight.x >= otherBotLeft.x && ourBottomRight.x <= otherTopRight.x)
+                botRightCollide = true;
+            */
+            
+            
+            log("bot left is " + ourBottomLeft.x + ", " + ourBottomLeft.y +
+                " and top right is " + ourTopRight.x + ", " + ourTopRight.y);
+
+            if (!isDoingHitboxStuff)
+                StartCoroutine(doHitboxStuff());
+
+        }
+
+        private float getDistanceBetweenVectors(Vector2 a, Vector2 b)
+        {
+            return (float) (Math.Sqrt( Math.Pow(((double)(a.x - b.x)), 2.0) + Math.Pow(((double)(a.y - b.y)), 2.0)));
+        }
+
+        private IEnumerator doHitboxStuff()
+        {
+            isDoingHitboxStuff = true;
+            
+            yield return null;
+            
+            log("The following are being collided with \ntopleft: " + topLeftCollide + " topright: " +topRightCollide +
+                " botleft: " + botLeftCollide + " botright: " + botRightCollide);
+            
+            int direction = 0;
+            int collides = 0;
+
+            if (topLeftCollide)
+                collides++;
+            if (topRightCollide)
+                collides++;
+            if (botLeftCollide)
+                collides++;
+            if (botRightCollide)
+                collides++;
+            
+            if (!topRightCollide && topLeftCollide)
+            {
+                direction = 3;
+            } 
+            else if (topRightCollide && !topLeftCollide)
+            {
+                direction = 1;
+            } else if (!botLeftCollide && !botRightCollide)
+            {
+                direction = 2;
+            } else if (topLeftCollide && topRightCollide && botLeftCollide && botRightCollide)
+            {
+                direction = 2;
+            }
+            
+            fireball.transform.rotation = Quaternion.identity;           
+            fireball.transform.Rotate(new Vector3(0f, 0f, (float) (direction * 90.0)));
+            int balls = redwing_flame_gen.rng.Next(0, 4);
+            
+            
+            
+            if (collides > 1)
+            {
+                StartCoroutine(magmaFadeAnimation(direction));
+                this.GetComponent<DamageEnemies>().damageDealt = this.GetComponent<DamageEnemies>().damageDealt / 2;
+            }
+            else
+            {
+                ballExplode();
+                this.GetComponent<DamageEnemies>().damageDealt = 0;
+            }
+
+            generateFireballMagmaBalls(balls);
+            
+        }
+
+        private void ballExplode()
+        {
+            Color fireballSpriteColor = fireballSprite.color;
+            fireballSpriteColor.a = 0f;
+            fireballSprite.color = fireballSpriteColor;
+            generateFireballMagmaBalls(4);
+            generateFireballMagmaBalls(4);
+            stopAppear = true;
+
         }
 
         private void generateFireballMagmaBalls(int balls)
@@ -339,9 +537,9 @@ namespace redwing
                 yield return null;
 
             }
-            log("Despawned because animation is done. Current frame is " + frame);
+
             Destroy(fireball);
-            
+            Destroy(this.gameObject);
             yield return null;
         }
         
@@ -378,9 +576,41 @@ namespace redwing
                 selfSprite.color = selfSpriteColor;
                 yield return null;
             }
-            Modding.Logger.Log("Destroying ball because life ran out. life is " + life);
-            Destroy(self);
+            Destroy(this);
         }
 
     }
+    
+    
+    public static class collider_two_dimensional_extension
+    {
+        /// <summary>
+        /// Return the closest point on a Collider2D relative to point
+        /// </summary>
+        public static Vector2 closestPoint(this Collider2D col, Vector2 point)
+        {
+            GameObject go = new GameObject("tempCollider");
+            go.transform.position = point;
+            CircleCollider2D c = go.AddComponent<CircleCollider2D>();
+            c.radius = 0.1f;
+            ColliderDistance2D dist = col.Distance(c);
+            UnityEngine.Object.Destroy(go);
+            return dist.pointA;
+        }
+
+        public static bool didCollide(this Collider2D col, Vector2 point)
+        {
+            GameObject go = new GameObject("tempCollider");
+            go.transform.position = point;
+            CircleCollider2D c = go.AddComponent<CircleCollider2D>();
+            c.radius = 0.1f;
+            Modding.Logger.Log("[circlecolliderthingy] c " + c.bounds.center.x + ", " + c.bounds.center.y +
+                               ", " + c.bounds.center.z);
+            bool collideWithCol = c.IsTouching(col);
+            UnityEngine.Object.Destroy(go);
+            return collideWithCol;
+        }
+        
+    }
+    
 }
