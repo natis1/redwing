@@ -54,7 +54,7 @@ namespace redwing
             log("Doing laser attack");
             laserTime = LASER_COOLDOWN;
             redwingSpawner.addLasers();
-            StartCoroutine(freezeKnight(0.5f));
+            StartCoroutine(freezeKnight(1f));
             
             return damageamount;
         }
@@ -156,7 +156,7 @@ namespace redwing
             while (freezeTime > 0.0f)
             {
                 freezeTime -= Time.unscaledDeltaTime;
-                Time.timeScale = 0.1f;
+                Time.timeScale = 0.5f;
                 HeroController.instance.current_velocity = Vector2.zero;
                 voidKnight.transform.position = heroPostion;
                 

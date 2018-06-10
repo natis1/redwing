@@ -82,7 +82,7 @@
     <Compile Include="redwing_flame_gen.cs" />
     <Compile Include="redwing_game_objects.cs" />
     <Compile Include="redwing_hooks.cs" />
-    <Compile Include="redwing_laser_behaviors.cs" />
+    <Compile Include="redwing_laser_behavior.cs" />
     <Compile Include="redwing_settings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

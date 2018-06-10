@@ -32,17 +32,17 @@ namespace redwing
         // ReSharper disable once ConvertToConstant.Global
         // ReSharper disable once MemberCanBePrivate.Global
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int laserX = 40;
+        public static int laserX = 80;
         
         // ReSharper disable once ConvertToConstant.Global
         // ReSharper disable once MemberCanBePrivate.Global
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int laserY = 500;
+        public static int laserY = 1500;
         
         // ReSharper disable once ConvertToConstant.Global
         // ReSharper disable once MemberCanBePrivate.Global
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int laserDamage = 30;
+        public static int laserDamage = 5;
 
         private const float rotationAmount = (float) (360.0 / 16.0);
         
@@ -50,6 +50,7 @@ namespace redwing
         //private const float TRANSFORM_XOFFSET = 0.69f;
 
         private GameObject fireballSpawn;
+        private GameObject laserSpawn;
         private readonly GameObject[] fireballsGo = new GameObject[7];
         
         // Seriously. Fuck you Unity. I literally just want spinning fireballs.
@@ -66,15 +67,21 @@ namespace redwing
             {
                 return;
             }
-
+            
+            laserSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_laser_spawner_behavior));
+            Vector3 laserSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
+            laserSpawn.transform.position = laserSpawnPos;
+            
+            float rotationMod = (float)(redwing_flame_gen.rng.NextDouble() * rotationAmount);
+            
             for (int i = 0; i < 16; i++)
             {
                 lasers[i] = new GameObject("redwingLaser" + i, typeof(SpriteRenderer), typeof(Rigidbody2D),
-                    typeof(BoxCollider2D), typeof(DamageEnemies), typeof(redwing_laser_behaviors));
-                lasers[i].transform.parent = voidKnight.transform;
+                    typeof(BoxCollider2D), typeof(redwing_laser_behavior));
+                lasers[i].transform.parent = laserSpawn.transform;
                 lasers[i].transform.localPosition = Vector3.zero;
                 lasers[i].layer = 170;
-                lasers[i].transform.localScale = new Vector3(4f, 4f, 4f);
+                lasers[i].transform.localScale = new Vector3(2f, 2f, 2f);
                 Rigidbody2D laserPhysics = lasers[i].GetComponent<Rigidbody2D>();
                 laserPhysics.isKinematic = true;
                 
@@ -82,18 +89,20 @@ namespace redwing
                 SpriteRenderer s = lasers[i].GetComponent<SpriteRenderer>();
                 s.sprite = Sprite.Create(fireLasers[i], r, new Vector2(0.5f, 0f));
                 s.enabled = true;
-                s.color = Color.white;
+                s.color = new Color(1f, 1f, 1f, 0f);
                 BoxCollider2D laserPassthrough = lasers[i].GetComponent<BoxCollider2D>();
                 laserPassthrough.isTrigger = true;
                 laserPassthrough.size = s.bounds.size;
                 Vector2 spriteSize = s.bounds.size;
                 laserPassthrough.offset = new Vector2(spriteSize.x / 2, 0);
+                redwing_laser_behavior shootEm = lasers[i].GetComponent<redwing_laser_behavior>();
+                shootEm.damageDealt = laserDamage;
+                shootEm.hurtEm = lasers[i].GetComponent<DamageEnemies>();
+                shootEm.drawEm = s;
+                shootEm.spriteUsed = fireLasers[i];
                 
-                DamageEnemies dmg = lasers[i].GetComponent<DamageEnemies>();
-                dmg.damageDealt = laserDamage;
-                dmg.attackType = AttackTypes.Generic;
 
-                float rotationMod = (float)(redwing_flame_gen.rng.NextDouble() * rotationAmount);
+                
                 
                 lasers[i].transform.Rotate(0f, 0f, rotationAmount * i + rotationMod);
 
@@ -115,12 +124,7 @@ namespace redwing
                 return;
             }
             fireballSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_fireball_spawner_behavior));
-            //fireballSpawn.transform.position = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
-            
             Vector3 fbSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
-            //log("FB spawn position xyz is " + fbSpawnPos.x + ", " + fbSpawnPos.y + ", " + fbSpawnPos.z);
-            
-            fbSpawnPos.x = fbSpawnPos.x;
             fireballSpawn.transform.position = fbSpawnPos;
 
 

@@ -906,11 +906,8 @@ namespace redwing
             // Actually set the colors
             for (int x = 0; x < FSTEXTURE_WIDTH; x++)
             {
-                double realDistance = x - (FSTEXTURE_WIDTH / 2.0);
-                if (realDistance < 0.0)
-                {
-                    realDistance *= -1;
-                }
+                double realDistance = (FSTEXTURE_WIDTH / 2.0) - 0.5 - x;
+                
                 for (int y = 0; y < FSTEXTURE_HEIGHT; y++)
                 {
                     if (y > 150)
@@ -999,17 +996,16 @@ namespace redwing
             // RNG phase
             for (int i = 0; i < FTTEXTURE_WIDTH; i++)
             {
-                if (i % FT_INTERPOLATE_PIXELS == 0)
-                {
-                    verticalIntensity150[i] = rng.NextDouble();
-                    verticalOpacity150[i] = rng.NextDouble();
+                if (i % FT_INTERPOLATE_PIXELS != 0) continue;
+                
+                verticalIntensity150[i] = rng.NextDouble();
+                verticalOpacity150[i] = rng.NextDouble();
 
-                    // because c# sucks NextDouble can't return arbitrary numbers
-                    // so apply a transformation to map verticalIntensity150 -> 0 - 0.2
-                    // and verticalOpacity150 -> -1 - 0
-                    verticalOpacity150[i] = verticalOpacity150[i] * 0.2 - 0.6;
-                    verticalIntensity150[i] = (verticalIntensity150[i] * 0.2);
-                }
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map verticalIntensity150 -> 0 - 0.2
+                // and verticalOpacity150 -> -1 - 0
+                verticalOpacity150[i] = verticalOpacity150[i] * 0.2 - 0.6;
+                verticalIntensity150[i] = (verticalIntensity150[i] * 0.2);
             }
 
             // Interpolation phase
