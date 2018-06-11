@@ -44,11 +44,11 @@ namespace redwing
             {
                 if (forceReloadGlobalSettings)
                 {
-                    Log("Settings outdated! Rebuilding.");
+                    log("Settings outdated! Rebuilding.");
                 }
                 else
                 {
-                    Log("Settings not found, rebuilding... File will be saved to: " + settingsFilePath);
+                    log("Settings not found, rebuilding... File will be saved to: " + settingsFilePath);
                 }
 
                 GlobalSettings.reset();
@@ -63,9 +63,12 @@ namespace redwing
 
         private void addComponent()
         {
-            Log("Adding Redwing to game.");
+            log("Adding Redwing to game.");
+            
+            
             GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
             GameManager.instance.gameObject.AddComponent<redwing_hooks>();
+            GameManager.instance.gameObject.AddComponent<greymoth>();
         }
 
         public override int LoadPriority()
@@ -75,13 +78,13 @@ namespace redwing
 
         public void Unload()
         {
-            Log("Disabling! If you see any more non-settings messages by this mod please report as an issue.");
+            log("Disabling! If you see any more non-settings messages by this mod please report as an issue.");
             ModHooks.Instance.AfterSavegameLoadHook -= saveGame;
             ModHooks.Instance.NewGameHook -= addComponent;
             
         }
 
-        public new void Log(string str)
+        public void log(string str)
         {
             Modding.Logger.Log("[Redwing] " + str);
         }
