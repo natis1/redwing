@@ -21,6 +21,8 @@ namespace redwing
         private readonly float dashCooldownTime = HeroController.instance.DASH_COOLDOWN_CH;
         private float dashCooldown = 0f;
         private float dashInvulTimer = 0f;
+        private int antiTurboLeft = 0;
+        private const int FUCK_TURBO_FRAMES = 1;
         public Vector2 DashDirection;
         public PlayMakerFSM sharpShadowFSM;
         public GameObject sharpShadow;
@@ -37,7 +39,7 @@ namespace redwing
 
         public void Start()
         {
-            StartCoroutine(ConfigureHero());
+            StartCoroutine(configureHero());
             ModHooks.Instance.DashPressedHook += dashTapped;
             ModHooks.Instance.DashVectorHook += doDashDirection;
         }
@@ -48,17 +50,16 @@ namespace redwing
             float num = getDashLength();
             if (DashDirection.y <= 0.02 && DashDirection.y >= -0.02)
             {
-                ret = Time.deltaTime * num * DashDirection;
+                ret = num * DashDirection;
                 
             } else if (DashDirection.x <= 0.02 && DashDirection.x >= -0.02)
             {
-                ret = Time.deltaTime * num * DashDirection;
+                ret = num * DashDirection;
             }
             else
             {
-                ret = Time.deltaTime * (num / Mathf.Sqrt(2)) * DashDirection;
+                ret = (num / Mathf.Sqrt(2)) * DashDirection;
             }
-            log($@"Returning a vector which is: {ret}");
             
             return ret;
         }
@@ -93,28 +94,33 @@ namespace redwing
             if (dashInvulTimer > 0)
             {
                 HeroController.instance.cState.invulnerable = true;
+                antiTurboLeft = FUCK_TURBO_FRAMES;
             }
             else
             {
                 HeroController.instance.cState.invulnerable = false;
+                if (antiTurboLeft > 0)
+                    antiTurboLeft--;
             }
 
         }
-        
-        IEnumerator ConfigureHero()
+
+        private IEnumerator configureHero()
         {
             while (HeroController.instance == null)
                 yield return new WaitForEndOfFrame();
 
-            if (sharpShadow == null || !sharpShadow.CompareTag("Sharp Shadow"))
-                foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
-                {
-                    if (go == null || !go.CompareTag("Sharp Shadow")) continue;
+            if (sharpShadow != null && sharpShadow.CompareTag("Sharp Shadow")) yield break;
+            
+            
+            foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (go == null || !go.CompareTag("Sharp Shadow")) continue;
                     
-                    sharpShadow = go;
-                    sharpShadowFSM = FSMUtility.LocateFSM(sharpShadow, "damages_enemy");
-                    log($@"Found Sharp Shadow: {sharpShadow} - {sharpShadowFSM}.");
-                }
+                sharpShadow = go;
+                sharpShadowFSM = FSMUtility.LocateFSM(sharpShadow, "damages_enemy");
+                log($@"Found Sharp Shadow: {sharpShadow} - {sharpShadowFSM}.");
+            }
 
             //HeroController.instance.gameObject.AddComponent<SuperDashHandler>();
         }
@@ -123,6 +129,9 @@ namespace redwing
         
         private void dashTapped()
         {
+            if (antiTurboLeft != 0)
+                return;
+            
             getPrivateField("dashQueueSteps").SetValue(HeroController.instance, 0);
             getPrivateField("dashQueuing").SetValue(HeroController.instance, false);
             HeroActions direction = GameManager.instance.inputHandler.inputActions;
@@ -169,8 +178,8 @@ namespace redwing
             sharpShadowFSM.SetState("Idle");
 
         }
-        
-        void doDash()
+
+        private void doDash()
         {
             if ((HeroController.instance.hero_state == ActorStates.no_input ||
                  HeroController.instance.hero_state == ActorStates.hard_landing ||

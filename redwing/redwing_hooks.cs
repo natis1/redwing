@@ -28,7 +28,8 @@ namespace redwing
 
         private int flameShield(ref int hazardtype, int damage)
         {
-            if (hazardtype != (int) GlobalEnums.HazardType.SPIKES || !(laserTime <= 0.0)) return damage;
+            if (hazardtype != (int) GlobalEnums.HazardType.SPIKES ||
+                HeroController.instance.cState.invulnerable) return damage;
             
             if (invulnTime > 0.0)
             {
@@ -49,7 +50,8 @@ namespace redwing
         {
             
             // Team cherry pls. Spikes = acid... thanks
-            if (hazardtype != (int) GlobalEnums.HazardType.SPIKES || !(laserTime <= 0.0)) return damageamount;
+            if (hazardtype != (int) GlobalEnums.HazardType.SPIKES || !(laserTime <= 0.0) ||
+                HeroController.instance.cState.invulnerable) return damageamount;
             
             log("Doing laser attack");
             laserTime = LASER_COOLDOWN;
