@@ -51,10 +51,11 @@ namespace redwing
             
             // Team cherry pls. Spikes = acid... thanks
             if (hazardtype != (int) GlobalEnums.HazardType.SPIKES || !(laserTime <= 0.0) ||
-                HeroController.instance.cState.invulnerable) return damageamount;
+                HeroController.instance.cState.invulnerable || invulnTime > 0.0) return damageamount;
             
             log("Doing laser attack");
             laserTime = LASER_COOLDOWN;
+            invulnTime = IFRAMES;
             redwingSpawner.addLasers();
             StartCoroutine(freezeKnight(1f));
             
