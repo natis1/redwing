@@ -68,7 +68,9 @@ namespace redwing
             GameManager.instance.gameObject.AddComponent<greymoth>();
             GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
             GameManager.instance.gameObject.AddComponent<redwing_hooks>();
-            
+
+            GameManager.instance.gameObject.AddComponent<redwing_lore>();
+            log(Language.Language.CurrentLanguage() + " is your current language.");
         }
 
         public override int LoadPriority()

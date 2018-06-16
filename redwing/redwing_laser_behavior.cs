@@ -29,7 +29,7 @@ namespace redwing
 	
 	public class redwing_laser_behavior : MonoBehaviour
 	{
-		private const float LIFESPAN = 1f;
+		private const float LIFESPAN = 0.5f;
 		private const int LASER_WIDTH = 80;
 		private const int LASER_HEIGHT = 1500;
 

@@ -13,8 +13,10 @@ namespace redwing
         private void OnDestroy()
         {
             ModHooks.Instance.DashPressedHook -= checkFireBalls;
-            ModHooks.Instance.TakeDamageHook -= laserAttack;
-            ModHooks.Instance.TakeDamageHook -= flameShield;
+            ModHooks.Instance.TakeDamageHook -= flameShieldAndLaser;
+            
+            if (flameShieldObj != null)
+                Destroy(flameShieldObj);
         }
         
         public void Start()
@@ -22,11 +24,32 @@ namespace redwing
             StartCoroutine(getHeroFsMs());
             redwingSpawner = new redwing_game_objects();
             ModHooks.Instance.DashPressedHook += checkFireBalls;
-            ModHooks.Instance.TakeDamageHook += laserAttack;
-            ModHooks.Instance.TakeDamageHook += flameShield;
+            ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
+
+            StartCoroutine(createFlameShield());
         }
 
-        private int flameShield(ref int hazardtype, int damage)
+        private IEnumerator createFlameShield()
+        {
+            while (voidKnight == null)
+            {
+                yield return null;
+            }
+            
+            flameShieldObj = new GameObject("redwingFlameShield", typeof(SpriteRenderer));
+            currentFlameShieldTexture = 0;
+            flameShieldSprite = flameShieldObj.GetComponent<SpriteRenderer>();
+            flameShieldObj.transform.parent = voidKnight.transform;
+            flameShieldObj.transform.localPosition = Vector3.zero;
+            flameShieldObj.transform.localPosition = new Vector3(0f, -0.4f);
+            flameShieldSprite.color = Color.white;
+            flameShieldSprite.sprite = Sprite.Create(flameShieldTextures[currentFlameShieldTexture],
+                new Rect(0, 0, redwing_flame_gen.FSHIELDTEXTURE_WIDTH, redwing_flame_gen.FSHIELDTEXTURE_HEIGHT),
+                new Vector2(0.5f, 0.5f));
+
+        }
+
+        private int flameShieldAndLaser(ref int hazardtype, int damage)
         {
             if (hazardtype != (int) GlobalEnums.HazardType.SPIKES ||
                 HeroController.instance.cState.invulnerable) return damage;
@@ -35,37 +58,41 @@ namespace redwing
             {
                 return 0;
             }
-            if (!(fsCharge <= 0.0) || damage <= 0) return damage;
+            
+            if (fsCharge <= 0.0 && damage > 0)
+            {
+                log("Shielding one damage");
+                fsCharge = FS_RECHARGE;
+                invulnTime = IFRAMES;
+                damage--;
+            }
             
             
-            log("Shielding one damage");
-            fsCharge = FS_RECHARGE;
-            invulnTime = IFRAMES;
-            damage--;
+            // ReSharper disable once InvertIf because patterns man
+            if (laserTime <= 0.0)
+            {
+                log("Doing laser attack");
+                laserTime = LASER_COOLDOWN;
+                invulnTime = IFRAMES;
+                justDidLaserAttack = true;
+                redwingSpawner.addLasers();
+                StartCoroutine(freezeKnight(1f));
+            }
 
             return damage;
-        }
-
-        private int laserAttack(ref int hazardtype, int damageamount)
-        {
-            
-            // Team cherry pls. Spikes = acid... thanks
-            if (hazardtype != (int) GlobalEnums.HazardType.SPIKES || !(laserTime <= 0.0) ||
-                HeroController.instance.cState.invulnerable || invulnTime > 0.0) return damageamount;
-            
-            log("Doing laser attack");
-            laserTime = LASER_COOLDOWN;
-            invulnTime = IFRAMES;
-            redwingSpawner.addLasers();
-            StartCoroutine(freezeKnight(1f));
-            
-            return damageamount;
         }
 
         private redwing_game_objects redwingSpawner;
         private GameObject voidKnight;
         private GameObject sharpShadow;
         private PlayMakerFSM sharpShadowFsm;
+
+        public static Texture2D[] flameShieldTextures;
+        private GameObject flameShieldObj;
+        private SpriteRenderer flameShieldSprite;
+        private int currentFlameShieldTexture;
+
+        private bool justDidLaserAttack;
         private double fbTime;
         private double laserTime;
         private double fsCharge;
@@ -74,7 +101,11 @@ namespace redwing
         private const double LASER_COOLDOWN = 1.5f;
         private const double FS_RECHARGE = 10f;
         private const double IFRAMES = 2f;
+
+        private const float FS_UPDATE_TIME = 0.2f;
+        private float fsLastUpdate = 0f;
         
+        //private readonly Rect = new Rect(50, 50, 100, 100);
 
         private void checkFireBalls()
         {
@@ -115,6 +146,42 @@ namespace redwing
                 redwingSpawner.voidKnight = voidKnight;
             }
             attackCooldownUpdate();
+            flameShieldUpdate();
+        }
+
+        private void flameShieldUpdate()
+        {
+            fsLastUpdate += Time.deltaTime;
+            Color c = flameShieldSprite.color;
+
+            float alpha;
+            if (fsCharge <= 0.0)
+            {
+                alpha = 1.0f;
+            }
+            else
+            {
+                alpha = (float)( 0.5 * (FS_RECHARGE - fsCharge) / FS_RECHARGE );
+            }
+
+            c.a = alpha;
+            
+            flameShieldSprite.color = c;
+            
+            if (!(fsLastUpdate > FS_UPDATE_TIME)) return;
+            
+            fsLastUpdate = 0f;
+            currentFlameShieldTexture++;
+            if (currentFlameShieldTexture >= flameShieldTextures.Length)
+            {
+                currentFlameShieldTexture = 0;
+            }
+                
+            flameShieldSprite.sprite = Sprite.Create(flameShieldTextures[currentFlameShieldTexture],
+                new Rect(0, 0, redwing_flame_gen.FSHIELDTEXTURE_WIDTH, redwing_flame_gen.FSHIELDTEXTURE_HEIGHT),
+                new Vector2(0.5f, 0.5f));
+            
+
         }
         
         private void attackCooldownUpdate()
