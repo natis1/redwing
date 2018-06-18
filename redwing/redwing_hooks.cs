@@ -18,7 +18,6 @@ namespace redwing
     {
         private void OnDestroy()
         {
-            ModHooks.Instance.DashPressedHook -= checkFireBalls;
             ModHooks.Instance.TakeDamageHook -= flameShieldAndLaser;
             ModHooks.Instance.DashVectorHook -= fireballsAndTrail;
             voidKnightSpellControl = null;
@@ -31,49 +30,36 @@ namespace redwing
         {
             StartCoroutine(getHeroFSMs());
             redwingSpawner = new redwing_game_objects();
-            ModHooks.Instance.DashPressedHook += checkFireBalls;
-            ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
-
-            ModHooks.Instance.DashVectorHook += fireballsAndTrail;
             
-            log("bigmeme. Got to end of hooks without crashing lul");
+            // wow all 4 primary effects in two neat little functions.
+            ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
+            ModHooks.Instance.DashVectorHook += fireballsAndTrail;
         }
 
         private Vector2 fireballsAndTrail(Vector2 change)
         {
             
-            return change;
-        }
-        
-        private void checkFireBalls()
-        {
-            float cooldown;
-            try
-            {
-                // ReSharper disable once PossibleNullReferenceException because in try catch thing.
-                cooldown = (float) instance.GetType()
-                    .GetField("dashCooldownTimer", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(instance);
-
-            }
-            catch (Exception e)
-            {
-                cooldown = 0.5f;
-                log("Failed to set cooldown by reflection because " + e);
-            }
-
-            if (!(cooldown <= 0)) return;
-
             HeroActions direction = GameManager.instance.inputHandler.inputActions;
             if (direction.up.IsPressed && !direction.down.IsPressed)
             {
-                if (!(fbTime <= 0.0)) return;
-                spawnFireballs();
-                
-            } else
-            {
-                spawnFireTrail();
+                if (fbTime <= 0.0)
+                {
+                    spawnFireballs();
+                }
             }
+            
+            // ReSharper disable once InvertIf This looks really dumb
+            if (ftTime <= 0.0)
+            {
+                currentTrailSprite = redwing_flame_gen.rng.Next(0, fireTrailTextures.Length - 1);
+                netTrailDistance = 0;
+                ftTime = HeroController.instance.SHADOW_DASH_COOLDOWN;
+                spawnFireTrail(change);
+            }
+            
+            return change;
         }
+        
 
 
         private IEnumerator createFlameShield()
@@ -82,6 +68,8 @@ namespace redwing
             {
                 yield return null;
             }
+
+            
             
             flameShieldObj = new GameObject("redwingFlameShield", typeof(SpriteRenderer));
             currentFlameShieldTexture = 0;
@@ -93,7 +81,6 @@ namespace redwing
             flameShieldSprite.sprite = Sprite.Create(flameShieldTextures[currentFlameShieldTexture],
                 new Rect(0, 0, redwing_flame_gen.FSHIELDTEXTURE_WIDTH, redwing_flame_gen.FSHIELDTEXTURE_HEIGHT),
                 new Vector2(0.5f, 0.5f));
-
         }
 
         private int flameShieldAndLaser(ref int hazardtype, int damage)
@@ -136,23 +123,27 @@ namespace redwing
         private PlayMakerFSM sharpShadowFsm;
 
         public static Texture2D[] flameShieldTextures;
+        public static Texture2D[] fireTrailTextures;
         private GameObject flameShieldObj;
         private SpriteRenderer flameShieldSprite;
         private int currentFlameShieldTexture;
 
-        private GameObject flamePillar;
         private GameObject flamePillarDetect;
         private PlayMakerFSM voidKnightSpellControl;
 
         private bool justDidLaserAttack;
-        private double fbTime;
-        private double laserTime;
-        private double fsCharge;
-        private double invulnTime;
+        private double ftTime = 0;
+        private double fbTime = 0;
+        private double laserTime = 0;
+        private double fsCharge = 0;
+        private double invulnTime = 0;
         private const double FB_COOLDOWN = 3.0f;
         private const double LASER_COOLDOWN = 1.5f;
         private const double FS_RECHARGE = 10f;
         private const double IFRAMES = 2f;
+
+        private int currentTrailSprite = 0;
+        private int netTrailDistance = 0;
 
         private const float FP_RANGE = 15f;
 
@@ -234,13 +225,40 @@ namespace redwing
             {
                 invulnTime -= Time.deltaTime;
             }
-        }
-        
-        private void spawnFireTrail()
-        {
-            log("I should be spawning a fire trail right now");
+
+            if (ftTime > 0.0)
+            {
+                ftTime -= Time.deltaTime;
+            }
         }
 
+        private void spawnFireTrail(Vector2 delta)
+        {
+            float angle = (float) redwing_flame_gen.getNearestAngel((int) (delta.x * 100), (int) (delta.y * 100), 0, 0);
+
+            GameObject trail = new GameObject("redwingFireTrail", typeof(redwing_trail_behavior),
+                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer), typeof(DebugColliders));
+
+            GameObject trailMemeSpawner = new GameObject("redwingFireTrailSpawner");
+            trailMemeSpawner.transform.localPosition = voidKnight.transform.position;
+
+            trail.transform.parent = trailMemeSpawner.transform;
+            trail.transform.localPosition = Vector3.zero;
+            trail.transform.Rotate(0f, 0f, angle);
+            Rigidbody2D physics = trail.GetComponent<Rigidbody2D>();
+            physics.isKinematic = true;
+            BoxCollider2D detect = trail.GetComponent<BoxCollider2D>();
+            detect.isTrigger = true;
+
+            redwing_trail_behavior meme = trail.GetComponent<redwing_trail_behavior>();
+
+            meme.dashVector = delta;
+            meme.drawEm = trail.GetComponent<SpriteRenderer>();
+            meme.spriteUsed = fireTrailTextures[currentTrailSprite];
+            
+            trailMemeSpawner.SetActive(true);
+            trail.SetActive(true);
+        } 
 
         private void spawnFireballs()
         {
@@ -258,8 +276,6 @@ namespace redwing
                 //Time.timeScale = 0.5f;
                 HeroController.instance.current_velocity = Vector2.zero;
                 voidKnight.transform.position = heroPostion;
-                
-                
                 yield return null;
             }
 
@@ -270,13 +286,8 @@ namespace redwing
         private IEnumerator firinMaLaser()
         {
             allLaserEnemies = new List<Collider2D>();
-            yield return null;
             const float waitTime = 0.2f;
-            float wait = 0f;
-            while (wait < waitTime)
-            {
-                wait += Time.unscaledDeltaTime;
-            }
+            yield return new WaitForSecondsRealtime(waitTime);
 
             for (int i = 0; i < 16; i++)
             {

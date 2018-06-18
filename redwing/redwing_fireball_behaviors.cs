@@ -15,13 +15,7 @@ namespace redwing
 
         private IEnumerator despawn()
         {
-            float currentTime = 0f;
-            while (currentTime < lifespan)
-            {
-                yield return null;
-                currentTime += Time.deltaTime;
-            }
-            Modding.Logger.Log("[REDWING] Despawning fb because time ran out I guess");
+            yield return new WaitForSeconds(lifespan);
             Destroy(fbSpawn);
         }
 
@@ -160,12 +154,7 @@ namespace redwing
         private IEnumerator despawn()
         {
             despawnBall = true;
-            float currentTime = 0f;
-            while (currentTime < lifespan)
-            {
-                yield return null;
-                currentTime += Time.deltaTime;
-            }
+            yield return new WaitForSeconds(lifespan);
 
             if (!despawnBall) yield break;
             Modding.Logger.Log("[REDWING] Despawning fb because time ran out I guess");
@@ -401,13 +390,9 @@ namespace redwing
                     fireballSprite.sprite = Sprite.Create(fireballMagmas[frame], r, new Vector2(0.5f, 0.5f));
                     oldFrame = frame;
                 }
-                
-                
-                const float timePerFrame = 1 / MAGMA_FRAMERATE;
-                animTime += Time.deltaTime;
-                frame = (int) (animTime / timePerFrame);
 
-                yield return null;
+                frame++;
+                yield return new WaitForSeconds((float)(1.0 / MAGMA_FRAMERATE));
 
             }
 

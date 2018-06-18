@@ -67,6 +67,7 @@
     <Compile Include="redwing_lore.cs" />
     <Compile Include="redwing_pillar_behaviors.cs" />
     <Compile Include="redwing_settings.cs" />
+    <Compile Include="redwing_trail_behaviors.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

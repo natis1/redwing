@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Modding;
 using UnityEngine;
 
@@ -13,14 +14,29 @@ namespace redwing
         private void Start()
         {
             log("Adding lore to a game without it.");
-            setupLoreEN();
-            
+            try
+            {
+                setupLoreEN();
+            }
+            catch (Exception e)
+            {
+                log("cannot setup lore because " + e);
+            }
+
             ModHooks.Instance.LanguageGetHook += printRealLore;
         }
 
         // ReSharper disable once InconsistentNaming because ur dumb and EN is a language code
         private static void setupLoreEN()
         {
+            //string s = "Starting stupid language dump: {0}", Language.Language.settings.sheetTitles
+            log($@"Starting stupid language dump: {Language.Language.settings.sheetTitles}");
+
+            foreach (string meme in Language.Language.settings.sheetTitles)
+            {
+                log("sheet title: " + meme);
+            }
+            
             // Testing only. Not actual lore.
             /*langStrings["Titles"] = new Dictionary<string, string>
             {

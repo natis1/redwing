@@ -18,42 +18,44 @@ namespace redwing
         {
             log("started firepillar");
             enteredColliders = new List<Collider2D>();
-            
 
+            StartCoroutine(fadeOut());
             StartCoroutine(destroyPillar());
+        }
+
+        private IEnumerator fadeOut()
+        {
+            float life = 0f;
+            SpriteRenderer cachedSprite = this.gameObject.GetComponent<SpriteRenderer>();
+            Color cachedColor = cachedSprite.color;
+
+            while (life < LIFESPAN)
+            {
+                life += Time.deltaTime;
+                cachedColor.a = (0.1f + LIFESPAN - life) / LIFESPAN;
+                cachedSprite.color = cachedColor;
+                yield return null;
+            }
+
+            cachedColor.a = 0f;
+            cachedSprite.color = cachedColor;
         }
 
         private IEnumerator destroyPillar()
         {
             float life = 0f;
             int secondaryAttacks = 0;
-            SpriteRenderer cachedSprite = this.gameObject.GetComponent<SpriteRenderer>();
-            Color cachedColor = cachedSprite.color;
             yield return null;
             primaryDamage();
-            DamageEnemies test;
             
             while (secondaryAttacks < damageSecondaryTimes)
             {
-                int damagesDone = (int)(damageSecondaryTimes * (life / LIFESPAN));
-                if (damagesDone > secondaryAttacks)
-                {
-                    try
-                    {
-                        secondaryDamage();
-                    }
-                    catch (Exception e)
-                    {
-                        log("unable to do damage because " + e);
-                    }
-
-                    secondaryAttacks++;
-                }
-
-                cachedColor.a = (0.1f + LIFESPAN - life) / LIFESPAN;
-                cachedSprite.color = cachedColor;
-                life += Time.deltaTime;
-                yield return null;
+                secondaryDamage();
+                secondaryAttacks++;
+                
+                
+                
+                yield return new WaitForSeconds(LIFESPAN / secondaryAttacks);
             }
             log("ending firepillar");
             Destroy(this.gameObject);

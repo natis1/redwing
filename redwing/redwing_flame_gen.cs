@@ -58,8 +58,8 @@ namespace redwing
         public const int FBTEXTURE_WIDTH = 150;
         public const int FBTEXTURE_HEIGHT = 150;
 
-        private const int FTTEXTURE_WIDTH = 600;
-        private const int FTTEXTURE_HEIGHT = 300;
+        public const int FTTEXTURE_WIDTH = 1800;
+        public const int FTTEXTURE_HEIGHT = 200;
 
         public const int FPTEXTURE_WIDTH = 150;
         public const int FPTEXTURE_HEIGHT = 1080;
@@ -122,13 +122,13 @@ namespace redwing
             redwing_game_objects.fireBalls = fireBalls;
             redwing_game_objects.fireLasers = fireSpikes;
             redwing_game_objects.firePillars = firePillars;
-            redwing_game_objects.fireTrails = fireTrails;
             redwing_game_objects.fireballMagmas = fireballMagmas;
             redwing_game_objects.fireballMagmaFireballs = fireballMagmaBalls;
 
             redwing_pillar_detect_behavior.pillarTextures = firePillars;
 
             redwing_hooks.flameShieldTextures = fireShields;
+            redwing_hooks.fireTrailTextures = fireTrails;
 
             redwing_game_objects.soundFxClip = soundFxClip;
 
@@ -1058,7 +1058,7 @@ namespace redwing
             {
                 for (int y = 0; y < FBMBTEXTURE_WIDTH; y++)
                 {
-                    int angel = getNearestAngel(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT);
+                    int angel = (int) getNearestAngel(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT);
                     fb.SetPixel(x, y, getFireColor
                         (getDistance(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT), radialIntensity400[angel],
                         radialOpacity400[angel], FBMBTEXTURE_WIDTH/2, FBMBTEXTURE_HEIGHT/2.0, 9.0));
@@ -1111,7 +1111,7 @@ namespace redwing
             {
                 for (int y = 0; y < FBTEXTURE_HEIGHT; y++)
                 {
-                    int angel = getNearestAngel(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
+                    int angel = (int) getNearestAngel(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
                     fb.SetPixel(x, y, getFireColor
                         (getDistance(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), radialIntensity400[angel],
                         radialOpacity400[angel], FBTEXTURE_HEIGHT/2, FBTEXTURE_HEIGHT/2.0, 9.0));
@@ -1174,7 +1174,7 @@ namespace redwing
                         fShield.SetPixel(x, y, Color.clear);
                     } else if (dist < ringStartAt)
                     {
-                        int angel = getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
+                        int angel = (int) getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
                         fShield.SetPixel(x, y, getFireColor
                         ( ringStartAt - dist, radialIntensityEdge[angel],
                             0.0, 15, 15.0, 1.0));
@@ -1182,7 +1182,7 @@ namespace redwing
                     else
                     {
 
-                        int angel = getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
+                        int angel = (int) getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
                         fShield.SetPixel(x, y, getFireColor
                         (dist - ringStartAt, radialIntensityEdge[angel],
                             radialOpacityEdge[angel], (int)ringSize, (int)ringSize, 1.5));
@@ -1288,25 +1288,25 @@ namespace redwing
         }
 
 
-        private int getNearestAngel(int x, int y, int width, int height)
+        public static double getNearestAngel(int x, int y, int width, int height)
         {
-            int angel;
+            double angel;
 
             int relX = x - (width / 2);
             int relY = y - (height / 2);
 
             if (relX == 0)
             {
-                return relY >= 0 ? 90 : 270;
+                return relY >= 0 ? 90.0 : 270.0;
             } else
             {
-                angel = (int) ( Math.Atan2(relY, relX) * 180.0 / Math.PI);
+                angel = ( Math.Atan2(relY, relX) * 180.0 / Math.PI);
             }
-            while (angel < 0)
+            while (angel < 0.0)
             {
-                angel += 360;
+                angel += 360.0;
             }
-            angel %= 360;
+            angel %= 360.0;
 
             return angel;
         }

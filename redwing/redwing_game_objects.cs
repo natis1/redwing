@@ -43,7 +43,7 @@ namespace redwing
         
         
         private GameObject shield;
-        public GameObject[] lasers = new GameObject[16];
+        public readonly GameObject[] lasers = new GameObject[16];
         
 
         public void addLasers()

@@ -19,7 +19,7 @@ namespace redwing
          * */
 
         private readonly float dashCooldownTime = HeroController.instance.DASH_COOLDOWN_CH;
-        private float dashCooldown = 0f;
+        private static float dashCooldown = 0f;
         private float dashInvulTimer = 0f;
         private int antiTurboLeft = 0;
         private const int FUCK_TURBO_FRAMES = 1;
@@ -198,7 +198,7 @@ namespace redwing
             // Fixes TC problem where after tink sharp shadow is broken
             sharpShadowFSM.SetState("Idle");
 
-        }
+        } 
 
         private void doDash()
         {
