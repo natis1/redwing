@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
+using ModCommon;
 using Modding;
+using RandomizerMod.Extensions;
 using UnityEngine;
 using static HeroController;
+using Bounds = UnityEngine.Bounds;
 
 namespace redwing
 {
@@ -14,6 +20,8 @@ namespace redwing
         {
             ModHooks.Instance.DashPressedHook -= checkFireBalls;
             ModHooks.Instance.TakeDamageHook -= flameShieldAndLaser;
+            ModHooks.Instance.DashVectorHook -= fireballsAndTrail;
+            voidKnightSpellControl = null;
             
             if (flameShieldObj != null)
                 Destroy(flameShieldObj);
@@ -21,13 +29,52 @@ namespace redwing
         
         public void Start()
         {
-            StartCoroutine(getHeroFsMs());
+            StartCoroutine(getHeroFSMs());
             redwingSpawner = new redwing_game_objects();
             ModHooks.Instance.DashPressedHook += checkFireBalls;
             ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
 
-            StartCoroutine(createFlameShield());
+            ModHooks.Instance.DashVectorHook += fireballsAndTrail;
+            
+            log("bigmeme. Got to end of hooks without crashing lul");
         }
+
+        private Vector2 fireballsAndTrail(Vector2 change)
+        {
+            
+            return change;
+        }
+        
+        private void checkFireBalls()
+        {
+            float cooldown;
+            try
+            {
+                // ReSharper disable once PossibleNullReferenceException because in try catch thing.
+                cooldown = (float) instance.GetType()
+                    .GetField("dashCooldownTimer", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(instance);
+
+            }
+            catch (Exception e)
+            {
+                cooldown = 0.5f;
+                log("Failed to set cooldown by reflection because " + e);
+            }
+
+            if (!(cooldown <= 0)) return;
+
+            HeroActions direction = GameManager.instance.inputHandler.inputActions;
+            if (direction.up.IsPressed && !direction.down.IsPressed)
+            {
+                if (!(fbTime <= 0.0)) return;
+                spawnFireballs();
+                
+            } else
+            {
+                spawnFireTrail();
+            }
+        }
+
 
         private IEnumerator createFlameShield()
         {
@@ -76,7 +123,8 @@ namespace redwing
                 invulnTime = IFRAMES;
                 justDidLaserAttack = true;
                 redwingSpawner.addLasers();
-                StartCoroutine(freezeKnight(1f));
+                StartCoroutine(freezeKnight(0.3f));
+                StartCoroutine(firinMaLaser());
             }
 
             return damage;
@@ -92,6 +140,10 @@ namespace redwing
         private SpriteRenderer flameShieldSprite;
         private int currentFlameShieldTexture;
 
+        private GameObject flamePillar;
+        private GameObject flamePillarDetect;
+        private PlayMakerFSM voidKnightSpellControl;
+
         private bool justDidLaserAttack;
         private double fbTime;
         private double laserTime;
@@ -102,51 +154,28 @@ namespace redwing
         private const double FS_RECHARGE = 10f;
         private const double IFRAMES = 2f;
 
+        private const float FP_RANGE = 15f;
+
+        private const int laserDamage = 35;
+
+        private IEnumerable<Collider2D> allLaserEnemies;
+
         private const float FS_UPDATE_TIME = 0.2f;
         private float fsLastUpdate = 0f;
         
         //private readonly Rect = new Rect(50, 50, 100, 100);
-
-        private void checkFireBalls()
-        {
-            float cooldown;
-            try
-            {
-                // ReSharper disable once PossibleNullReferenceException because in try catch thing.
-                cooldown = (float) instance.GetType()
-                    .GetField("dashCooldownTimer", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(instance);
-
-            }
-            catch (Exception e)
-            {
-                cooldown = 0.5f;
-                log("Failed to set cooldown by reflection because " + e);
-            }
-
-            if (!(cooldown <= 0)) return;
-
-            HeroActions direction = GameManager.instance.inputHandler.inputActions;
-            if (direction.up.IsPressed && !direction.down.IsPressed && !direction.left.IsPressed && !direction.right.IsPressed)
-            {
-                if (!(fbTime <= 0.0)) return;
-                spawnFireballs();
-                
-            } else
-            {
-                spawnFireTrail();
-            }
-        }
+        
+        
+        
+        
         
         public void Update()
         {
-            //sceneTimer++;
-            if (voidKnight == null)
-            {
-                voidKnight = GameObject.Find("Knight");
-                redwingSpawner.voidKnight = voidKnight;
-            }
             attackCooldownUpdate();
-            flameShieldUpdate();
+            
+            if (flameShieldSprite != null)
+                flameShieldUpdate();
+            
         }
 
         private void flameShieldUpdate()
@@ -221,12 +250,12 @@ namespace redwing
         
         private IEnumerator freezeKnight(float freezeTime)
         {
-            float realTimescale = Time.timeScale;
+            //float realTimescale = Time.timeScale;
             Vector3 heroPostion = voidKnight.transform.position;
             while (freezeTime > 0.0f)
             {
                 freezeTime -= Time.unscaledDeltaTime;
-                Time.timeScale = 0.5f;
+                //Time.timeScale = 0.5f;
                 HeroController.instance.current_velocity = Vector2.zero;
                 voidKnight.transform.position = heroPostion;
                 
@@ -234,15 +263,64 @@ namespace redwing
                 yield return null;
             }
 
-            Time.timeScale = realTimescale;
+            //Time.timeScale = realTimescale;
+
+        }
+
+        private IEnumerator firinMaLaser()
+        {
+            allLaserEnemies = new List<Collider2D>();
+            yield return null;
+            const float waitTime = 0.2f;
+            float wait = 0f;
+            while (wait < waitTime)
+            {
+                wait += Time.unscaledDeltaTime;
+            }
+
+            for (int i = 0; i < 16; i++)
+            {
+                allLaserEnemies = allLaserEnemies.Union(redwingSpawner.lasers[i].GetComponent<redwing_laser_behavior>()
+                    .enteredColliders);
+            }
+            
+            foreach (Collider2D collider in allLaserEnemies)
+            {
+                
+                GameObject target = collider.gameObject;
+                log("Doing laser damage to target with name " + target.name);
+                
+                FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
+                HitTaker.Hit(target, new HitInstance
+                {
+                    Source = base.gameObject,
+                    AttackType = AttackTypes.Generic,
+                    CircleDirection = false,
+                    DamageDealt = laserDamage,
+                    Direction = 0f,
+                    IgnoreInvulnerable = true,
+                    MagnitudeMultiplier = 1f,
+                    MoveAngle = 0f,
+                    MoveDirection = false,
+                    Multiplier = 1f,
+                    SpecialType = SpecialTypes.None,
+                    IsExtraDamage = false
+                }, 3);
+            }
 
         }
         
-        private IEnumerator getHeroFsMs()
+        private IEnumerator getHeroFSMs()
         {
-            while (GameManager.instance == null)
-                yield return new WaitForEndOfFrame();
-
+            while (GameManager.instance == null || HeroController.instance == null)
+                yield return null;
+            
+            voidKnight = GameObject.Find("Knight");
+            redwingSpawner.voidKnight = voidKnight;
+            
+            
+            voidKnightSpellControl = FSMUtility.LocateFSM(voidKnight, "ProxyFSM");
+            
             // ReSharper disable once InvertIf because idk it also looks dumb here.
             if (sharpShadow == null || !sharpShadow.CompareTag("Sharp Shadow"))
                 foreach (GameObject ssGameObject in Resources.FindObjectsOfTypeAll<GameObject>())
@@ -253,6 +331,9 @@ namespace redwing
 
                     log("Found sharpshadow");
                 }
+            
+            StartCoroutine(setupFlamePillar());
+            StartCoroutine(createFlameShield());
         }
         
         private GameObject fireSoul(GameObject go, Fsm fsm)
@@ -268,6 +349,60 @@ namespace redwing
             }
             return go;
         }
+
+        private IEnumerator setupFlamePillar()
+        {
+            log("start flame pillar setup");
+            while (voidKnightSpellControl == null)
+            {
+                yield return null;
+            }
+            
+            // lul... grimm enemy range.
+            flamePillarDetect = new GameObject("redwingFlamePillarDetect",
+                typeof(redwing_pillar_detect_behavior), typeof(Rigidbody2D), typeof(CircleCollider2D));
+            flamePillarDetect.transform.parent = voidKnight.transform;
+            flamePillarDetect.transform.localPosition = Vector3.zero;
+            
+            
+            CircleCollider2D fpRangeCollide = flamePillarDetect.GetComponent<CircleCollider2D>();
+            Bounds bounds = fpRangeCollide.bounds;
+            bounds.center = flamePillarDetect.transform.position;
+            fpRangeCollide.isTrigger = true;
+            fpRangeCollide.radius = FP_RANGE;
+
+            log("detect enemy hitbox centered around " + bounds.center.x + ", " + bounds.center.y + " with radius: " +
+                fpRangeCollide.radius);
+            
+
+            Rigidbody2D fpFakePhysics = flamePillarDetect.GetComponent<Rigidbody2D>();
+            fpFakePhysics.isKinematic = true;
+            
+            
+            
+            
+            
+            //GrimmEnemyRange fpGrimmRange = flamePillarDetect.GetComponent<GrimmEnemyRange>();
+            //fpGrimmRange
+            
+            CallMethod firePillarOnRecover = new CallMethod();
+            try
+            {
+                firePillarOnRecover.behaviour = flamePillarDetect.GetComponent<redwing_pillar_detect_behavior>();
+                firePillarOnRecover.methodName = "spawnFirePillar";
+                firePillarOnRecover.parameters = new FsmVar[0];
+                firePillarOnRecover.everyFrame = false;
+                
+                voidKnightSpellControl.getState("Focus Completed").addAction(firePillarOnRecover);
+            } catch (Exception e)
+            {
+                log("Unable to add method: error " + e);
+            }
+            log("got to end of FP method");
+        }
+        
+        
+        
         
         private static void log(string str)
         {

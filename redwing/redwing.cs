@@ -8,7 +8,7 @@ namespace redwing
 {
     public class redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "0.0.3";
+        private const string VERSION = "0.0.5rc1";
         private const int LOAD_ORDER = 90;
 
         // Version detection code originally by Seanpr, used with permission.
@@ -64,12 +64,20 @@ namespace redwing
         private void addComponent()
         {
             log("Adding Redwing to game.");
-            
-            GameManager.instance.gameObject.AddComponent<greymoth>();
-            GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
-            GameManager.instance.gameObject.AddComponent<redwing_hooks>();
 
-            GameManager.instance.gameObject.AddComponent<redwing_lore>();
+            try
+            {
+                GameManager.instance.gameObject.AddComponent<redwing_greymoth>();
+                GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
+                GameManager.instance.gameObject.AddComponent<redwing_hooks>();
+
+                GameManager.instance.gameObject.AddComponent<redwing_lore>();
+            }
+            catch (Exception e)
+            {
+                log("what the fuck? " + e);
+            }
+
             log(Language.Language.CurrentLanguage() + " is your current language.");
         }
 

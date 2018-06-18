@@ -27,22 +27,7 @@ namespace redwing
         // ReSharper disable once ConvertToConstant.Global
         // ReSharper disable once MemberCanBePrivate.Global
         // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int fbDamage = 10;
-        
-        // ReSharper disable once ConvertToConstant.Global
-        // ReSharper disable once MemberCanBePrivate.Global
-        // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int laserX = 80;
-        
-        // ReSharper disable once ConvertToConstant.Global
-        // ReSharper disable once MemberCanBePrivate.Global
-        // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int laserY = 1500;
-        
-        // ReSharper disable once ConvertToConstant.Global
-        // ReSharper disable once MemberCanBePrivate.Global
-        // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int laserDamage = 5;
+        public static int fbDamage = 25; 
 
         private const float rotationAmount = (float) (360.0 / 16.0);
         
@@ -58,7 +43,7 @@ namespace redwing
         
         
         private GameObject shield;
-        private GameObject[] lasers = new GameObject[16];
+        public GameObject[] lasers = new GameObject[16];
         
 
         public void addLasers()
@@ -71,6 +56,9 @@ namespace redwing
             laserSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_laser_spawner_behavior));
             Vector3 laserSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
             laserSpawn.transform.position = laserSpawnPos;
+            // Why? Because layers 20, 9, 26, and 31 are explicitly ignored by the game
+            // and layers above 31 don't exist
+            laserSpawn.layer = 31;
             
             float rotationMod = (float)(redwing_flame_gen.rng.NextDouble() * rotationAmount);
             
@@ -80,35 +68,27 @@ namespace redwing
                     typeof(BoxCollider2D), typeof(redwing_laser_behavior));
                 lasers[i].transform.parent = laserSpawn.transform;
                 lasers[i].transform.localPosition = Vector3.zero;
-                lasers[i].layer = 170;
-                lasers[i].transform.localScale = new Vector3(2f, 2f, 2f);
+                
+                lasers[i].layer = 0;
+                lasers[i].transform.localScale = new Vector3(2f, 12f, 2f);
                 Rigidbody2D laserPhysics = lasers[i].GetComponent<Rigidbody2D>();
                 laserPhysics.isKinematic = true;
                 
-                Rect r = new Rect(0, 0, laserX, laserY);
+                Rect r = new Rect(0, 0, redwing_flame_gen.LASERTEXTURE_WIDTH, redwing_flame_gen.LASERTEXTURE_HEIGHT);
                 SpriteRenderer s = lasers[i].GetComponent<SpriteRenderer>();
                 s.sprite = Sprite.Create(fireLasers[i], r, new Vector2(0.5f, 0f));
                 s.enabled = true;
                 s.color = new Color(1f, 1f, 1f, 0f);
                 BoxCollider2D laserPassthrough = lasers[i].GetComponent<BoxCollider2D>();
                 laserPassthrough.isTrigger = true;
-                laserPassthrough.size = s.bounds.size;
-                Vector2 spriteSize = s.bounds.size;
+                laserPassthrough.size = s.size;
+                Vector2 spriteSize = s.size;
                 laserPassthrough.offset = new Vector2(spriteSize.x / 2, 0);
                 redwing_laser_behavior shootEm = lasers[i].GetComponent<redwing_laser_behavior>();
-                shootEm.damageDealt = laserDamage;
-                shootEm.hurtEm = lasers[i].GetComponent<DamageEnemies>();
                 shootEm.drawEm = s;
                 shootEm.spriteUsed = fireLasers[i];
                 
-
-                
-                
                 lasers[i].transform.Rotate(0f, 0f, rotationAmount * i + rotationMod);
-
-                
-
-
             }
             
             
@@ -126,26 +106,30 @@ namespace redwing
             fireballSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_fireball_spawner_behavior));
             Vector3 fbSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
             fireballSpawn.transform.position = fbSpawnPos;
-
+            fireballSpawn.layer = 31;
 
             fireballSpawn.SetActive(true);
             for (int i = 0; i < 7; i++)
             {
                 
                 fireballPivotGOs[i] = new GameObject("redwingFBPivot" + i, typeof(BoxCollider2D),
-                    typeof(IgnoreHeroCollision), typeof(Rigidbody2D), typeof(DamageEnemies),
-                    typeof(redwing_fireball_behavior));
+                    typeof(Rigidbody2D), typeof(redwing_fireball_behavior));
                 fireballPivotGOs[i].transform.parent = fireballSpawn.transform;
                 //fireballPivotGOs[i].transform.position = Vector3.zero;
                 fireballPivotGOs[i].transform.localPosition = Vector3.zero;
-                fireballPivotGOs[i].layer = 169;
+                
+                
+                fireballPivotGOs[i].layer = 0;
                 
                 fireballsGo[i] = new GameObject("redwingFB" + i, typeof(SpriteRenderer));
                 fireballsGo[i].transform.parent = fireballPivotGOs[i].transform;
                 //fireballsGo[i].transform.position = Vector3.zero;
                 fireballsGo[i].transform.localPosition = Vector3.zero;
                 
-                setupFireballDamage(fireballPivotGOs[i].GetComponent<DamageEnemies>());
+                // Layers 20, 9, 26, and 31 are explicitly ignored by the game
+                // and layers above 31 don't exist
+                fireballsGo[i].layer = 31;
+                
                 setupFireballSprite(fireballsGo[i].GetComponent<SpriteRenderer>(), i);
                 setupFireballPhysics(fireballPivotGOs[i].GetComponent<Rigidbody2D>());
                 setupCustomFireballObject(fireballPivotGOs[i].GetComponent<redwing_fireball_behavior>(),
@@ -170,8 +154,8 @@ namespace redwing
 
             behavior.fireballSprite = fireballsGo[i].GetComponent<SpriteRenderer>();
             behavior.fireballPhysics = fireballPivotGOs[i].GetComponent<Rigidbody2D>();
-            collide.size = behavior.fireballSprite.bounds.size;
-            Vector2 spriteSize = behavior.fireballSprite.bounds.size;
+            collide.size = behavior.fireballSprite.size;
+            Vector2 spriteSize = behavior.fireballSprite.size;
             collide.offset = new Vector2(spriteSize.x / 2, 0);
             behavior.rotationalVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
             
@@ -219,6 +203,7 @@ namespace redwing
                 
             behavior.fireballMagmas = fireballMagmas;
             behavior.doPhysics = true;
+            behavior.fireballDmg = fbDamage;
             behavior.fireballMagmaFireballs = fireballMagmaFireballs;
             behavior.fireballMagmaFireballHeight = redwing_flame_gen.FBMBTEXTURE_HEIGHT;
             behavior.fireballMagmaFireballWidth = redwing_flame_gen.FBMBTEXTURE_WIDTH;
@@ -232,14 +217,6 @@ namespace redwing
             sprite.enabled = true;
             sprite.color = Color.white;
             
-        }
-
-        private static void setupFireballDamage(DamageEnemies hitbox)
-        {
-            hitbox.ignoreInvuln = false;
-            hitbox.damageDealt = fbDamage;
-            hitbox.attackType = AttackTypes.Spell;
-
         }
 
         private static void setupFireballPhysics(Rigidbody2D physics)

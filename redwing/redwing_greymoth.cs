@@ -7,7 +7,7 @@ using GlobalEnums;
 
 namespace redwing
 {
-    internal class greymoth : MonoBehaviour
+    internal class redwing_greymoth : MonoBehaviour
     {
 
         /*
@@ -26,11 +26,13 @@ namespace redwing
         public Vector2 DashDirection;
         public PlayMakerFSM sharpShadowFSM;
         public GameObject sharpShadow;
-
+        
         // These bools track player upgrades
         public bool dashRegular;
         public bool shadowDash;
 
+        private bool completedCoroutines;
+        
         public void OnDestroy()
         {
             ModHooks.Instance.DashPressedHook -= dashTapped;
@@ -39,12 +41,20 @@ namespace redwing
 
         public void Start()
         {
-            StartCoroutine(configureHero());
-            ModHooks.Instance.DashPressedHook += dashTapped;
-            ModHooks.Instance.DashVectorHook += doDashDirection;
+            completedCoroutines = false;
+            try
+            {
+                StartCoroutine(configureHero());
+                ModHooks.Instance.DashPressedHook += dashTapped;
+                ModHooks.Instance.DashVectorHook += doDashDirection;
+            }
+            catch (Exception e)
+            {
+                log("Error setting up hooks. Error: " + e);
+            }
         }
 
-        private Vector2 doDashDirection()
+        private Vector2 doDashDirection(Vector2 orig)
         {
             Vector2 ret;
             float num = getDashLength();
@@ -82,6 +92,9 @@ namespace redwing
 
         private void Update()
         {
+            if (!completedCoroutines)
+                return;
+            
             if (dashCooldown > 0)
             {
                 dashCooldown -= Time.deltaTime;
@@ -90,17 +103,24 @@ namespace redwing
             {
                 dashInvulTimer -= Time.deltaTime;
             }
-            
-            if (dashInvulTimer > 0)
+
+            try
             {
-                HeroController.instance.cState.invulnerable = true;
-                antiTurboLeft = FUCK_TURBO_FRAMES;
+                if (dashInvulTimer > 0)
+                {
+                    HeroController.instance.cState.invulnerable = true;
+                    antiTurboLeft = FUCK_TURBO_FRAMES;
+                }
+                else
+                {
+                    HeroController.instance.cState.invulnerable = false;
+                    if (antiTurboLeft > 0)
+                        antiTurboLeft--;
+                }
             }
-            else
+            catch (NullReferenceException e)
             {
-                HeroController.instance.cState.invulnerable = false;
-                if (antiTurboLeft > 0)
-                    antiTurboLeft--;
+                log("Null Reference trying to set Hero cState. Probably because you're transitioning levels " + e);
             }
 
         }
@@ -122,6 +142,7 @@ namespace redwing
                 log($@"Found Sharp Shadow: {sharpShadow} - {sharpShadowFSM}.");
             }
 
+            completedCoroutines = true;
             //HeroController.instance.gameObject.AddComponent<SuperDashHandler>();
         }
 

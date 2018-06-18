@@ -47,6 +47,8 @@ namespace redwing
         private const int FIREBALL_WIDTH = 150;
         private const int FIREBALL_HEIGHT = 150;
 
+        public int fireballDmg;
+
         public float maxHeight = 8f;
         public float maxySpeed = 30f;
         
@@ -173,92 +175,47 @@ namespace redwing
             
         }
 
-        
-        /*
-        private void OnCollisionEnter2D(Collision2D other)
-        {
-            
-            if (other.collider.gameObject.layer != 8) return;
-            
-            log("Hit a layer 8 object with on trigger enter. obj name is " + other.collider.name);
-            
-            doPhysics = false;
-            hitboxForPivot.isTrigger = true;
-            
-            
-            float RectWidth = hitboxForPivot.bounds.size.x;
-            float RectHeight = hitboxForPivot.bounds.size.y;
-            
-            //other.otherCollider.bounds.max
-            
-            
-            //other.collider.OverlapPoint(Vector2.down);
-            
-            Vector2 contactPoint = other.contacts[0].point;
-            Vector2 bottomLeft = other.collider.bounds.min;
-            Vector2 topRight = other.collider.bounds.max;
-            
-            float pushUpDistance = topRight.y - contactPoint.y;
-            float pushDownDistance = contactPoint.y - bottomLeft.y;
-
-            float pushRightDistance = topRight.x - contactPoint.x;
-            float pushLeftDistance = contactPoint.x - bottomLeft.x;
-            int direction;
-            
-            if (pushUpDistance <= pushDownDistance && pushUpDistance <= pushRightDistance &&
-                pushUpDistance <= pushLeftDistance)
-            {
-                direction = 0;
-            } else if (pushDownDistance <= pushRightDistance && pushDownDistance <= pushLeftDistance)
-            {
-                direction = 2;
-            } else if (pushRightDistance <= pushLeftDistance)
-            {
-                direction = 1;
-            }
-            else
-            {
-                direction = 3;
-            }
-            
-            /*
-            int direction = 0;
-            if (pushUpDistance <= pushDownDistance && pushUpDistance <= pushRightDistance &&
-                pushUpDistance <= pushLeftDistance)
-            {
-                direction = 0;
-                moveFireballBy(0f, pushUpDistance);
-            } else if (pushDownDistance <= pushRightDistance && pushDownDistance <= pushLeftDistance)
-            {
-                direction = 2;
-                moveFireballBy(0f, -pushDownDistance);
-            } else if (pushRightDistance <= pushLeftDistance)
-            {
-                direction = 1;
-                moveFireballBy(pushRightDistance, 0f);
-            }
-            else
-            {
-                direction = 3;
-                moveFireballBy(-pushLeftDistance, 0f);
-            }
-            
-            fireball.transform.rotation = Quaternion.identity;
-            fireball.transform.Rotate(new Vector3(0f, 0f, (float) (direction * 90.0)));
-            int balls = redwing_flame_gen.rng.Next(0, 4);
-            
-            StartCoroutine(magmaFadeAnimation(direction));
-            generateFireballMagmaBalls(balls);
-
-            
-        }
-        
-        */
-
         public void OnTriggerEnter2D(Collider2D hitbox)
         {
+            int targetLayer = hitbox.gameObject.layer;
+                        
+            // why? These are hardcoded layers in the Damages Enemy class so they must not be important.
+            // Or rather they must be specifically avoided for some reason.
+            if (targetLayer == 20 || targetLayer == 9 || targetLayer == 26 || targetLayer == 31)
+            {
+                return;
+            }
+            else if (targetLayer == 11)
+            {
+                FSMUtility.SendEventToGameObject(hitbox.gameObject, "TAKE DAMAGE", false);
+                HitTaker.Hit(hitbox.gameObject, new HitInstance
+                {
+                    Source = base.gameObject,
+                    AttackType = AttackTypes.Generic,
+                    CircleDirection = false,
+                    DamageDealt = fireballDmg,
+                    Direction = 0f,
+                    IgnoreInvulnerable = true,
+                    MagnitudeMultiplier = 1.0f,
+                    MoveAngle = 0f,
+                    MoveDirection = false,
+                    Multiplier = 1f,
+                    SpecialType = SpecialTypes.None,
+                    IsExtraDamage = false
+                }, 3);
+
+                log("Did damage to enemy probably with fireball.");
+                if (doPhysics)
+                {
+                    fireballDmg = 0;
+                    doPhysics = false;
+                    ballExplode();
+                }
+
+            }
             
-            if (hitbox.gameObject.layer != 8) return;
+            
+            if (targetLayer != 8) return;
             
             log("Hit a layer 8 object with on trigger enter. obj name is " + hitbox.name);
             
@@ -281,35 +238,6 @@ namespace redwing
             Vector2 otherTopRight = hitbox.bounds.max;
             Vector2 otherBotLeft = hitbox.bounds.min;
             
-            /*
-            Bounds topLeftFakeCollider = new Bounds
-            {
-                center = ourTopLeft,
-                size = new Vector3(epsilon, epsilon, 1000f)
-            };
-            Bounds botLeftFakeCollider = new Bounds
-            {
-                center = ourBottomLeft,
-                size = new Vector3(epsilon, epsilon, 1000f)
-            };
-            Bounds topRightFakeCollider = new Bounds
-            {
-                center = ourTopRight,
-                size = new Vector3(epsilon, epsilon, 1000f)
-            };
-            Bounds botRightFakeCollider = new Bounds
-            {
-                center = ourBottomRight,
-                size = new Vector3(epsilon, epsilon, 1000f)
-            };*/
-
-            /*
-            if (!botLeftCollide)
-            {
-                //hitboxForPivot.
-                //botLeftCollide = hitbox.IsTouching();
-
-            }*/
 
             float br = getDistanceBetweenVectors(ourBottomRight, hitbox.closestPoint(ourBottomRight));
             float tr = getDistanceBetweenVectors(ourTopRight, hitbox.closestPoint(ourTopRight));
@@ -348,52 +276,7 @@ namespace redwing
                 }
             }
             
-            /*
-            if (!topRightCollide && topLeftCollide)
-            {
-                selfPosition.x += tl;
-            } 
-            else if (topRightCollide && !topLeftCollide)
-            {
-                selfPosition.x -= tr;
-            } else if (!botLeftCollide && !botRightCollide)
-            {
-                selfPosition.y -= tr;
-            }
-            else if (botRightCollide)
-            {
-                selfPosition.y += br;
-            } else if (botLeftCollide)
-            {
-                selfPosition.y += bl;
-            }*/
             
-            //if (!botLeftCollide)
-            //    botLeftCollide = hitbox.OverlapPoint()
-            /*
-            if (ourBottomLeft.y >= otherBotLeft.y && ourBottomLeft.y <= otherTopRight.y &&
-                ourBottomLeft.x >= otherBotLeft.x && ourBottomLeft.x <= otherTopRight.x)
-                botLeftCollide = true;
-           
-
-            if (ourTopRight.y >= otherBotLeft.y && ourTopRight.y <= otherTopRight.y &&
-                ourTopRight.x >= otherBotLeft.x && ourTopRight.x <= otherTopRight.x)
-                topRightCollide = true;
-
-
-            if (ourTopLeft.y >= otherBotLeft.y && ourTopLeft.y <= otherTopRight.y &&
-                ourTopLeft.x >= otherBotLeft.x && ourTopLeft.x <= otherTopRight.x)
-                topLeftCollide = true;
-
-            if (ourBottomRight.y >= otherBotLeft.y && ourBottomRight.y <= otherTopRight.y &&
-                ourBottomRight.x >= otherBotLeft.x && ourBottomRight.x <= otherTopRight.x)
-                botRightCollide = true;
-            */
-            
-            
-            log("bot left is " + ourBottomLeft.x + ", " + ourBottomLeft.y +
-                " and top right is " + ourTopRight.x + ", " + ourTopRight.y);
-
             if (!isDoingHitboxStuff)
                 StartCoroutine(doHitboxStuff());
 
@@ -410,8 +293,6 @@ namespace redwing
             
             yield return null;
             
-            log("The following are being collided with \ntopleft: " + topLeftCollide + " topright: " +topRightCollide +
-                " botleft: " + botLeftCollide + " botright: " + botRightCollide);
             
             int direction = 0;
             int collides = 0;
@@ -449,12 +330,12 @@ namespace redwing
             if (collides > 1)
             {
                 StartCoroutine(magmaFadeAnimation(direction));
-                this.GetComponent<DamageEnemies>().damageDealt = this.GetComponent<DamageEnemies>().damageDealt / 2;
+                fireballDmg /= 2;
             }
             else
             {
                 ballExplode();
-                this.GetComponent<DamageEnemies>().damageDealt = 0;
+                fireballDmg = 0;
             }
 
             generateFireballMagmaBalls(balls);
@@ -476,16 +357,13 @@ namespace redwing
         {
             if (balls == 0) return;
             
-            log("building " + balls + " fireballs");
             for (int i = 0; i < balls; i++)
             {
-                ballObjs[i] = new GameObject("FireballMagmaFireball" + i, typeof(Rigidbody2D), typeof(BoxCollider2D),
-                    typeof(redwing_fireball_magma_fireball_behavior), typeof(SpriteRenderer),
-                    typeof(IgnoreHeroCollision));
+                ballObjs[i] = new GameObject("FireballMagmaFireball" + i, typeof(Rigidbody2D),
+                    typeof(redwing_fireball_magma_fireball_behavior), typeof(SpriteRenderer));
                 ballObjs[i].transform.localPosition = selfTranform.position;
                 ballObjs[i].transform.parent = fireball.transform;
-                log("Ball position x is " + ballObjs[i].transform.position.x + " and localposition x " +
-                                   "is " + ballObjs[i].transform.localPosition.x);
+                ballObjs[i].layer = 31;
                 
                 redwing_fireball_magma_fireball_behavior a = ballObjs[i].
                     GetComponent<redwing_fireball_magma_fireball_behavior>();
@@ -496,11 +374,6 @@ namespace redwing
                     (float)(redwing_flame_gen.rng.NextDouble() * 2.5 + 2f));
                 b.mass = 0.005f;
                 b.isKinematic = true;
-                
-                
-                BoxCollider2D c = ballObjs[i].GetComponent<BoxCollider2D>();
-                c.density = 0.005f;
-                c.size = Vector2.zero;
                 
                 Rect r = new Rect(0, 0, fireballMagmaFireballWidth, fireballMagmaFireballHeight);
                 SpriteRenderer d = ballObjs[i].GetComponent<SpriteRenderer>();

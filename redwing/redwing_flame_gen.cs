@@ -17,7 +17,8 @@ namespace redwing
         private readonly Texture2D[] fireballMagmas = new Texture2D[12];
         private readonly Texture2D[] fireballMagmaBalls = new Texture2D[4];
         
-        private readonly Texture2D[] fireTrails = new Texture2D[10];
+        private readonly Texture2D[] fireTrails = new Texture2D[4];
+        
         private readonly Texture2D[] firePillars = new Texture2D[10];
         private readonly Texture2D[] fireSpikes = new Texture2D[16];
         private readonly Texture2D[] fireShields = new Texture2D[20];
@@ -60,17 +61,17 @@ namespace redwing
         private const int FTTEXTURE_WIDTH = 600;
         private const int FTTEXTURE_HEIGHT = 300;
 
-        private const int FPTEXTURE_WIDTH = 500;
-        private const int FPTEXTURE_HEIGHT = 1080;
+        public const int FPTEXTURE_WIDTH = 150;
+        public const int FPTEXTURE_HEIGHT = 1080;
 
-        private const int FSTEXTURE_WIDTH = 80;
-        private const int FSTEXTURE_HEIGHT = 1500;
+        public const int LASERTEXTURE_WIDTH = 80;
+        public const int LASERTEXTURE_HEIGHT = 250;
         
-        public const int FBMBTEXTURE_WIDTH = 50;
-        public const int FBMBTEXTURE_HEIGHT = 50;
+        public const int FBMBTEXTURE_WIDTH = 85;
+        public const int FBMBTEXTURE_HEIGHT = 85;
 
         public const int FSHIELDTEXTURE_WIDTH = 250;
-        public const int FSHIELDTEXTURE_HEIGHT = 300;
+        public const int FSHIELDTEXTURE_HEIGHT = 320;
 
         private const double OPACITY_MASK = 1.0;
 
@@ -89,7 +90,7 @@ namespace redwing
         // pick a factor of FPTEXTURE_HEIGHT
         private const int FP_INTERPOLATE_PIXELS = 40;
 
-        // pick a factor of FSTEXTURE_HEIGHT
+        // pick a factor of LASERTEXTURE_HEIGHT
         private const int FS_INTERPOLATE_PIXELS = 50;
 
         private const int FB_MAGMA_INTERPOLATE_PIXELS = 15;
@@ -125,6 +126,8 @@ namespace redwing
             redwing_game_objects.fireballMagmas = fireballMagmas;
             redwing_game_objects.fireballMagmaFireballs = fireballMagmaBalls;
 
+            redwing_pillar_detect_behavior.pillarTextures = firePillars;
+
             redwing_hooks.flameShieldTextures = fireShields;
 
             redwing_game_objects.soundFxClip = soundFxClip;
@@ -134,22 +137,6 @@ namespace redwing
         
 
 
-
-        //for testing only
-
-        private static IEnumerator volumeFade(AudioSource audioSource, float waitTime)
-        {
-            float startTime = Time.time;
-            waitTime = waitTime + startTime;
-            while (startTime < waitTime)
-            {
-                startTime = Time.time;
-                yield return null;
-            }
-            audioSource.Stop();
-
-        }
-        
         private void generateSoundEffects()
         {
             soundFxClip[0] = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
@@ -342,7 +329,6 @@ namespace redwing
             }
             dat2[1] = dat2[0] = fx[0];
             dat2[dF2 + 3] = dat2[dF2 + 2] = fx[dF2];
-            log("Allocation complete without error");
 
             double wc = Math.Tan(frequency * Math.PI / ((double)AUDIO_SAMPLE_HZ) );
             double k1 = 1.414213562 * wc; // Sqrt(2) * wc
@@ -364,8 +350,6 @@ namespace redwing
             }
             datYt[dF2 + 3] = datYt[dF2 + 2] = datYt[dF2 + 1];
 
-            log("Recursive triggers complete");
-
             // FORWARD filter
             float[] datZt = new float[dF2 + 2];
             datZt[dF2] = datYt[dF2 + 2];
@@ -375,7 +359,6 @@ namespace redwing
                 datZt[-t] = (float)(a * datYt[-t + 2] + b * datYt[-t + 3] + c * datYt[-t + 4]
                             + d * datZt[-t + 1] + e * datZt[-t + 2]);
             }
-            log("Recursive triggers complete");
 
             // Calculated points copied for return
             for (long p = 0; p < dF2; p++)
@@ -675,41 +658,6 @@ namespace redwing
 
         
 
-        public void placeTextureSomewhere()
-        {
-
-            plane = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));            
-            plane.SetActive(true);
-            Sprite renderSprite = Sprite.Create(fireBalls[currentImg], new Rect(0, 0, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), new Vector2(0, 0));
-            canvas = CanvasUtil.CreateImagePanel(plane, renderSprite, new CanvasUtil.RectData(new Vector2(1920, 1080), new Vector2(0f, 0f)));
-            
-        }
-
-        public Mesh createMesh(float width, float height)
-        {
-            Mesh m = new Mesh
-            {
-                name = "ScriptedMesh",
-                vertices = new Vector3[]
-                {
-                    new Vector3(-width, -height, 0.01f),
-                    new Vector3(width, -height, 0.01f),
-                    new Vector3(width, height, 0.01f),
-                    new Vector3(-width, height, 0.01f)
-                },
-                uv = new Vector2[]
-                {
-                    new Vector2(0, 0),
-                    new Vector2(0, 1),
-                    new Vector2(1, 1),
-                    new Vector2(1, 0)
-                },
-                triangles = new int[] {0, 1, 2, 0, 2, 3}
-            };
-            m.RecalculateNormals();
-            return m;
-        }
-
         private void generateFlameTextures()
         {
 
@@ -879,13 +827,13 @@ namespace redwing
 
         private Texture2D generateFireSpike()
         {
-            Texture2D fs = new Texture2D(FSTEXTURE_WIDTH, FSTEXTURE_HEIGHT);
-            double[] horzIntensity20 = new double[FSTEXTURE_HEIGHT];
-            double[] horzOpacity20 = new double[FSTEXTURE_HEIGHT];
+            Texture2D fs = new Texture2D(LASERTEXTURE_WIDTH, LASERTEXTURE_HEIGHT);
+            double[] horzIntensity20 = new double[LASERTEXTURE_HEIGHT];
+            double[] horzOpacity20 = new double[LASERTEXTURE_HEIGHT];
 
 
             // RNG phase
-            for (int i = 0; i < FSTEXTURE_HEIGHT; i++)
+            for (int i = 0; i < LASERTEXTURE_HEIGHT; i++)
             {
                 if (i % FS_INTERPOLATE_PIXELS != 0) continue;
                 horzIntensity20[i] = rng.NextDouble();
@@ -902,7 +850,7 @@ namespace redwing
             }
 
             // Interpolation phase
-            for (int i = 0; i < FSTEXTURE_HEIGHT - FS_INTERPOLATE_PIXELS; i++)
+            for (int i = 0; i < LASERTEXTURE_HEIGHT - FS_INTERPOLATE_PIXELS; i++)
             {
                 if (i % FS_INTERPOLATE_PIXELS == 0) continue;
                 int offset = i % FS_INTERPOLATE_PIXELS;
@@ -913,7 +861,7 @@ namespace redwing
             }
 
             // Interpolation phase pt 2 (for wrap around)
-            for (int i = FSTEXTURE_HEIGHT - FS_INTERPOLATE_PIXELS; i < FSTEXTURE_HEIGHT; i++)
+            for (int i = LASERTEXTURE_HEIGHT - FS_INTERPOLATE_PIXELS; i < LASERTEXTURE_HEIGHT; i++)
             {
                 if (i % FS_INTERPOLATE_PIXELS == 0) continue;
                 int offset = i % FS_INTERPOLATE_PIXELS;
@@ -925,23 +873,23 @@ namespace redwing
 
 
             // Actually set the colors
-            for (int x = 0; x < FSTEXTURE_WIDTH; x++)
+            for (int x = 0; x < LASERTEXTURE_WIDTH; x++)
             {
-                double realDistance = (FSTEXTURE_WIDTH / 2.0) - 0.5 - x;
+                double realDistance = (LASERTEXTURE_WIDTH / 2.0) - 0.5 - x;
                 
-                for (int y = 0; y < FSTEXTURE_HEIGHT; y++)
+                for (int y = 0; y < LASERTEXTURE_HEIGHT; y++)
                 {
-                    if (y > 150)
+                    if (y > 50)
                     {
                         fs.SetPixel(x, y, getFireColor
-                        ((realDistance), horzIntensity20[y], horzOpacity20[y], FSTEXTURE_WIDTH / 2,
-                            FSTEXTURE_WIDTH / 2.0, 9.0));
+                        ((realDistance), horzIntensity20[y], horzOpacity20[y], LASERTEXTURE_WIDTH / 2,
+                            LASERTEXTURE_WIDTH / 2.0, 9.0));
                     }
                     else
                     {
                         fs.SetPixel(x, y, getFireColor
-                        ((int)( ((double)y / 150.0) * (double)realDistance), horzIntensity20[y], horzOpacity20[y], FSTEXTURE_WIDTH / 2,
-                            FSTEXTURE_WIDTH / 2.0, 9.0));
+                        ((int)( ((double)y / 50.0) * (double)realDistance), horzIntensity20[y], horzOpacity20[y], LASERTEXTURE_WIDTH / 2,
+                            LASERTEXTURE_WIDTH / 2.0, 9.0));
                     }
                     
                 }
@@ -967,7 +915,7 @@ namespace redwing
                 // because c# sucks NextDouble can't return arbitrary numbers
                 // so apply a transformation to map verticalIntensity150 -> 0-0.2
                 // and verticalOpacity150 -> -1 - 0
-                horzOpacity150[i] = horzOpacity150[i] * 0.2 - 0.6;
+                horzOpacity150[i] = horzOpacity150[i] * 0.2 - 0.2;
 
                 horzIntensity150[i] = (horzIntensity150[i] * 0.2);
             }
@@ -1221,9 +1169,15 @@ namespace redwing
                 for (int y = 0; y < FSHIELDTEXTURE_HEIGHT; y++)
                 {
                     double dist = ovalDistance(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
-                    if (dist < ringStartAt)
+                    if (dist < (ringStartAt - 15.0))
                     {
                         fShield.SetPixel(x, y, Color.clear);
+                    } else if (dist < ringStartAt)
+                    {
+                        int angel = getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
+                        fShield.SetPixel(x, y, getFireColor
+                        ( ringStartAt - dist, radialIntensityEdge[angel],
+                            0.0, 15, 15.0, 1.0));
                     }
                     else
                     {
