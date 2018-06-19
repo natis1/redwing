@@ -75,7 +75,7 @@ namespace redwing
             float currentTime = 0f;
             while (currentTime < 0.2f && !stopAppear)
             {
-                float alpha = currentTime * 5f;
+                float alpha = currentTime * (float) (1.0/0.2);
                 currentTime += Time.deltaTime;
                 
                 this.transform.localScale = ballSize * alpha;
@@ -214,7 +214,7 @@ namespace redwing
             //Vector2 centerMeme = hitbox.bounds.center;
 
 
-            const float epsilon = 0.2f;
+            const float epsilon = 0.4f;
             
             Vector2 ourTopRight = hitboxForPivot.bounds.max;
             Vector2 ourBottomLeft = hitboxForPivot.bounds.min;
@@ -298,16 +298,21 @@ namespace redwing
             if (!topRightCollide && topLeftCollide)
             {
                 direction = 3;
+                // left and right collides should just disappear into balls because the animation looks stupid otherwise
+                // Not much I can do about it.
+                collides = 0;
             } 
             else if (topRightCollide && !topLeftCollide)
             {
                 direction = 1;
+                collides = 0;
             } else if (!botLeftCollide && !botRightCollide)
             {
                 direction = 2;
             } else if (topLeftCollide && topRightCollide && botLeftCollide && botRightCollide)
             {
-                direction = 2;
+                direction = 0;
+                collides = 0;
             }
             
             fireball.transform.rotation = Quaternion.identity;           

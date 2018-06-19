@@ -34,6 +34,16 @@ namespace redwing
             // wow all 4 primary effects in two neat little functions.
             ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
             ModHooks.Instance.DashVectorHook += fireballsAndTrail;
+            ModHooks.Instance.DashPressedHook += setTrailCooldown;
+        }
+
+        private void setTrailCooldown()
+        {
+            if (ftTime <= 0.0)
+            {
+                useFT = true;
+            }
+            ftTime = HeroController.instance.SHADOW_DASH_COOLDOWN;
         }
 
         private Vector2 fireballsAndTrail(Vector2 change)
@@ -49,12 +59,12 @@ namespace redwing
             }
             
             // ReSharper disable once InvertIf This looks really dumb
-            if (ftTime <= 0.0)
+            if (useFT)
             {
                 currentTrailSprite = redwing_flame_gen.rng.Next(0, fireTrailTextures.Length - 1);
                 netTrailDistance = 0;
-                ftTime = HeroController.instance.SHADOW_DASH_COOLDOWN;
                 spawnFireTrail(change);
+                useFT = false;
             }
             
             return change;
@@ -153,6 +163,7 @@ namespace redwing
 
         private const float FS_UPDATE_TIME = 0.2f;
         private float fsLastUpdate = 0f;
+        private bool useFT = false;
         
         //private readonly Rect = new Rect(50, 50, 100, 100);
         
@@ -237,10 +248,12 @@ namespace redwing
             float angle = (float) redwing_flame_gen.getNearestAngel((int) (delta.x * 100), (int) (delta.y * 100), 0, 0);
 
             GameObject trail = new GameObject("redwingFireTrail", typeof(redwing_trail_behavior),
-                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer), typeof(DebugColliders));
+                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer));
 
             GameObject trailMemeSpawner = new GameObject("redwingFireTrailSpawner");
-            trailMemeSpawner.transform.localPosition = voidKnight.transform.position;
+            Vector3 voidKnightPos = voidKnight.transform.position;
+            voidKnightPos.y -= 0.4f;
+            trailMemeSpawner.transform.localPosition = voidKnightPos;
 
             trail.transform.parent = trailMemeSpawner.transform;
             trail.transform.localPosition = Vector3.zero;
@@ -252,9 +265,9 @@ namespace redwing
 
             redwing_trail_behavior meme = trail.GetComponent<redwing_trail_behavior>();
 
-            meme.dashVector = delta;
             meme.drawEm = trail.GetComponent<SpriteRenderer>();
             meme.spriteUsed = fireTrailTextures[currentTrailSprite];
+            meme.voidKnightCollider = voidKnight.GetComponent<BoxCollider2D>();
             
             trailMemeSpawner.SetActive(true);
             trail.SetActive(true);

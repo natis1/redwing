@@ -254,7 +254,7 @@ namespace redwing
             log("found enemy list. there are " + enemyList.Count + " enemies");
             GameObject result = null;
             float num = 99999f;
-            if (enemyList.Count <= 0) return result;
+            if (enemyList.Count <= 0) return null;
             
             for (int i = enemyList.Count - 1; i > -1; i--)
             {

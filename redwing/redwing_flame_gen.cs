@@ -59,7 +59,7 @@ namespace redwing
         public const int FBTEXTURE_HEIGHT = 150;
 
         public const int FTTEXTURE_WIDTH = 1800;
-        public const int FTTEXTURE_HEIGHT = 200;
+        public const int FTTEXTURE_HEIGHT = 150;
 
         public const int FPTEXTURE_WIDTH = 150;
         public const int FPTEXTURE_HEIGHT = 1080;

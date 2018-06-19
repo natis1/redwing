@@ -105,7 +105,9 @@ namespace redwing
             }
             fireballSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_fireball_spawner_behavior));
             Vector3 fbSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
+            fbSpawnPos.y += 0.4f;
             fireballSpawn.transform.position = fbSpawnPos;
+            
             fireballSpawn.layer = 31;
 
             fireballSpawn.SetActive(true);
@@ -138,7 +140,6 @@ namespace redwing
                 fireballPivotGOs[i].SetActive(true);
                 fireballsGo[i].SetActive(true);
             }
-            log("Spawned in fireballs");
             
         }
 
@@ -194,8 +195,6 @@ namespace redwing
             }
 
             behavior.selfTranform.position = selfPos;
-
-            //fireballsGo[i].transform.localPosition = ;
             
             behavior.selfPosition = selfPos;
             behavior.yVelocity = 30f;
@@ -222,11 +221,7 @@ namespace redwing
         private static void setupFireballPhysics(Rigidbody2D physics)
         {
             physics.isKinematic = true;
-            physics.gravityScale = 0f; // we in space
-            log("Fireball physics name is " + physics.transform.name);
-            //physics.transform.name = "meme";
-            //physics.angularVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
-
+            physics.gravityScale = 0f;
         }
 
         private static void log(string str)

@@ -1,33 +1,41 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace redwing
 {
     public class redwing_trail_behavior : MonoBehaviour
     {
-        private const float LIFESPAN = 3f;
+        private const float LIFESPAN = 1.2f;
+        private const float DAMAGEPERIOD = 0.2f;
+        private const int SECONDARYDAMAGETIMES = 5;
 
         // woah... that's strong. especially when combined with the blackmoth dash.
         private const int TRAIL_DAMAGE = 15;
+        private const int TRAIL_SUSTAIN_DMG = 5;
 
         public SpriteRenderer drawEm;
         public Texture2D spriteUsed;
-        public Vector2 dashVector;
         private bool stopAnimation;
-        
+        public BoxCollider2D voidKnightCollider;
         public List<Collider2D> enteredColliders;
+
+        private Vector2 initPosition;
 
         public void Start()
         {
             enteredColliders = new List<Collider2D>();
             StartCoroutine(playAnimation());
             StartCoroutine(dashAnimation());
+            StartCoroutine(secondaryAttacks());
         }
 
         private IEnumerator dashAnimation()
         {
+            initPosition = voidKnightCollider.gameObject.transform.localPosition;
+            
             yield return null;
             int maxDashLength = spriteUsed.width;
             int currentDashLength = 0;
@@ -37,7 +45,11 @@ namespace redwing
             while ( (HeroController.instance.cState.dashing || HeroController.instance.cState.shadowDashing ||
                    HeroController.instance.cState.backDashing) && currentDashLength < maxDashLength && !stopAnimation)
             {
-                estimatedPixelsMoved += dashVector.magnitude * Time.deltaTime * pixelsPerUnit;
+                Vector2 currentPosition = voidKnightCollider.gameObject.transform.localPosition;
+                Vector2 deltaPosition = currentPosition - initPosition;
+                
+                //log($@"currentPos is {currentPosition} and init position is {initPosition}");
+                estimatedPixelsMoved += deltaPosition.magnitude * pixelsPerUnit;
                 
                 currentDashLength = (int) estimatedPixelsMoved;
                 Rect spriteRect = new Rect(0, 0, currentDashLength, spriteUsed.height);
@@ -45,10 +57,12 @@ namespace redwing
 
                 Vector2 cachedColliderSize = cachedCollider.size;
                 cachedColliderSize.x = estimatedPixelsMoved / pixelsPerUnit;
-                cachedColliderSize.y = drawEm.size.y * 0.7f;
+                cachedColliderSize.y = voidKnightCollider.size.y;
+                
                 cachedCollider.size = cachedColliderSize;
                 cachedCollider.offset = new Vector2(cachedColliderSize.x / 2, 0);
-                
+
+                initPosition = currentPosition;
                 yield return null;
             }
             if (stopAnimation)
@@ -71,7 +85,7 @@ namespace redwing
             while (currentTime < LIFESPAN)
             {
                 currentTime += Time.unscaledDeltaTime;
-                cachedColor.a = (float) ((0.2f + LIFESPAN - currentTime) / LIFESPAN);
+                cachedColor.a = (float) ((LIFESPAN - currentTime) / LIFESPAN);
                 drawEm.color = cachedColor;
                 yield return null;
             }
@@ -79,19 +93,87 @@ namespace redwing
             Destroy(this.gameObject);
         }
         
+        private IEnumerator secondaryAttacks()
+        {
+            yield return null;
+            int secDamages = 0;
+            while (secDamages < SECONDARYDAMAGETIMES)
+            {
+                secondaryDamage();
+                secDamages++;
+                yield return new WaitForSeconds(DAMAGEPERIOD);
+            }
+        }
+
+        private void secondaryDamage()
+        {
+            log("removing dead enemies from colliders");
+            
+            for (int index = enteredColliders.Count - 1; index >= 0; index--)
+            {
+                Collider2D enteredCollider = enteredColliders[index];
+                if ((UnityEngine.Object) enteredCollider == (UnityEngine.Object) null || !enteredCollider.isActiveAndEnabled)
+                    enteredColliders.RemoveAt(index);
+            }
+            
+            log("dealing secondary dmg to " + enteredColliders.Count + " enemies");
+            
+            
+            
+            foreach (Collider2D collider in enteredColliders.ToList())
+            {
+
+                GameObject target = collider.gameObject;
+                log("Doing primary pillar damage to target with name " + target.name);
+
+                FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
+                
+                // first hit counts as a spell because we want it to stagger.
+                HitTaker.Hit(target, new HitInstance
+                {
+                    Source = base.gameObject,
+                    AttackType = AttackTypes.Generic,
+                    CircleDirection = false,
+                    DamageDealt = TRAIL_SUSTAIN_DMG,
+                    Direction = 0f,
+                    IgnoreInvulnerable = true,
+                    MagnitudeMultiplier = 1f,
+                    MoveAngle = 0f,
+                    MoveDirection = false,
+                    Multiplier = 1f,
+                    SpecialType = SpecialTypes.None,
+                    IsExtraDamage = false
+                }, 3);
+            }
+            
+        }
+        
         
         private void OnTriggerEnter2D(Collider2D collision)
         {
             int layer = collision.gameObject.layer;
-            if (layer == 8)
+            if (layer != 11) return;
+
+            if (this.enteredColliders.Contains(collision)) return;
+            
+            enteredColliders.Add(collision);
+            burnThatMotherTrucker(collision.gameObject);
+        }
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            int layer = other.gameObject.layer;
+            if (layer != 11) return;
+
+            try
             {
-                stopAnimation = true;
+                enteredColliders.Remove(other);
+            }
+            catch (Exception e)
+            {
+                log("failed to remove collider. error " + e);
             }
             
-            
-            if (layer != 11) return;
-            
-            burnThatMotherTrucker(collision.gameObject);
         }
 
         private void burnThatMotherTrucker(GameObject enemy)
