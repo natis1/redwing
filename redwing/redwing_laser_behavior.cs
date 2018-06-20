@@ -7,20 +7,21 @@ namespace redwing
 	public class redwing_laser_spawner_behavior : MonoBehaviour
 	{
 		private const float lifespan = 0.7f;
-
+		public static AudioClip laserFX;
+		
 		public void Start()
 		{
 			StartCoroutine(despawn());
+			AudioSource a = gameObject.GetComponent<AudioSource>();
+			a.clip = laserFX;
+			a.volume = (GameManager.instance.gameSettings.masterVolume *
+			            GameManager.instance.gameSettings.soundVolume * 0.01f);
+			a.Play();
 		}
 
 		private IEnumerator despawn()
 		{
-			float currentTime = 0f;
-			while (currentTime < lifespan)
-			{
-				yield return null;
-				currentTime += Time.unscaledDeltaTime;
-			}
+			yield return new WaitForSecondsRealtime(lifespan);
 			Modding.Logger.Log("[REDWING] Despawning laser spawner because time ran out");
 			Destroy(this.gameObject);
 		}

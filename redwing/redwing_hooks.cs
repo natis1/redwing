@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GlobalEnums;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using ModCommon;
@@ -35,6 +36,12 @@ namespace redwing
             ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
             ModHooks.Instance.DashVectorHook += fireballsAndTrail;
             ModHooks.Instance.DashPressedHook += setTrailCooldown;
+
+            if (UIManager.instance.uiState == UIState.PAUSED)
+            {
+                
+            }
+            //GameManager.instance.gameSettings.masterVolume
         }
 
         private void setTrailCooldown()
@@ -72,16 +79,10 @@ namespace redwing
         
 
 
-        private IEnumerator createFlameShield()
+        private void createFlameShield()
         {
-            while (voidKnight == null)
-            {
-                yield return null;
-            }
-
             
-            
-            flameShieldObj = new GameObject("redwingFlameShield", typeof(SpriteRenderer));
+            flameShieldObj = new GameObject("redwingFlameShield", typeof(SpriteRenderer), typeof(AudioSource));
             currentFlameShieldTexture = 0;
             flameShieldSprite = flameShieldObj.GetComponent<SpriteRenderer>();
             flameShieldObj.transform.parent = voidKnight.transform;
@@ -91,6 +92,10 @@ namespace redwing
             flameShieldSprite.sprite = Sprite.Create(flameShieldTextures[currentFlameShieldTexture],
                 new Rect(0, 0, redwing_flame_gen.FSHIELDTEXTURE_WIDTH, redwing_flame_gen.FSHIELDTEXTURE_HEIGHT),
                 new Vector2(0.5f, 0.5f));
+
+            flameShieldAudio = flameShieldObj.GetComponent<AudioSource>();
+            flameShieldAudio.clip = shieldSoundEffect;
+            flameShieldAudio.loop = true;
         }
 
         private int flameShieldAndLaser(ref int hazardtype, int damage)
@@ -108,6 +113,8 @@ namespace redwing
                 log("Shielding one damage");
                 fsCharge = FS_RECHARGE;
                 invulnTime = IFRAMES;
+                //flameShieldAudio.Stop();
+                playFSSound = true;
                 damage--;
             }
             
@@ -134,8 +141,12 @@ namespace redwing
 
         public static Texture2D[] flameShieldTextures;
         public static Texture2D[] fireTrailTextures;
+        public static AudioClip shieldSoundEffect;
+        public static AudioClip fireTrailSoundEffect;
+            
         private GameObject flameShieldObj;
         private SpriteRenderer flameShieldSprite;
+        private AudioSource flameShieldAudio;
         private int currentFlameShieldTexture;
 
         private GameObject flamePillarDetect;
@@ -164,6 +175,7 @@ namespace redwing
         private const float FS_UPDATE_TIME = 0.2f;
         private float fsLastUpdate = 0f;
         private bool useFT = false;
+        private bool playFSSound = true;
         
         //private readonly Rect = new Rect(50, 50, 100, 100);
         
@@ -189,11 +201,27 @@ namespace redwing
             if (fsCharge <= 0.0)
             {
                 alpha = 1.0f;
+                if (playFSSound && UIManager.instance.uiState == UIState.PLAYING)
+                {
+                    log("current sound fx volume is " + GameManager.instance.gameSettings.masterVolume *
+                        GameManager.instance.gameSettings.soundVolume);
+                    flameShieldAudio.volume = (GameManager.instance.gameSettings.masterVolume *
+                                               GameManager.instance.gameSettings.soundVolume * 0.01f);
+                    // make sound less annoying before you play it or maybe make it not loop
+                    //flameShieldAudio.Play();
+                    playFSSound = false;
+                } else if (playFSSound == false && UIManager.instance.uiState != UIState.PLAYING)
+                {
+                    //flameShieldAudio.Stop();
+                    playFSSound = true;
+                }
             }
             else
             {
                 alpha = (float)( 0.5 * (FS_RECHARGE - fsCharge) / FS_RECHARGE );
             }
+
+            
 
             c.a = alpha;
             
@@ -248,7 +276,7 @@ namespace redwing
             float angle = (float) redwing_flame_gen.getNearestAngel((int) (delta.x * 100), (int) (delta.y * 100), 0, 0);
 
             GameObject trail = new GameObject("redwingFireTrail", typeof(redwing_trail_behavior),
-                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer));
+                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer), typeof(AudioSource));
 
             GameObject trailMemeSpawner = new GameObject("redwingFireTrailSpawner");
             Vector3 voidKnightPos = voidKnight.transform.position;
@@ -268,6 +296,9 @@ namespace redwing
             meme.drawEm = trail.GetComponent<SpriteRenderer>();
             meme.spriteUsed = fireTrailTextures[currentTrailSprite];
             meme.voidKnightCollider = voidKnight.GetComponent<BoxCollider2D>();
+            meme.cachedAudio = trail.GetComponent<AudioSource>();
+            meme.cachedAudio.clip = fireTrailSoundEffect;
+            
             
             trailMemeSpawner.SetActive(true);
             trail.SetActive(true);
@@ -356,8 +387,8 @@ namespace redwing
                     log("Found sharpshadow");
                 }
             
-            StartCoroutine(setupFlamePillar());
-            StartCoroutine(createFlameShield());
+            setupFlamePillar();
+            createFlameShield();
         }
         
         private GameObject fireSoul(GameObject go, Fsm fsm)
@@ -374,13 +405,10 @@ namespace redwing
             return go;
         }
 
-        private IEnumerator setupFlamePillar()
+        private void setupFlamePillar()
         {
             log("start flame pillar setup");
-            while (voidKnightSpellControl == null)
-            {
-                yield return null;
-            }
+            
             
             // lul... grimm enemy range.
             flamePillarDetect = new GameObject("redwingFlamePillarDetect",
@@ -409,14 +437,17 @@ namespace redwing
             //GrimmEnemyRange fpGrimmRange = flamePillarDetect.GetComponent<GrimmEnemyRange>();
             //fpGrimmRange
             
-            CallMethod firePillarOnRecover = new CallMethod();
+            
             try
             {
-                firePillarOnRecover.behaviour = flamePillarDetect.GetComponent<redwing_pillar_detect_behavior>();
-                firePillarOnRecover.methodName = "spawnFirePillar";
-                firePillarOnRecover.parameters = new FsmVar[0];
-                firePillarOnRecover.everyFrame = false;
-                
+                CallMethod firePillarOnRecover = new CallMethod
+                {
+                    behaviour = flamePillarDetect.GetComponent<redwing_pillar_detect_behavior>(),
+                    methodName = "spawnFirePillar",
+                    parameters = new FsmVar[0],
+                    everyFrame = false
+                };
+
                 voidKnightSpellControl.getState("Focus Completed").addAction(firePillarOnRecover);
             } catch (Exception e)
             {
@@ -424,6 +455,47 @@ namespace redwing
             }
             log("got to end of FP method");
         }
+        
+        /*
+        private HitInstance overrideBlackmothDamage(Fsm hitter, HitInstance hit)
+        {
+            //LogDebug($@"Creating HitInstance for {hitter.Owner}");
+
+            int nailDamage = 5 + PlayerData.instance.GetInt("nailSmithUpgrades") * 4;
+            float multiplier = 1;
+            if (PlayerData.instance.GetBool("hasShadowDash"))
+            {
+                multiplier *= 2;
+            }
+            if (PlayerData.instance.GetBool("equippedCharm_25"))
+            {
+                multiplier *= 1.5f;
+            }
+            if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
+            {
+                multiplier *= 1.75f;
+            }
+            if (sharpShadow != null && hitter.GameObject == sharpShadow)
+            {
+                LogDebug($@"Setting damage for {hitter.GameObject.name}");
+                hit.DamageDealt = dashDamage;
+                hit.AttackType = 0;
+                hit.Multiplier = multiplier;
+                hit.Direction = HeroController.instance.cState.facingRight ? 0 : 180;
+                hit.MagnitudeMultiplier = PlayerData.instance.GetBool("equippedCharm_15") ? 2f : 0f;
+            }
+            else if (hitter.GameObject.name.Contains("Slash"))
+            {
+                LogDebug($@"Setting damage for {hitter.GameObject.name}");
+                hit.DamageDealt = 1;
+            }
+            else if (hitter.GameObject.name == superDash.gameObject.name && PlayerData.instance.GetBool("defeatedNightmareGrimm"))
+            {
+                LogDebug($@"Setting damage for {hitter.GameObject.name}");
+                hit.DamageDealt = dashDamage;
+            }
+            return hit;
+        }*/
         
         
         

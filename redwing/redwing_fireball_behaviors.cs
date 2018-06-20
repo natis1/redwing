@@ -62,6 +62,10 @@ namespace redwing
         private bool isDoingHitboxStuff;
         private bool stopAppear;
 
+        public static AudioClip fireballSissle;
+        public static AudioClip fireballImpact;
+        public AudioSource cachedAudioPlayer;
+
         public void Start()
         {
             StartCoroutine(despawn());
@@ -154,6 +158,8 @@ namespace redwing
         private IEnumerator despawn()
         {
             despawnBall = true;
+            
+            
             yield return new WaitForSeconds(lifespan);
 
             if (!despawnBall) yield break;
@@ -198,6 +204,11 @@ namespace redwing
                 {
                     fireballDmg = 0;
                     doPhysics = false;
+                    cachedAudioPlayer.clip = fireballImpact;
+                    cachedAudioPlayer.volume = (GameManager.instance.gameSettings.masterVolume *
+                                                GameManager.instance.gameSettings.soundVolume * 0.01f * 0.3f);
+                    cachedAudioPlayer.loop = false;
+                    cachedAudioPlayer.Play();
                     ballExplode();
                 }
 
@@ -205,6 +216,13 @@ namespace redwing
             
             
             if (targetLayer != 8) return;
+            
+            
+            cachedAudioPlayer.clip = fireballSissle;
+            cachedAudioPlayer.volume = (GameManager.instance.gameSettings.masterVolume *
+                                        GameManager.instance.gameSettings.soundVolume * 0.01f * 0.12f);
+            cachedAudioPlayer.loop = false;
+            cachedAudioPlayer.Play();
             
             log("Hit a layer 8 object with on trigger enter. obj name is " + hitbox.name);
             

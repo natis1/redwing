@@ -16,8 +16,7 @@ namespace redwing
         public static Texture2D[] fireTrails;
         public static Texture2D[] firePillars;
         public static Texture2D[] fireLasers;
-        public static AudioClip[] soundFxClip;
-
+        
         public GameObject voidKnight;
         
         // ReSharper disable once ConvertToConstant.Global
@@ -53,7 +52,8 @@ namespace redwing
                 return;
             }
             
-            laserSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_laser_spawner_behavior));
+            laserSpawn = new GameObject("redwingFireballSpawner", typeof(redwing_laser_spawner_behavior),
+                typeof(AudioSource));
             Vector3 laserSpawnPos = voidKnight.GetComponent<BoxCollider2D>().bounds.center;
             laserSpawn.transform.position = laserSpawnPos;
             // Why? Because layers 20, 9, 26, and 31 are explicitly ignored by the game
@@ -123,7 +123,7 @@ namespace redwing
                 
                 fireballPivotGOs[i].layer = 0;
                 
-                fireballsGo[i] = new GameObject("redwingFB" + i, typeof(SpriteRenderer));
+                fireballsGo[i] = new GameObject("redwingFB" + i, typeof(SpriteRenderer), typeof(AudioSource));
                 fireballsGo[i].transform.parent = fireballPivotGOs[i].transform;
                 //fireballsGo[i].transform.position = Vector3.zero;
                 fireballsGo[i].transform.localPosition = Vector3.zero;
@@ -206,6 +206,8 @@ namespace redwing
             behavior.fireballMagmaFireballs = fireballMagmaFireballs;
             behavior.fireballMagmaFireballHeight = redwing_flame_gen.FBMBTEXTURE_HEIGHT;
             behavior.fireballMagmaFireballWidth = redwing_flame_gen.FBMBTEXTURE_WIDTH;
+
+            behavior.cachedAudioPlayer = fireballsGo[i].GetComponent<AudioSource>();
 
         }
 

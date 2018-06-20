@@ -24,8 +24,18 @@ namespace redwing
         private readonly Texture2D[] fireShields = new Texture2D[20];
         
         
-        private readonly AudioClip[] soundFxClip = new AudioClip[3];
         private const int TESTING_CLIP = 2;
+
+        private AudioClip fireballHitSoundFX;
+        private AudioClip laserCastSoundFX;
+        private AudioClip shieldWavySoundFX;
+        private AudioClip fireTrailSoundFX;
+        private AudioClip sizzleSoundFX;
+
+        // What could this be for?
+        private AudioClip sirenSoundFx;
+        
+        
         private int boopTimer;
 
 
@@ -130,7 +140,12 @@ namespace redwing
             redwing_hooks.flameShieldTextures = fireShields;
             redwing_hooks.fireTrailTextures = fireTrails;
 
-            redwing_game_objects.soundFxClip = soundFxClip;
+            redwing_fireball_behavior.fireballImpact = fireballHitSoundFX;
+            redwing_fireball_behavior.fireballSissle = sizzleSoundFX;
+            redwing_laser_spawner_behavior.laserFX = laserCastSoundFX;
+            redwing_hooks.shieldSoundEffect = shieldWavySoundFX;
+            redwing_hooks.fireTrailSoundEffect = fireTrailSoundFX;
+            //redwing_game_objects.soundFxClip = soundFxClip;
 
         }
 
@@ -139,15 +154,47 @@ namespace redwing
 
         private void generateSoundEffects()
         {
-            soundFxClip[0] = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
-            soundFxClip[0].SetData(generateFbSound((int)(AUDIO_SAMPLE_HZ * 1.0) + 30000), 0);
+            fireballHitSoundFX = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
+            fireballHitSoundFX.SetData(generateFbSound((int)(AUDIO_SAMPLE_HZ * 1.0) + 30000), 0);
 
-            soundFxClip[1] = AudioClip.Create("laser1", AUDIO_SAMPLE_HZ * 10, 1, AUDIO_SAMPLE_HZ, false);
-            soundFxClip[1].SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 10), 0);
+            laserCastSoundFX = AudioClip.Create("laser1", AUDIO_SAMPLE_HZ * 1, 1, AUDIO_SAMPLE_HZ, false);
+            laserCastSoundFX.SetData(generateLaserSound(AUDIO_SAMPLE_HZ * 1), 0);
 
-            soundFxClip[2] = AudioClip.Create("shieldwavy", AUDIO_SAMPLE_HZ * 3, 1, AUDIO_SAMPLE_HZ, false);
-            soundFxClip[2].SetData(generateShieldSound(AUDIO_SAMPLE_HZ * 3), 0);
+            shieldWavySoundFX = AudioClip.Create("shieldwavy", AUDIO_SAMPLE_HZ * 3, 1, AUDIO_SAMPLE_HZ, false);
+            shieldWavySoundFX.SetData(generateShieldSound(AUDIO_SAMPLE_HZ * 3), 0);
+            
+            fireTrailSoundFX = AudioClip.Create("firetrail", AUDIO_SAMPLE_HZ * 2, 1, AUDIO_SAMPLE_HZ, false);
+            fireTrailSoundFX.SetData(generateFireTrailSound(AUDIO_SAMPLE_HZ * 2), 0);
+            
+            sizzleSoundFX = AudioClip.Create("sizzle", (int) (AUDIO_SAMPLE_HZ * 1.5), 1, AUDIO_SAMPLE_HZ, false);
+            sizzleSoundFX.SetData(generateSizzleSound((int) (AUDIO_SAMPLE_HZ * 1.5)), 0);
 
+        }
+
+        private float[] generateSizzleSound(int length)
+        {
+            float[] fx = new float[length];
+            
+            fx = generateWhiteNoise(0.2, 0, fx.Length, fx);
+            
+            fx = speedUpEffect(1.5, fx);
+            fx = fadeAudio(2.0, 0, AUDIO_SAMPLE_HZ / 4, fx);
+            fx = fadeAudio(0.0, AUDIO_SAMPLE_HZ / 2, length - AUDIO_SAMPLE_HZ / 2, fx);
+            
+            return fx;
+        }
+
+        private float[] generateFireTrailSound(int length)
+        {
+            float[] fx = new float[length];
+
+            fx = generateWhiteNoise(0.2, 0, fx.Length, fx);
+            fx = slowDownEffect(0.6666, fx);
+            
+            fx = fadeAudio(2.0, 0, AUDIO_SAMPLE_HZ / 4, fx);
+            fx = fadeAudio(0.0, AUDIO_SAMPLE_HZ / 2, length - AUDIO_SAMPLE_HZ, fx);
+            
+            return fx;
         }
 
         private float[] generateShieldSound(int length)
@@ -267,25 +314,21 @@ namespace redwing
         {
             try
             {
-                //fx = generateNoise(0.9, 100.0, 10000, 15.0, fx);
-                //fx = generatePinkNoise(0.7f, fx);
-                //fx = generateNoiseAtHZ(1.2, 160, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(1.0, 100, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(1.5, 50, fx, 0, fx.Length);
-                fx = generateWhiteNoise(6.0, 0, fx.Length, fx);
+                fx = generateWhiteNoise(4.0, 0, fx.Length, fx);
+                fx = fadeAudio(2.0, 0, fx.Length / 4, fx);
+                fx = lowPassFilter(800, fx);
+                fx = lowPassFilter(800, fx);
+                fx = highPassFilter(600, fx);
+                fx = highPassFilter(600, fx);
 
-                fx = generateSawtooth(3.0, 4000, fx, 0, fx.Length);
-                fx = generateSawtooth(2.0, 2000, fx, 0, fx.Length);
-                fx = generateSawtooth(1.0, 1000, fx, 0, fx.Length);
-                fx = generateSawtooth(4.0, 250, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(2.0, 4000, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(1.0, 2000, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(2.0, 1000, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(1.0, 500, fx, 0, fx.Length);
-                //fx = generateNoiseAtHZ(2.0, 250, fx, 0, fx.Length);
-
+                fx = slowDownEffect(0.666, fx);
+                
+                //fx = generateWhiteNoise(0.1, 0, fx.Length, fx);
+                
+                fx = fadeAudio(0.0, fx.Length/4 , fx.Length, fx);
+                
                 fx = normalizeVolume(fx);
-                log("Made fireball sound without error");
+                log("Made laser sound without error.");
 
                 return fx;
             }
@@ -311,59 +354,30 @@ namespace redwing
         }
 
 
-        // code mostly stolen from here: https://www.codeproject.com/tips/1092012/a-butterworth-filter-in-csharp
-        // which is using a very permissive license that I can modify.
-        // how the fuck does this work.
+        // how does this work.
         private float[] lowPassFilter(double frequency, float[] fx)
         {
-
-            //double Samplingrate = 1 / (double)AUDIO_SAMPLE_HZ;
-            long dF2 = fx.Length - 1;        // The data range is set with dF2
-            float[] dat2 = new float[dF2 + 4]; // Array with 3 extra points front and back
-            float[] data = fx; // Ptr., changes passed data
-
-            // Copy indata to Dat2
-            for (long r = 0; r < dF2; r++)
+            filter_butterworth a =
+                new filter_butterworth((float)frequency, AUDIO_SAMPLE_HZ, filter_butterworth.pass_type.Lowpass, 1.0f);
+            for (int i = 0; i < fx.Length; i++)
             {
-                dat2[2 + r] = fx[r];
-            }
-            dat2[1] = dat2[0] = fx[0];
-            dat2[dF2 + 3] = dat2[dF2 + 2] = fx[dF2];
-
-            double wc = Math.Tan(frequency * Math.PI / ((double)AUDIO_SAMPLE_HZ) );
-            double k1 = 1.414213562 * wc; // Sqrt(2) * wc
-            double k2 = wc * wc;
-            double a = k2 / (1 + k1 + k2);
-            double b = 2 * a;
-            double c = a;
-            double k3 = b / k2;
-            double d = -2 * a + k3;
-            double e = 1 - (2 * a) - k3;
-
-            // RECURSIVE TRIGGERS - ENABLE filter is performed (first, last points constant)
-            float[] datYt = new float[dF2 + 4];
-            datYt[1] = datYt[0] = fx[0];
-            for (long s = 2; s < dF2 + 2; s++)
-            {
-                datYt[s] = (float)(a * dat2[s] + b * dat2[s - 1] + c * dat2[s - 2]
-                           + d * datYt[s - 1] + e * datYt[s - 2]);
-            }
-            datYt[dF2 + 3] = datYt[dF2 + 2] = datYt[dF2 + 1];
-
-            // FORWARD filter
-            float[] datZt = new float[dF2 + 2];
-            datZt[dF2] = datYt[dF2 + 2];
-            datZt[dF2 + 1] = datYt[dF2 + 3];
-            for (long t = -dF2 + 1; t <= 0; t++)
-            {
-                datZt[-t] = (float)(a * datYt[-t + 2] + b * datYt[-t + 3] + c * datYt[-t + 4]
-                            + d * datZt[-t + 1] + e * datZt[-t + 2]);
+                a.update(fx[i]);
+                fx[i] = a.value;
             }
 
-            // Calculated points copied for return
-            for (long p = 0; p < dF2; p++)
+            return fx;
+        }
+        
+        // this is really stupid and can't possibly work x2
+        private float[] highPassFilter(double frequency, float[] fx)
+        {
+
+            filter_butterworth a =
+                new filter_butterworth((float)frequency, AUDIO_SAMPLE_HZ, filter_butterworth.pass_type.Highpass, 1.0f);
+            for (int i = 0; i < fx.Length; i++)
             {
-                data[p] = datZt[p];
+                a.update(fx[i]);
+                fx[i] = a.value;
             }
 
             return fx;
@@ -399,6 +413,66 @@ namespace redwing
             }
 
             return speededFx;
+        }
+
+        private float[] generateSirenSound(double volume, double minHz, double maxHz, int startTime, int maxTime, double modulateTime,
+            float[] fx)
+        {
+            return generateSirenSound(volume, minHz, maxHz, startTime, maxTime, modulateTime, rng.NextDouble() * Math.PI * 2.0, fx);
+        }
+
+        private float[] generateSirenSound(double volume, double minHz, double maxHz, int startTime, int maxTime, double modulateTime,
+            double startingPoint, float[] fx)
+        {
+            
+            
+            // Basically because the difference between 100 and 200 Hz should be
+            // the same as the difference between 1,000 and 2,000 Hz. This
+            // is because of how ears work, basically.
+            double minHzForComparison = Math.Log(minHz);
+            double maxHzForComparison = Math.Log(maxHz);
+            double modulateInterval = (modulateTime * AUDIO_SAMPLE_HZ) / (Math.PI * 2.0);
+
+            double randomPointOnSin = rng.NextDouble() * 2.0 * Math.PI;
+            
+            for (int i = startTime; i < maxTime; i++)
+            {
+
+                double frequencyPos = Math.Sin(startingPoint + ((double) ((i - startTime) / modulateInterval)));
+                frequencyPos = (frequencyPos + 1.0f) / 2.0f;
+                double freqForComparison =
+                    ((1.0f - frequencyPos) * minHzForComparison + frequencyPos * maxHzForComparison);
+                double actualFreq = Math.Exp(freqForComparison);
+                double sinePitchTime = (AUDIO_SAMPLE_HZ / actualFreq) / (2.0 * Math.PI);
+                
+                // Will this work? Who knows.
+                fx[i] += (float)(volume * (Math.Sin( randomPointOnSin + ( ((double) i) / sinePitchTime) )));
+            }
+            return fx;
+        }
+        
+
+        private float[] slowDownEffect(double speed, float[] fx)
+        {
+            float[] slowedFx = new float[fx.Length];
+            int positionRoundedDown = 0;
+            
+            for (int i = 0; i < fx.Length; i++)
+            {
+                double realPosition = i * speed;
+                positionRoundedDown = (int)realPosition;
+                double weighting = realPosition % 1.0;
+                if (positionRoundedDown + 1 < fx.Length)
+                {
+                    slowedFx[i] = (float)(((1.0 - weighting) * fx[positionRoundedDown]) + (weighting * fx[positionRoundedDown + 1]));
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return slowedFx;
         }
 
 
@@ -1315,6 +1389,83 @@ namespace redwing
         {
             if (str == null) throw new ArgumentNullException(nameof(str));
             Modding.Logger.Log("[Redwing] " + str);
+        }
+    }
+
+
+    public class filter_butterworth
+    {
+        /// <summary>
+        /// rez amount, from sqrt(2) to ~ 0.1
+        /// </summary>
+        private readonly float resonance;
+
+        private readonly float frequency;
+        private readonly int sampleRate;
+        private readonly pass_type passType;
+
+        private readonly float c, a1, a2, a3, b1, b2;
+
+        /// <summary>
+        /// Array of input values, latest are in front
+        /// </summary>
+        private readonly float[] inputHistory = new float[2];
+
+        /// <summary>
+        /// Array of output values, latest are in front
+        /// </summary>
+        private readonly float[] outputHistory = new float[3];
+
+        public filter_butterworth(float frequency, int sampleRate, pass_type passType, float resonance)
+        {
+            this.resonance = resonance;
+            this.frequency = frequency;
+            this.sampleRate = sampleRate;
+            this.passType = passType;
+
+            switch (passType)
+            {
+                case pass_type.Lowpass:
+                    c = 1.0f / (float) Math.Tan(Math.PI * frequency / sampleRate);
+                    a1 = 1.0f / (1.0f + resonance * c + c * c);
+                    a2 = 2f * a1;
+                    a3 = a1;
+                    b1 = 2.0f * (1.0f - c * c) * a1;
+                    b2 = (1.0f - resonance * c + c * c) * a1;
+                    break;
+                case pass_type.Highpass:
+                    c = (float) Math.Tan(Math.PI * frequency / sampleRate);
+                    a1 = 1.0f / (1.0f + resonance * c + c * c);
+                    a2 = -2f * a1;
+                    a3 = a1;
+                    b1 = 2.0f * (c * c - 1.0f) * a1;
+                    b2 = (1.0f - resonance * c + c * c) * a1;
+                    break;
+            }
+        }
+
+        public enum pass_type
+        {
+            Highpass,
+            Lowpass,
+        }
+
+        public void update(float newInput)
+        {
+            float newOutput = a1 * newInput + a2 * this.inputHistory[0] + a3 * this.inputHistory[1] -
+                              b1 * this.outputHistory[0] - b2 * this.outputHistory[1];
+
+            this.inputHistory[1] = this.inputHistory[0];
+            this.inputHistory[0] = newInput;
+
+            this.outputHistory[2] = this.outputHistory[1];
+            this.outputHistory[1] = this.outputHistory[0];
+            this.outputHistory[0] = newOutput;
+        }
+
+        public float value
+        {
+            get { return this.outputHistory[0]; }
         }
     }
 }

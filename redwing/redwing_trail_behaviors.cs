@@ -22,11 +22,17 @@ namespace redwing
         public BoxCollider2D voidKnightCollider;
         public List<Collider2D> enteredColliders;
 
+        public AudioSource cachedAudio;
+
         private Vector2 initPosition;
 
         public void Start()
         {
             enteredColliders = new List<Collider2D>();
+            cachedAudio.loop = false;
+            cachedAudio.volume = (GameManager.instance.gameSettings.masterVolume *
+                                  GameManager.instance.gameSettings.soundVolume * 0.01f * 0.4f);
+            cachedAudio.Play();
             StartCoroutine(playAnimation());
             StartCoroutine(dashAnimation());
             StartCoroutine(secondaryAttacks());

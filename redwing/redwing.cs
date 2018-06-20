@@ -8,7 +8,7 @@ namespace redwing
 {
     public class redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "0.0.6";
+        private const string VERSION = "0.0.7rc1";
         private const int LOAD_ORDER = 90;
 
         // Version detection code originally by Seanpr, used with permission.
