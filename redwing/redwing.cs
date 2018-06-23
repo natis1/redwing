@@ -8,14 +8,32 @@ namespace redwing
 {
     public class redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "0.0.7rc1";
+        private const string VERSION = "0.0.8rc1";
         private const int LOAD_ORDER = 90;
+
+        private bool blackmothExists = false;
 
         // Version detection code originally by Seanpr, used with permission.
         public override string GetVersion()
         {
             string ver = VERSION;
-            const int minApi = 40;
+            const int minApi = 43;
+
+
+            if (blackmothExists)
+            {
+                ver += " (Blackmoth)";
+            }
+            else if (GlobalSettings.useGreymothDashWhenBlackmothMissing)
+            {
+                ver += " (Greymoth)";
+            }
+            else
+            {
+                ver += " (Othermoth?)";
+            }
+            
+            
 
             bool apiTooLow = Convert.ToInt32(ModHooks.Instance.ModVersion.Split('-')[1]) < minApi;
             bool noModCommon = !(from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "ModCommon" select type).Any();
@@ -28,6 +46,35 @@ namespace redwing
 
         public override void Initialize()
         {
+            setupSettings();
+            
+            // report if the user has blackmoth.
+            blackmothExists = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "BlackmothMod" select type).Any();
+
+            redwing_fireball_behavior.fbDamageBase = GlobalSettings.fireballDamageBase;
+            redwing_fireball_behavior.fbDamageScale = GlobalSettings.fireballDamagePerNailLvl;
+            redwing_fireball_behavior.fbmDamageBase = GlobalSettings.fireballMagmaDamageBase;
+            redwing_fireball_behavior.fbmDamageScale = GlobalSettings.fireballMagmaDamagePerNailLvl;
+
+            redwing_hooks.fbCooldown = GlobalSettings.fireballCooldownBase;
+            redwing_hooks.fsRecharge = GlobalSettings.shieldCooldownBase;
+            redwing_hooks.fsReduceOnHit = GlobalSettings.shieldCooldownReductionPerNailHit;
+            redwing_hooks.laserCooldown = GlobalSettings.laserCooldownBase;
+            redwing_hooks.zeroDmgLaser = GlobalSettings.lasersWhenShieldBlocksAllDmg;
+            redwing_hooks.laserDamageBase = GlobalSettings.laserDamageBase;
+            redwing_hooks.laserDamagePerNail = GlobalSettings.laserDamagePerNailLvl;
+
+            redwing_pillar_behavior.damagePriBase = GlobalSettings.pillarDamageBase;
+            redwing_pillar_behavior.damagePriNail = GlobalSettings.pillarDamagePerNailLvl;
+            redwing_pillar_behavior.damageSecBase = GlobalSettings.pillarSecondaryDamageBase;
+            redwing_pillar_behavior.damageSecNail = GlobalSettings.pillarSecondaryDamagePerNailLvl;
+            redwing_pillar_behavior.damageSecondaryTimes = GlobalSettings.pillarSecondaryAttacks;
+
+            redwing_trail_behavior.damagePriBase = GlobalSettings.trailDamageBase;
+            redwing_trail_behavior.damagePriNail = GlobalSettings.trailDamagePerNailLvl;
+            redwing_trail_behavior.damageSecBase = GlobalSettings.trailSecondaryDamageBase;
+            redwing_trail_behavior.damageSecNail = GlobalSettings.trailSecondaryDamagePerNailLvl;
+            
             ModHooks.Instance.AfterSavegameLoadHook += saveGame;
             ModHooks.Instance.NewGameHook += addComponent;
 
@@ -64,10 +111,32 @@ namespace redwing
         private void addComponent()
         {
             log("Adding Redwing to game.");
+            
+            redwing_lore.overrideBlackmothLore = GlobalSettings.overrideBlackmothLore;
 
             try
             {
-                GameManager.instance.gameObject.AddComponent<redwing_greymoth>();
+                if (!blackmothExists && GlobalSettings.useGreymothDashWhenBlackmothMissing)
+                {
+                    GameManager.instance.gameObject.AddComponent<redwing_greymoth>();
+                    // no blackmoth so no need to override it.
+                    redwing_hooks.overrideBlackmothNailDmg = false;
+                    log("Unable to find Blackmoth, loading Greymoth instead.");
+                }
+                else if (blackmothExists)
+                {
+                    log("Found Blackmoth...");
+                    log(GlobalSettings.overrideBlackmothNailDamage
+                        ? "The God of fire and void has arrived."
+                        : "Enter the knight, on flaming wings.");
+
+                    redwing_hooks.overrideBlackmothNailDmg = GlobalSettings.overrideBlackmothNailDamage;
+                }
+                else
+                {
+                    log("Not adding any dash manager. I hope you have one loaded...");
+                }
+
                 GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
                 GameManager.instance.gameObject.AddComponent<redwing_hooks>();
 

@@ -8,13 +8,17 @@ namespace redwing
 {
     public class redwing_trail_behavior : MonoBehaviour
     {
-        private const float LIFESPAN = 1.2f;
-        private const float DAMAGEPERIOD = 0.2f;
+        private const float LIFESPAN = 1.6f;
+        private const float DAMAGEPERIOD = 0.3f;
         private const int SECONDARYDAMAGETIMES = 5;
 
         // woah... that's strong. especially when combined with the blackmoth dash.
-        private const int TRAIL_DAMAGE = 15;
-        private const int TRAIL_SUSTAIN_DMG = 5;
+        public static int damagePriBase;
+        public static int damagePriNail;
+        public static int damageSecBase;
+        public static int damageSecNail;
+        private int cachedPrimaryDmg;
+        private int cachedSecondaryDmg;
 
         public SpriteRenderer drawEm;
         public Texture2D spriteUsed;
@@ -29,6 +33,11 @@ namespace redwing
         public void Start()
         {
             enteredColliders = new List<Collider2D>();
+            
+            cachedPrimaryDmg = damagePriBase + damagePriNail * PlayerData.instance.GetInt("nailSmithUpgrades");
+            cachedSecondaryDmg = damageSecBase + damageSecNail * PlayerData.instance.GetInt("nailSmithUpgrades");
+
+            
             cachedAudio.loop = false;
             cachedAudio.volume = (GameManager.instance.gameSettings.masterVolume *
                                   GameManager.instance.gameSettings.soundVolume * 0.01f * 0.4f);
@@ -112,9 +121,7 @@ namespace redwing
         }
 
         private void secondaryDamage()
-        {
-            log("removing dead enemies from colliders");
-            
+        {            
             for (int index = enteredColliders.Count - 1; index >= 0; index--)
             {
                 Collider2D enteredCollider = enteredColliders[index];
@@ -140,7 +147,7 @@ namespace redwing
                     Source = base.gameObject,
                     AttackType = AttackTypes.Generic,
                     CircleDirection = false,
-                    DamageDealt = TRAIL_SUSTAIN_DMG,
+                    DamageDealt = cachedSecondaryDmg,
                     Direction = 0f,
                     IgnoreInvulnerable = true,
                     MagnitudeMultiplier = 1f,
@@ -190,7 +197,7 @@ namespace redwing
                 Source = base.gameObject,
                 AttackType = AttackTypes.Generic,
                 CircleDirection = false,
-                DamageDealt = TRAIL_DAMAGE,
+                DamageDealt = cachedPrimaryDmg,
                 Direction = 0f,
                 IgnoreInvulnerable = true,
                 MagnitudeMultiplier = 1.0f,
@@ -205,7 +212,7 @@ namespace redwing
         
         private static void log(string str)
         {
-            Modding.Logger.Log("[Greymoth] " + str);
+            Modding.Logger.Log("[Redwing] " + str);
         }
     }
 }

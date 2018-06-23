@@ -19,15 +19,6 @@ namespace redwing
         
         public GameObject voidKnight;
         
-        // ReSharper disable once ConvertToConstant.Global
-        // ReSharper disable once MemberCanBePrivate.Global
-        // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int fireballLength = 150;
-        // ReSharper disable once ConvertToConstant.Global
-        // ReSharper disable once MemberCanBePrivate.Global
-        // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static int fbDamage = 25; 
-
         private const float rotationAmount = (float) (360.0 / 16.0);
         
 
@@ -202,7 +193,6 @@ namespace redwing
                 
             behavior.fireballMagmas = fireballMagmas;
             behavior.doPhysics = true;
-            behavior.fireballDmg = fbDamage;
             behavior.fireballMagmaFireballs = fireballMagmaFireballs;
             behavior.fireballMagmaFireballHeight = redwing_flame_gen.FBMBTEXTURE_HEIGHT;
             behavior.fireballMagmaFireballWidth = redwing_flame_gen.FBMBTEXTURE_WIDTH;
@@ -213,7 +203,7 @@ namespace redwing
 
         private static void setupFireballSprite(SpriteRenderer sprite, int i)
         {
-            Rect r = new Rect(0, 0, fireballLength, fireballLength);
+            Rect r = new Rect(0, 0, redwing_flame_gen.FBTEXTURE_WIDTH, redwing_flame_gen.FBTEXTURE_HEIGHT);
             sprite.sprite = Sprite.Create(fireBalls[i], r, new Vector2(0.5f, 0.5f));
             sprite.enabled = true;
             sprite.color = Color.white;

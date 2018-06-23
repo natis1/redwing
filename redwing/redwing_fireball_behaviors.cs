@@ -41,7 +41,7 @@ namespace redwing
         private const int FIREBALL_WIDTH = 150;
         private const int FIREBALL_HEIGHT = 150;
 
-        public int fireballDmg;
+        private int fireballDmg;
 
         public float maxHeight = 8f;
         public float maxySpeed = 30f;
@@ -62,8 +62,13 @@ namespace redwing
         private bool isDoingHitboxStuff;
         private bool stopAppear;
 
-        public static AudioClip fireballSissle;
+        public static AudioClip fireballSizzle;
         public static AudioClip fireballImpact;
+        public static int fbDamageBase;
+        public static int fbDamageScale;
+        public static int fbmDamageBase;
+        public static int fbmDamageScale;
+        
         public AudioSource cachedAudioPlayer;
 
         public void Start()
@@ -71,6 +76,8 @@ namespace redwing
             StartCoroutine(despawn());
             StartCoroutine(cartoonPhysics());
             StartCoroutine(ballAppear());
+            
+            fireballDmg = fbDamageBase + fbDamageScale * PlayerData.instance.GetInt("nailSmithUpgrades");
         }
 
         private IEnumerator ballAppear()
@@ -218,7 +225,7 @@ namespace redwing
             if (targetLayer != 8) return;
             
             
-            cachedAudioPlayer.clip = fireballSissle;
+            cachedAudioPlayer.clip = fireballSizzle;
             cachedAudioPlayer.volume = (GameManager.instance.gameSettings.masterVolume *
                                         GameManager.instance.gameSettings.soundVolume * 0.01f * 0.12f);
             cachedAudioPlayer.loop = false;
@@ -342,7 +349,7 @@ namespace redwing
             if (collides > 1)
             {
                 StartCoroutine(magmaFadeAnimation(direction));
-                fireballDmg /= 2;
+                fireballDmg = fbmDamageBase + fbmDamageScale * PlayerData.instance.GetInt("nailSmithUpgrades");
             }
             else
             {

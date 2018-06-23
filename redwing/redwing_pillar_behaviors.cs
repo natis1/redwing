@@ -9,9 +9,15 @@ namespace redwing
     public class redwing_pillar_behavior : MonoBehaviour
     {
         private const float LIFESPAN = 1.0f;
-        private const int damagePrimary = 30;
-        private const int damageSecondary = 3;
-        private const int damageSecondaryTimes = 6;
+        public static int damagePriBase;
+        public static int damagePriNail;
+        public static int damageSecBase;
+        public static int damageSecNail;
+        public static int damageSecondaryTimes;
+
+
+        private int cachedPrimaryDmg;
+        private int cachedSecondaryDmg;
         
         
         private void Start()
@@ -19,6 +25,9 @@ namespace redwing
             log("started firepillar");
             enteredColliders = new List<Collider2D>();
 
+            cachedPrimaryDmg = damagePriBase + damagePriNail * PlayerData.instance.GetInt("nailSmithUpgrades");
+            cachedSecondaryDmg = damageSecBase + damageSecNail * PlayerData.instance.GetInt("nailSmithUpgrades");
+            
             StartCoroutine(fadeOut());
             StartCoroutine(destroyPillar());
         }
@@ -79,7 +88,7 @@ namespace redwing
                     Source = base.gameObject,
                     AttackType = AttackTypes.Spell,
                     CircleDirection = false,
-                    DamageDealt = damagePrimary,
+                    DamageDealt = cachedPrimaryDmg,
                     Direction = 0f,
                     IgnoreInvulnerable = true,
                     MagnitudeMultiplier = 1f,
@@ -122,7 +131,7 @@ namespace redwing
                     Source = base.gameObject,
                     AttackType = AttackTypes.Generic,
                     CircleDirection = false,
-                    DamageDealt = damageSecondary,
+                    DamageDealt = cachedSecondaryDmg,
                     Direction = 0f,
                     IgnoreInvulnerable = true,
                     MagnitudeMultiplier = 1f,

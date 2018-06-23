@@ -21,6 +21,14 @@ namespace redwing
         {
             ModHooks.Instance.TakeDamageHook -= flameShieldAndLaser;
             ModHooks.Instance.DashVectorHook -= fireballsAndTrail;
+            ModHooks.Instance.DashPressedHook -= setTrailCooldown;
+            ModHooks.Instance.SlashHitHook -= reduceFSCooldown;
+            
+            if (overrideBlackmothNailDmg)
+            {
+                ModHooks.Instance.HitInstanceHook -= overrideBlackmothDamage;
+            }
+            
             voidKnightSpellControl = null;
             
             if (flameShieldObj != null)
@@ -29,6 +37,7 @@ namespace redwing
         
         public void Start()
         {
+            
             StartCoroutine(getHeroFSMs());
             redwingSpawner = new redwing_game_objects();
             
@@ -36,12 +45,25 @@ namespace redwing
             ModHooks.Instance.TakeDamageHook += flameShieldAndLaser;
             ModHooks.Instance.DashVectorHook += fireballsAndTrail;
             ModHooks.Instance.DashPressedHook += setTrailCooldown;
+            ModHooks.Instance.SlashHitHook += reduceFSCooldown;
+            
+            log("meme");
+            
+            log("Override blackmoth nail damage is set to " + overrideBlackmothNailDmg);
 
-            if (UIManager.instance.uiState == UIState.PAUSED)
+            if (overrideBlackmothNailDmg)
             {
-                
+                ModHooks.Instance.HitInstanceHook += overrideBlackmothDamage;
             }
-            //GameManager.instance.gameSettings.masterVolume
+            
+        }
+
+        private void reduceFSCooldown(Collider2D othercollider, GameObject gameobject)
+        {
+            if (fsCharge >= 0.0)
+            {
+                fsCharge -= fsReduceOnHit;
+            }
         }
 
         private void setTrailCooldown()
@@ -57,11 +79,16 @@ namespace redwing
         {
             
             HeroActions direction = GameManager.instance.inputHandler.inputActions;
-            if (direction.up.IsPressed && !direction.down.IsPressed)
+            if (direction.up.IsPressed && !direction.down.IsPressed && change.y > 0.1f)
             {
                 if (fbTime <= 0.0)
                 {
                     spawnFireballs();
+                    
+                    // Stop fireballs from spawning mid dash.
+                } else if (fbTime <= 0.2)
+                {
+                    fbTime = 0.2;
                 }
             }
             
@@ -111,7 +138,7 @@ namespace redwing
             if (fsCharge <= 0.0 && damage > 0)
             {
                 log("Shielding one damage");
-                fsCharge = FS_RECHARGE;
+                fsCharge = fsRecharge;
                 invulnTime = IFRAMES;
                 //flameShieldAudio.Stop();
                 playFSSound = true;
@@ -120,10 +147,10 @@ namespace redwing
             
             
             // ReSharper disable once InvertIf because patterns man
-            if (laserTime <= 0.0)
+            if (laserTime <= 0.0 && (zeroDmgLaser || damage > 0))
             {
                 log("Doing laser attack");
-                laserTime = LASER_COOLDOWN;
+                laserTime = laserCooldown;
                 invulnTime = IFRAMES;
                 justDidLaserAttack = true;
                 redwingSpawner.addLasers();
@@ -143,6 +170,8 @@ namespace redwing
         public static Texture2D[] fireTrailTextures;
         public static AudioClip shieldSoundEffect;
         public static AudioClip fireTrailSoundEffect;
+
+        public static bool overrideBlackmothNailDmg;
             
         private GameObject flameShieldObj;
         private SpriteRenderer flameShieldSprite;
@@ -158,9 +187,15 @@ namespace redwing
         private double laserTime = 0;
         private double fsCharge = 0;
         private double invulnTime = 0;
-        private const double FB_COOLDOWN = 3.0f;
-        private const double LASER_COOLDOWN = 1.5f;
-        private const double FS_RECHARGE = 10f;
+        
+        
+        public static double fbCooldown;
+        public static double laserCooldown;
+        public static double fsRecharge;
+        public static double fsReduceOnHit;
+        public static bool zeroDmgLaser;
+        
+        
         private const double IFRAMES = 2f;
 
         private int currentTrailSprite = 0;
@@ -168,7 +203,8 @@ namespace redwing
 
         private const float FP_RANGE = 15f;
 
-        private const int laserDamage = 35;
+        public static int laserDamageBase;
+        public static int laserDamagePerNail;
 
         private IEnumerable<Collider2D> allLaserEnemies;
 
@@ -218,7 +254,7 @@ namespace redwing
             }
             else
             {
-                alpha = (float)( 0.5 * (FS_RECHARGE - fsCharge) / FS_RECHARGE );
+                alpha = (float)( 0.5 * (fsRecharge - fsCharge) / fsRecharge );
             }
 
             
@@ -307,7 +343,7 @@ namespace redwing
         private void spawnFireballs()
         {
             redwingSpawner.addFireballs();
-            fbTime = FB_COOLDOWN;
+            fbTime = fbCooldown;
         }
         
         private IEnumerator freezeKnight(float freezeTime)
@@ -351,7 +387,7 @@ namespace redwing
                     Source = base.gameObject,
                     AttackType = AttackTypes.Generic,
                     CircleDirection = false,
-                    DamageDealt = laserDamage,
+                    DamageDealt = laserDamageBase + laserDamagePerNail *PlayerData.instance.GetInt("nailSmithUpgrades"),
                     Direction = 0f,
                     IgnoreInvulnerable = true,
                     MagnitudeMultiplier = 1f,
@@ -456,46 +492,48 @@ namespace redwing
             log("got to end of FP method");
         }
         
-        /*
+        
         private HitInstance overrideBlackmothDamage(Fsm hitter, HitInstance hit)
         {
-            //LogDebug($@"Creating HitInstance for {hitter.Owner}");
-
+            
+            if (!hitter.GameObject.name.Contains("Slash")) return hit;
+            
+            
             int nailDamage = 5 + PlayerData.instance.GetInt("nailSmithUpgrades") * 4;
-            float multiplier = 1;
-            if (PlayerData.instance.GetBool("hasShadowDash"))
-            {
-                multiplier *= 2;
-            }
+            double multiplier = 1;
+            float fsmMultiplier = 1;
             if (PlayerData.instance.GetBool("equippedCharm_25"))
             {
-                multiplier *= 1.5f;
+                multiplier *= 1.5;
             }
             if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
             {
-                multiplier *= 1.75f;
+                fsmMultiplier = 1.75f;
             }
-            if (sharpShadow != null && hitter.GameObject == sharpShadow)
+
+            if (hitter.GameObject.name.Contains("Great"))
             {
-                LogDebug($@"Setting damage for {hitter.GameObject.name}");
-                hit.DamageDealt = dashDamage;
-                hit.AttackType = 0;
-                hit.Multiplier = multiplier;
-                hit.Direction = HeroController.instance.cState.facingRight ? 0 : 180;
-                hit.MagnitudeMultiplier = PlayerData.instance.GetBool("equippedCharm_15") ? 2f : 0f;
+                multiplier = 2.5 * fsmMultiplier;
+                fsmMultiplier = 1;
             }
-            else if (hitter.GameObject.name.Contains("Slash"))
+
+            if (hitter.GameObject.name.Contains("Dash"))
             {
-                LogDebug($@"Setting damage for {hitter.GameObject.name}");
-                hit.DamageDealt = 1;
+                multiplier = 2.5;
+                fsmMultiplier = 1;
             }
-            else if (hitter.GameObject.name == superDash.gameObject.name && PlayerData.instance.GetBool("defeatedNightmareGrimm"))
-            {
-                LogDebug($@"Setting damage for {hitter.GameObject.name}");
-                hit.DamageDealt = dashDamage;
-            }
+            nailDamage = (int) Math.Round( (double)nailDamage * multiplier);
+            log("game wants to do " + hit.DamageDealt + " dmg with multiplier " + hit.Multiplier);
+            hit.DamageDealt = nailDamage;
+            hit.Multiplier = fsmMultiplier;
+            
+            
+            log("damage dealt is  " + nailDamage + " dmg with multiplier " + fsmMultiplier);
+                
+            log("running override for hitter of name " + hitter.GameObject.name);
+            
             return hit;
-        }*/
+        }
         
         
         

@@ -141,7 +141,7 @@ namespace redwing
             redwing_hooks.fireTrailTextures = fireTrails;
 
             redwing_fireball_behavior.fireballImpact = fireballHitSoundFX;
-            redwing_fireball_behavior.fireballSissle = sizzleSoundFX;
+            redwing_fireball_behavior.fireballSizzle = sizzleSoundFX;
             redwing_laser_spawner_behavior.laserFX = laserCastSoundFX;
             redwing_hooks.shieldSoundEffect = shieldWavySoundFX;
             redwing_hooks.fireTrailSoundEffect = fireTrailSoundFX;

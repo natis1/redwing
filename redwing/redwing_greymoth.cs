@@ -2,6 +2,7 @@
 using Modding;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using GlobalEnums;
 
@@ -30,6 +31,8 @@ namespace redwing
         // These bools track player upgrades
         public bool dashRegular;
         public bool shadowDash;
+
+        private bool secondWind;
 
         private bool completedCoroutines;
         
@@ -288,7 +291,7 @@ namespace redwing
             dashInvulTimer = 0.3f;
         }
 
-        private static bool airDashed()
+        private bool airDashed()
         {
             return (bool) getPrivateField("airDashed").GetValue(HeroController.instance);
         }
@@ -299,12 +302,37 @@ namespace redwing
             Modding.Logger.Log("[Greymoth] " + str);
         }
         
-        private static FieldInfo getPrivateField(string fieldName) => HeroController.instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private static void invokePrivateMethod(string methodName) => HeroController.instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(HeroController.instance, new object[] { });
-
         
+        private FieldInfo getPrivateField(string fieldName)
+        {
+            if (!privateFields.ContainsKey(fieldName))
+            {
+                privateFields.Add(fieldName,
+                    HeroController.instance.GetType()
+                        .GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance));
+            }
+            return privateFields[fieldName];
+        }
 
+        private void invokePrivateMethod(string methodName)
+        {
+            if (!privateMethods.ContainsKey(methodName))
+            {
+                privateMethods.Add(methodName,
+                    HeroController.instance.GetType()
+                        .GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance));
+            }
+            privateMethods[methodName]?.Invoke(HeroController.instance, new object[] { });
+        }
+        
+        private Dictionary<string, FieldInfo> privateFields;
+        private Dictionary<string, MethodInfo> privateMethods;
 
+        public redwing_greymoth(Dictionary<string, FieldInfo> privateFields,
+            Dictionary<string, MethodInfo> privateMethods)
+        {
+            this.privateFields = privateFields;
+            this.privateMethods = privateMethods;
+        }
     }
 }

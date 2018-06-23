@@ -10,6 +10,8 @@ namespace redwing
         
         // 100% of the lore in this file is completely legit.
         private static readonly Dictionary<string, Dictionary<string, string>> langStrings = new Dictionary<string, Dictionary<string, string>>();
+
+        public static bool overrideBlackmothLore;
         
         private void Start()
         {
@@ -36,6 +38,11 @@ namespace redwing
             {
                 log("sheet title: " + meme);
             }
+
+            if (overrideBlackmothLore)
+            {
+                setupBlackmothLoreEN();
+            }
             
             // Testing only. Not actual lore.
             /*langStrings["Titles"] = new Dictionary<string, string>
@@ -50,6 +57,13 @@ namespace redwing
             };
             */
 
+        }
+
+        // only used once blackmoth actually gets lore
+        private static void setupBlackmothLoreEN()
+        {
+            log("Replacing blackmoth lore with redwing lore.");
+            
         }
 
         private static string printRealLore(string smallKey, string key)

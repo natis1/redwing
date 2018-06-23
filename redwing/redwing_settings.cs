@@ -4,7 +4,7 @@ namespace redwing
 {
     public static class version_info
     {
-        public const int SETTINGS_VER = 1;
+        public const int SETTINGS_VER = 3;
     }
 
     public class redwing_global_settings : IModSettings
@@ -18,12 +18,76 @@ namespace redwing
             FloatValues.Clear();
             StringValues.Clear();
 
+            useGreymothDashWhenBlackmothMissing = true;
+            
+            overrideBlackmothNailDamage = true;
+            overrideBlackmothLore = true;
+            overrideBlackmothCloak = true;
 
+            fireballDamageBase = 6;
+            fireballDamagePerNailLvl = 3;
+            fireballMagmaDamageBase = 3;
+            fireballMagmaDamagePerNailLvl = 2;
+            laserDamageBase = 15;
+            laserDamagePerNailLvl = 3;
+            pillarDamageBase = 10;
+            pillarDamagePerNailLvl = 5;
+            pillarSecondaryDamageBase = 5;
+            pillarSecondaryAttacks = 4;
+            trailDamageBase = 3;
+            trailDamagePerNailLvl = 2;
+            trailSecondaryDamageBase = 2;
+            trailSecondaryDamagePerNailLvl = 1;
+
+            // Causes lasers to only fire when damage taken
+            lasersWhenShieldBlocksAllDmg = false;
+
+            fireballCooldownBase = 10f;
+            laserCooldownBase = 5f;
+            shieldCooldownBase = 30f;
+            shieldCooldownReductionPerNailHit = 0.5f;
+            
             settingsVersion = version_info.SETTINGS_VER;
         }
         public int settingsVersion { get => GetInt();
             private set => SetInt(value); }
-
+        
+        // sets the nail damage to what it should be and not what blackmoth wants it to be.
+        public bool overrideBlackmothNailDamage { get => GetBool(); private set => SetBool(value); }
+        
+        // Overrides any lore changed by blackmoth... with the exception of charm descriptions.
+        public bool overrideBlackmothLore { get => GetBool(); private set => SetBool(value); }
+        
+        // Overrides the color of the cloak set by blackmoth.
+        public bool overrideBlackmothCloak { get => GetBool(); private set => SetBool(value); }
+        
+        // Set to false ONLY if you have a non-blackmoth dashing mod.
+        public bool useGreymothDashWhenBlackmothMissing { get => GetBool(); private set => SetBool(value); }
+        
+        public int fireballDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int fireballDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int fireballMagmaDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int fireballMagmaDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int laserDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int laserDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int pillarDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int pillarDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int pillarSecondaryDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int pillarSecondaryDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int pillarSecondaryAttacks { get => GetInt(); private set => SetInt(value); }
+        public int trailDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int trailDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int trailSecondaryDamageBase { get => GetInt(); private set => SetInt(value); }
+        public int trailSecondaryDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        
+        
+        public bool lasersWhenShieldBlocksAllDmg { get => GetBool(); private set => SetBool(value); }
+        
+        public float fireballCooldownBase { get => GetFloat(); private set => SetFloat(value); }
+        public float laserCooldownBase { get => GetFloat(); private set => SetFloat(value); }
+        public float shieldCooldownBase { get => GetFloat(); private set => SetFloat(value); }
+        public float shieldCooldownReductionPerNailHit { get => GetFloat(); private set => SetFloat(value); }
+        
     }
 
 
