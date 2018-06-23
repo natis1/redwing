@@ -33,6 +33,9 @@
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\mods\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Blackmoth, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\Blackmoth.dll</HintPath>
+    </Reference>
     <Reference Include="ModCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\mods\ModCommon.dll</HintPath>
     </Reference>

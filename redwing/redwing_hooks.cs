@@ -2,15 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using GlobalEnums;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using ModCommon;
 using Modding;
 using RandomizerMod.Extensions;
 using UnityEngine;
-using static HeroController;
 using Bounds = UnityEngine.Bounds;
 
 namespace redwing
@@ -46,10 +43,6 @@ namespace redwing
             ModHooks.Instance.DashVectorHook += fireballsAndTrail;
             ModHooks.Instance.DashPressedHook += setTrailCooldown;
             ModHooks.Instance.SlashHitHook += reduceFSCooldown;
-            
-            log("meme");
-            
-            log("Override blackmoth nail damage is set to " + overrideBlackmothNailDmg);
 
             if (overrideBlackmothNailDmg)
             {
@@ -76,10 +69,18 @@ namespace redwing
         }
 
         private Vector2 fireballsAndTrail(Vector2 change)
-        {
+        {            
+            if (blackmothSymbolsExist)
+            {
+                // Why does this work but not just checking it directly?
+                if (blackmothGrubberCheck())
+                {
+                    return change;
+                }
+            }
             
             HeroActions direction = GameManager.instance.inputHandler.inputActions;
-            if (direction.up.IsPressed && !direction.down.IsPressed && change.y > 0.1f)
+            if (direction.up.IsPressed && !direction.down.IsPressed && change.y > 0.00001f)
             {
                 if (fbTime <= 0.0)
                 {
@@ -103,7 +104,11 @@ namespace redwing
             
             return change;
         }
-        
+
+        private bool blackmothGrubberCheck()
+        {
+            return BlackmothMod.Blackmoth.Instance.grubberOn;
+        }
 
 
         private void createFlameShield()
@@ -172,6 +177,10 @@ namespace redwing
         public static AudioClip fireTrailSoundEffect;
 
         public static bool overrideBlackmothNailDmg;
+        
+        // True if the Blackmoth DLL is there and is of a high enough version to work with Redwing
+        // If true you can directly use Blackmoth instead of through reflection which is a lot faster.
+        public static bool blackmothSymbolsExist;
             
         private GameObject flameShieldObj;
         private SpriteRenderer flameShieldSprite;
@@ -309,7 +318,7 @@ namespace redwing
 
         private void spawnFireTrail(Vector2 delta)
         {
-            float angle = (float) redwing_flame_gen.getNearestAngel((int) (delta.x * 100), (int) (delta.y * 100), 0, 0);
+            float angle = (float) redwing_flame_gen.getNearestAngel((int) (delta.x * 10000), (int) (delta.y * 10000), 0, 0);
 
             GameObject trail = new GameObject("redwingFireTrail", typeof(redwing_trail_behavior),
                 typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer), typeof(AudioSource));

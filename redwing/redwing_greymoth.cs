@@ -45,6 +45,9 @@ namespace redwing
         public void Start()
         {
             completedCoroutines = false;
+            privateFields = new Dictionary<string, FieldInfo>();
+            privateMethods = new Dictionary<string, MethodInfo>();
+            
             try
             {
                 StartCoroutine(configureHero());
@@ -327,12 +330,5 @@ namespace redwing
         
         private Dictionary<string, FieldInfo> privateFields;
         private Dictionary<string, MethodInfo> privateMethods;
-
-        public redwing_greymoth(Dictionary<string, FieldInfo> privateFields,
-            Dictionary<string, MethodInfo> privateMethods)
-        {
-            this.privateFields = privateFields;
-            this.privateMethods = privateMethods;
-        }
     }
 }

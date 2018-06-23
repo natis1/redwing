@@ -8,10 +8,11 @@ namespace redwing
 {
     public class redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "0.0.8rc1";
+        private const string VERSION = "0.0.8";
         private const int LOAD_ORDER = 90;
 
         private bool blackmothExists = false;
+        private bool blackmothError = false;
 
         // Version detection code originally by Seanpr, used with permission.
         public override string GetVersion()
@@ -32,6 +33,11 @@ namespace redwing
             {
                 ver += " (Othermoth?)";
             }
+
+            if (blackmothError)
+            {
+                ver += " (Error: Blackmoth too old - either remove it or update it)";
+            }
             
             
 
@@ -50,7 +56,8 @@ namespace redwing
             
             // report if the user has blackmoth.
             blackmothExists = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "BlackmothMod" select type).Any();
-
+            log("does blackmoth exist? " + blackmothExists);
+            
             redwing_fireball_behavior.fbDamageBase = GlobalSettings.fireballDamageBase;
             redwing_fireball_behavior.fbDamageScale = GlobalSettings.fireballDamagePerNailLvl;
             redwing_fireball_behavior.fbmDamageBase = GlobalSettings.fireballMagmaDamageBase;
@@ -63,6 +70,19 @@ namespace redwing
             redwing_hooks.zeroDmgLaser = GlobalSettings.lasersWhenShieldBlocksAllDmg;
             redwing_hooks.laserDamageBase = GlobalSettings.laserDamageBase;
             redwing_hooks.laserDamagePerNail = GlobalSettings.laserDamagePerNailLvl;
+            redwing_hooks.blackmothSymbolsExist = false;
+
+            try
+            {
+                if (blackmothExists)
+                {
+                    checkBlackmothVersion();
+                }
+            }
+            catch (Exception e)
+            {
+                log("Blackmoth not found. Error: " + e);
+            }
 
             redwing_pillar_behavior.damagePriBase = GlobalSettings.pillarDamageBase;
             redwing_pillar_behavior.damagePriNail = GlobalSettings.pillarDamagePerNailLvl;
@@ -79,6 +99,23 @@ namespace redwing
             ModHooks.Instance.NewGameHook += addComponent;
 
             ModHooks.Instance.ApplicationQuitHook += SaveGlobalSettings;
+        }
+
+        private void checkBlackmothVersion()
+        {
+            Version blackmothVers = new Version(BlackmothMod.Blackmoth.Instance.GetVersion());
+            Version blackmothNeeded = new Version("1.7.2");
+            if (blackmothNeeded.CompareTo(blackmothVers) > 0)
+            {
+                log("ERROR: Blackmoth found but too old to work with redwing!" +
+                    " Please update to Blackmoth 1.7.2 or newer");
+                blackmothError = true;
+            }
+            else
+            {
+                redwing_hooks.blackmothSymbolsExist = true;
+            }
+
         }
 
         private void setupSettings()
