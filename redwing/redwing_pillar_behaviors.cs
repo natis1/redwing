@@ -59,12 +59,9 @@ namespace redwing
             
             while (secondaryAttacks < damageSecondaryTimes)
             {
+                yield return new WaitForSeconds(LIFESPAN / damageSecondaryTimes);
                 secondaryDamage();
                 secondaryAttacks++;
-                
-                
-                
-                yield return new WaitForSeconds(LIFESPAN / secondaryAttacks);
             }
             log("ending firepillar");
             Destroy(this.gameObject);
@@ -202,7 +199,7 @@ namespace redwing
             
             firePillar = new GameObject("redwingFlamePillar", typeof(redwing_pillar_behavior),
                 typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(BoxCollider2D));
-            firePillar.transform.localScale = new Vector3(3f, 3f, 3f);
+            firePillar.transform.localScale = new Vector3(1f, 1f, 1f);
             GameObject fireAtJerk = null;
 
             if (isEnemyInRange())
@@ -216,7 +213,6 @@ namespace redwing
                     log("meme failed with error " + e);
                 }
             }
-
 
             if (fireAtJerk != null)
             {
@@ -240,7 +236,8 @@ namespace redwing
             SpriteRenderer img = firePillar.GetComponent<SpriteRenderer>();
             Rect pillarSpriteRect = new Rect(0, 0,
                 redwing_flame_gen.FPTEXTURE_WIDTH, redwing_flame_gen.FPTEXTURE_HEIGHT);
-            img.sprite = Sprite.Create(pillarTextures[randomTextureToUse], pillarSpriteRect, new Vector2(0.5f, 0.5f));
+            img.sprite = Sprite.Create(pillarTextures[randomTextureToUse], pillarSpriteRect,
+                new Vector2(0.5f, 0.5f), 30f);
             img.color = Color.white;
 
             Rigidbody2D fakePhysics = firePillar.GetComponent<Rigidbody2D>();

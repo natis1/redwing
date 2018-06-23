@@ -132,12 +132,23 @@ namespace redwing
 
         private int flameShieldAndLaser(ref int hazardtype, int damage)
         {
+            
+            
             if (hazardtype != (int) GlobalEnums.HazardType.SPIKES ||
                 HeroController.instance.cState.invulnerable) return damage;
             
             if (invulnTime > 0.0)
             {
                 return 0;
+            }
+            
+            // if you have grubberfly set damage to 0 always
+            if (blackmothSymbolsExist)
+            {
+                if (blackmothGrubberCheck())
+                {
+                    return 0;
+                }
             }
             
             if (fsCharge <= 0.0 && damage > 0)
@@ -205,7 +216,7 @@ namespace redwing
         public static bool zeroDmgLaser;
         
         
-        private const double IFRAMES = 2f;
+        private const double IFRAMES = 0.4f;
 
         private int currentTrailSprite = 0;
         private int netTrailDistance = 0;
