@@ -60,7 +60,7 @@
     <Compile Include="PlayMakerFSMExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="redwing.cs" />
-    <Compile Include="redwing_greymoth.cs" />
+    <Compile Include="greymoth.cs" />
     <Compile Include="redwing_fireball_behaviors.cs" />
     <Compile Include="redwing_flame_gen.cs" />
     <Compile Include="redwing_game_objects.cs" />

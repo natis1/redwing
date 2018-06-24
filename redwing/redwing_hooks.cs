@@ -126,8 +126,8 @@ namespace redwing
                 new Vector2(0.5f, 0.5f));
 
             flameShieldAudio = flameShieldObj.GetComponent<AudioSource>();
-            flameShieldAudio.clip = shieldSoundEffect;
-            flameShieldAudio.loop = true;
+            //flameShieldAudio.clip = shieldSoundEffect;
+            flameShieldAudio.loop = false;
         }
 
         private int flameShieldAndLaser(ref int hazardtype, int damage)
@@ -156,7 +156,11 @@ namespace redwing
                 log("Shielding one damage");
                 fsCharge = fsRecharge;
                 invulnTime = IFRAMES;
-                //flameShieldAudio.Stop();
+                flameShieldAudio.Stop();
+                flameShieldAudio.volume = (GameManager.instance.gameSettings.masterVolume *
+                                           GameManager.instance.gameSettings.soundVolume * 0.01f);
+                flameShieldAudio.clip = shieldDischargeSoundEffect;
+                flameShieldAudio.Play();
                 playFSSound = true;
                 damage--;
             }
@@ -186,6 +190,8 @@ namespace redwing
         public static Texture2D[] fireTrailTextures;
         public static AudioClip shieldSoundEffect;
         public static AudioClip fireTrailSoundEffect;
+        public static AudioClip shieldChargeSoundEffect;
+        public static AudioClip shieldDischargeSoundEffect;
 
         public static bool overrideBlackmothNailDmg;
         
@@ -261,15 +267,18 @@ namespace redwing
                 {
                     log("current sound fx volume is " + GameManager.instance.gameSettings.masterVolume *
                         GameManager.instance.gameSettings.soundVolume);
+                    
+                    flameShieldAudio.Stop();
                     flameShieldAudio.volume = (GameManager.instance.gameSettings.masterVolume *
                                                GameManager.instance.gameSettings.soundVolume * 0.01f);
                     // make sound less annoying before you play it or maybe make it not loop
-                    //flameShieldAudio.Play();
+                    flameShieldAudio.clip = shieldChargeSoundEffect;
+                    flameShieldAudio.Play();
                     playFSSound = false;
                 } else if (playFSSound == false && UIManager.instance.uiState != UIState.PLAYING)
                 {
                     //flameShieldAudio.Stop();
-                    playFSSound = true;
+                    //playFSSound = true;
                 }
             }
             else

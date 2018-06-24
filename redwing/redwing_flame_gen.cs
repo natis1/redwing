@@ -31,6 +31,14 @@ namespace redwing
         private AudioClip shieldWavySoundFX;
         private AudioClip fireTrailSoundFX;
         private AudioClip sizzleSoundFX;
+        
+        private AudioClip shieldRechargeSoundFX;
+        
+        // in the event I ever add a shield with multiple hit points both of these will be useful.
+        // for now just shield discharge is used.
+        private AudioClip shieldHitSoundFX;
+        private AudioClip shieldDischargeSoundFX;
+        
 
         // What could this be for?
         private AudioClip sirenSoundFx;
@@ -145,6 +153,8 @@ namespace redwing
             redwing_laser_spawner_behavior.laserFX = laserCastSoundFX;
             redwing_hooks.shieldSoundEffect = shieldWavySoundFX;
             redwing_hooks.fireTrailSoundEffect = fireTrailSoundFX;
+            redwing_hooks.shieldChargeSoundEffect = shieldRechargeSoundFX;
+            redwing_hooks.shieldDischargeSoundEffect = shieldDischargeSoundFX;
             //redwing_game_objects.soundFxClip = soundFxClip;
 
         }
@@ -168,7 +178,35 @@ namespace redwing
             
             sizzleSoundFX = AudioClip.Create("sizzle", (int) (AUDIO_SAMPLE_HZ * 1.5), 1, AUDIO_SAMPLE_HZ, false);
             sizzleSoundFX.SetData(generateSizzleSound((int) (AUDIO_SAMPLE_HZ * 1.5)), 0);
+            
+            shieldRechargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 12.2), 1, AUDIO_SAMPLE_HZ, false);
+            shieldRechargeSoundFX.SetData(generateShieldChargeSound((int) (AUDIO_SAMPLE_HZ * 12.2)), 0);
+            
+            shieldDischargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 12.2), 1, AUDIO_SAMPLE_HZ, false);
+            shieldDischargeSoundFX.SetData(generateShieldDischargeSound((int) (AUDIO_SAMPLE_HZ * 12.2)), 0);
+            
+        }
+        
+        private float[] generateShieldDischargeSound(int length)
+        {
+            float[] fx = new float[length];
+            fx = generateChirp(1.0, 1000.0, 100.0, 0, fx.Length / 2, fx);
+            fx = generateNoiseAtHz(1.0, 100.0, fx, fx.Length / 2, fx.Length);
+            fx = fadeAudio(0.0, fx.Length / 2, fx.Length - 4000, fx);
+            fx = normalizeVolume(fx);
+            
+            return fx;
+        }
 
+        private float[] generateShieldChargeSound(int length)
+        {
+            float[] fx = new float[length];
+            fx = generateChirp(1.0, 100.0, 1000.0, 0, fx.Length / 2, fx);
+            fx = generateNoiseAtHz(1.0, 1000.0, fx, fx.Length / 2, fx.Length);
+            fx = fadeAudio(0.0, fx.Length / 2, fx.Length - 4000, fx);
+            fx = normalizeVolume(fx);
+            
+            return fx;
         }
 
         private float[] generateSizzleSound(int length)
@@ -415,10 +453,28 @@ namespace redwing
             return speededFx;
         }
 
+
+        private float[] generateChirp(double volume, double startHz, double endHz, int startTime, int endTime,
+            float[] fx)
+        {
+            double modulateTime = (endTime - startTime) / ((double)AUDIO_SAMPLE_HZ * 0.5);
+            
+            // ReSharper disable once ConvertIfStatementToReturnStatement Yes it looks sexy but really it's too much
+            // for a one liner.
+            if (startHz <= endHz)
+            {
+                return generateSirenSound(volume, startHz, endHz, startTime, endTime, modulateTime, 0, fx);
+            }
+            else
+            {
+                return generateSirenSound(volume, endHz, startHz, startTime, endTime, modulateTime, 0.5, fx);
+            }
+        }
+
         private float[] generateSirenSound(double volume, double minHz, double maxHz, int startTime, int maxTime, double modulateTime,
             float[] fx)
         {
-            return generateSirenSound(volume, minHz, maxHz, startTime, maxTime, modulateTime, rng.NextDouble() * Math.PI * 2.0, fx);
+            return generateSirenSound(volume, minHz, maxHz, startTime, maxTime, modulateTime, rng.NextDouble(), fx);
         }
 
         private float[] generateSirenSound(double volume, double minHz, double maxHz, int startTime, int maxTime, double modulateTime,
@@ -429,25 +485,46 @@ namespace redwing
             // Basically because the difference between 100 and 200 Hz should be
             // the same as the difference between 1,000 and 2,000 Hz. This
             // is because of how ears work, basically.
-            double minHzForComparison = Math.Log(minHz);
-            double maxHzForComparison = Math.Log(maxHz);
-            double modulateInterval = (modulateTime * AUDIO_SAMPLE_HZ) / (Math.PI * 2.0);
+            double minHzForComparison = Math.Log(minHz, 2.0);
+            double maxHzForComparison = Math.Log(maxHz, 2.0);
+            double modulateInterval = (modulateTime * AUDIO_SAMPLE_HZ);
 
             double randomPointOnSin = rng.NextDouble() * 2.0 * Math.PI;
+
+            log("min freq is " + minHz);
+            log("max freq is " + maxHz);
             
             for (int i = startTime; i < maxTime; i++)
             {
+                double frequencyPos;
+                if ((i - startTime) % modulateInterval > (modulateInterval / 2))
+                {
+                    frequencyPos = (1.0 - (((i - startTime) % (modulateInterval / 2)) / (modulateInterval / 2)));
+                }
+                else
+                {
+                    frequencyPos = ((i - startTime) % (modulateInterval / 2)) / (modulateInterval / 2);
+                }
 
-                double frequencyPos = Math.Sin(startingPoint + ((double) ((i - startTime) / modulateInterval)));
-                frequencyPos = (frequencyPos + 1.0f) / 2.0f;
+                if (frequencyPos > 1.0 || frequencyPos < 0.0)
+                {
+                    log("ERROR: freq out of bounds. Freq is " + frequencyPos);
+                    break;
+                }
+                
                 double freqForComparison =
                     ((1.0f - frequencyPos) * minHzForComparison + frequencyPos * maxHzForComparison);
-                double actualFreq = Math.Exp(freqForComparison);
+                double actualFreq = Math.Pow(2.0, freqForComparison);
+                
                 double sinePitchTime = (AUDIO_SAMPLE_HZ / actualFreq) / (2.0 * Math.PI);
                 
+                if (i % 500 == 0)
+                    log("sine pitch time is " + sinePitchTime + " because the freq is " + actualFreq);
                 // Will this work? Who knows.
                 fx[i] += (float)(volume * (Math.Sin( randomPointOnSin + ( ((double) i) / sinePitchTime) )));
             }
+
+            //log("did generate sound");
             return fx;
         }
         
