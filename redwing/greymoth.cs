@@ -12,9 +12,11 @@ namespace redwing
     {
 
         /*
-         * Declassified things to track:
+         * Things to track:
          * 
-         * dash upgrades, did kill nkg.
+         * Just dash upgrades I guess. Maybe did kill NKG but if we're expecting the player to want to be really OP
+         * then they will also have grimmchild upgrades and that would make killing this one silly boss do too
+         * much. Although blackmoth does check this so maybe it's worth considering.
          * 
          * 
          * */
