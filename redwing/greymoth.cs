@@ -307,10 +307,11 @@ namespace redwing
 
             // Weird but basically if you have already airdashed but you have dashmaster,
             // then you can dash exactly once again.
-            if ((!didAirDash || !PlayerData.instance.GetBool("equippedCharm_31")) && !secondWind) return didAirDash;
-
+            if (!didAirDash || !PlayerData.instance.GetBool("equippedCharm_31") || !secondWind) return didAirDash;
             secondWind = false;
             return false;
+
+
         }
 
 
