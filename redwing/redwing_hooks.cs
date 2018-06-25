@@ -5,6 +5,7 @@ using System.Linq;
 using GlobalEnums;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using ModCommon;
 using Modding;
 using RandomizerMod.Extensions;
 using UnityEngine;
@@ -53,7 +54,7 @@ namespace redwing
 
         private void reduceFSCooldown(Collider2D othercollider, GameObject gameobject)
         {
-            if (fsCharge >= 0.0)
+            if (fsCharge >= 0.0 && othercollider.gameObject.IsGameEnemy())
             {
                 fsCharge -= fsReduceOnHit;
             }

@@ -123,6 +123,8 @@ namespace redwing
         // At what point do you switch from color X to color Y.
         private readonly double[] flameIntensityThresholds = { 0.4, 0.7, 2.5, 2.6 };
 
+        private double randomPointOnSin;
+
 
         
 
@@ -164,6 +166,8 @@ namespace redwing
 
         private void generateSoundEffects()
         {
+            randomPointOnSin = rng.NextDouble() * 2.0 * Math.PI;
+            
             fireballHitSoundFX = AudioClip.Create("fireball1", (int) (AUDIO_SAMPLE_HZ * 1.0) + 30000, 1, AUDIO_SAMPLE_HZ, false);
             fireballHitSoundFX.SetData(generateFbSound((int)(AUDIO_SAMPLE_HZ * 1.0) + 30000), 0);
 
@@ -179,19 +183,22 @@ namespace redwing
             sizzleSoundFX = AudioClip.Create("sizzle", (int) (AUDIO_SAMPLE_HZ * 1.5), 1, AUDIO_SAMPLE_HZ, false);
             sizzleSoundFX.SetData(generateSizzleSound((int) (AUDIO_SAMPLE_HZ * 1.5)), 0);
             
-            shieldRechargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 12.2), 1, AUDIO_SAMPLE_HZ, false);
-            shieldRechargeSoundFX.SetData(generateShieldChargeSound((int) (AUDIO_SAMPLE_HZ * 12.2)), 0);
+            shieldRechargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 0.6), 1, AUDIO_SAMPLE_HZ, false);
+            shieldRechargeSoundFX.SetData(generateShieldChargeSound((int) (AUDIO_SAMPLE_HZ * 0.6)), 0);
             
-            shieldDischargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 12.2), 1, AUDIO_SAMPLE_HZ, false);
-            shieldDischargeSoundFX.SetData(generateShieldDischargeSound((int) (AUDIO_SAMPLE_HZ * 12.2)), 0);
+            shieldDischargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 0.4), 1, AUDIO_SAMPLE_HZ, false);
+            shieldDischargeSoundFX.SetData(generateShieldDischargeSound((int) (AUDIO_SAMPLE_HZ * 0.4)), 0);
             
         }
         
         private float[] generateShieldDischargeSound(int length)
         {
             float[] fx = new float[length];
-            fx = generateChirp(1.0, 1000.0, 100.0, 0, fx.Length / 2, fx);
-            fx = generateNoiseAtHz(1.0, 100.0, fx, fx.Length / 2, fx.Length);
+            fx = generateChirp(1.0, 600.0, 200.0, 0, fx.Length, fx);
+            
+            // Tired of shitty sounding sound effects? Layer some white noise over it and nobody will notice.
+            fx = generateWhiteNoise(0.4, 0, fx.Length, fx);
+            //fx = generateNoiseAtHz(1.0, 100.0, fx, fx.Length / 2, fx.Length);
             fx = fadeAudio(0.0, fx.Length / 2, fx.Length - 4000, fx);
             fx = normalizeVolume(fx);
             
@@ -201,8 +208,8 @@ namespace redwing
         private float[] generateShieldChargeSound(int length)
         {
             float[] fx = new float[length];
-            fx = generateChirp(1.0, 100.0, 1000.0, 0, fx.Length / 2, fx);
-            fx = generateNoiseAtHz(1.0, 1000.0, fx, fx.Length / 2, fx.Length);
+            fx = generateChirp(1.0, 200.0, 400.0, 0, fx.Length, fx);
+            //fx = generateNoiseAtHz(1.0, 400.0, fx, fx.Length / 2, fx.Length);
             fx = fadeAudio(0.0, fx.Length / 2, fx.Length - 4000, fx);
             fx = normalizeVolume(fx);
             
@@ -489,7 +496,7 @@ namespace redwing
             double maxHzForComparison = Math.Log(maxHz, 2.0);
             double modulateInterval = (modulateTime * AUDIO_SAMPLE_HZ);
 
-            double randomPointOnSin = rng.NextDouble() * 2.0 * Math.PI;
+            
 
             log("min freq is " + minHz);
             log("max freq is " + maxHz);
@@ -497,13 +504,15 @@ namespace redwing
             for (int i = startTime; i < maxTime; i++)
             {
                 double frequencyPos;
-                if ((i - startTime) % modulateInterval > (modulateInterval / 2))
+                if ( ( ((i - startTime) + startingPoint * modulateInterval ) % modulateInterval) > (modulateInterval / 2))
                 {
-                    frequencyPos = (1.0 - (((i - startTime) % (modulateInterval / 2)) / (modulateInterval / 2)));
+                    frequencyPos =
+                        (1.0 - (((i - startTime) + startingPoint * modulateInterval) % (modulateInterval / 2)) /
+                         (modulateInterval / 2));
                 }
                 else
                 {
-                    frequencyPos = ((i - startTime) % (modulateInterval / 2)) / (modulateInterval / 2);
+                    frequencyPos = (((i - startTime) + startingPoint * modulateInterval )  % (modulateInterval / 2)) / (modulateInterval / 2);
                 }
 
                 if (frequencyPos > 1.0 || frequencyPos < 0.0)
@@ -516,7 +525,7 @@ namespace redwing
                     ((1.0f - frequencyPos) * minHzForComparison + frequencyPos * maxHzForComparison);
                 double actualFreq = Math.Pow(2.0, freqForComparison);
                 
-                double sinePitchTime = (AUDIO_SAMPLE_HZ / actualFreq) / (2.0 * Math.PI);
+                double sinePitchTime = (AUDIO_SAMPLE_HZ / actualFreq) / 2.0;
                 
                 if (i % 500 == 0)
                     log("sine pitch time is " + sinePitchTime + " because the freq is " + actualFreq);
@@ -708,6 +717,7 @@ namespace redwing
             double realVolume = volume * freqInterval / (freqMax - freqMin + freqInterval);
             for (double i = freqMin; i <= freqMax; i += freqInterval)
             {
+                randomPointOnSin = rng.NextDouble() * 2.0 * Math.PI;
                 fx = generateNoiseAtHz(realVolume, i, fx, startTime, endTime);
             }
 
@@ -723,10 +733,6 @@ namespace redwing
             // lasts that long
             double sinePitchTime = pitchTime / (2.0 * Math.PI);
 
-            // Don't generate every frequency at the same point
-            // Gotta pick random ones.
-            double randomOffset = rng.NextDouble() * sinePitchTime;
-
             /* Noise is generated with a sine wave formula
              * I think this is the proper way to do it
              * but I'm not 100% sure. Change to a different kind
@@ -737,7 +743,7 @@ namespace redwing
             {
                 for (int i = startTime; i < endTime; i++)
                 {
-                    fx[i] += (float)(volume * (Math.Sin(((double) i + randomOffset) / sinePitchTime)));
+                    fx[i] += (float)(volume * (Math.Sin(((double) i + randomPointOnSin) / sinePitchTime)));
                 }
             }
             catch (Exception e)

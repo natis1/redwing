@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using GlobalEnums;
+using HutongGames.PlayMaker.Actions;
 
 namespace redwing
 {
@@ -60,6 +61,8 @@ namespace redwing
             {
                 log("Error setting up hooks. Error: " + e);
             }
+
+            log("GreymothMod added to interpret dashes.");
         }
 
         private Vector2 doDashDirection(Vector2 orig)
@@ -84,18 +87,8 @@ namespace redwing
 
         private float getDashLength()
         {
-            float length;
-
-            if (HeroController.instance.cState.shadowDashing)
-            {
-                length = HeroController.instance.DASH_SPEED_SHARP;
-            } else
-            {
-                length = HeroController.instance.DASH_SPEED;
-            }
-
-
-            return length;
+            return HeroController.instance.cState.shadowDashing ?
+                HeroController.instance.DASH_SPEED_SHARP : HeroController.instance.DASH_SPEED;
         }
 
         private void Update()
@@ -131,6 +124,8 @@ namespace redwing
                 log("Null Reference trying to set Hero cState. Probably because you're transitioning levels " + e);
             }
 
+            if (!secondWind && HeroController.instance.cState.onGround) secondWind = true;
+
         }
 
         private IEnumerator configureHero()
@@ -151,6 +146,7 @@ namespace redwing
             }
 
             completedCoroutines = true;
+            log("Completed needed coroutines. Your game is loaded.");
             //HeroController.instance.gameObject.AddComponent<SuperDashHandler>();
         }
 
@@ -195,12 +191,21 @@ namespace redwing
             {
                 DashDirection.x = 0;
             }
-            log($@"Dash direction: {DashDirection}");
-            if (!PlayerData.instance.hasDash)
+            //log($@"Dash direction: {DashDirection}");
+            if (!PlayerData.instance.GetBool("hasDash"))
             {
                 DashDirection.y = 0;
                 DashDirection.x = HeroController.instance.cState.facingRight ? 1 : -1;
             }
+
+            if (!PlayerData.instance.GetBool("hasShadowDash"))
+            {
+                if (Math.Abs(DashDirection.y) > 0.001f && Math.Abs(DashDirection.x) > 0.001f)
+                {
+                    DashDirection.y = 0f;
+                }
+            }
+            
             doDash();
             
             // Fixes TC problem where after tink sharp shadow is broken
@@ -221,7 +226,7 @@ namespace redwing
                   !HeroController.instance.cState.wallSliding))) return;
             
             
-            if ((!HeroController.instance.cState.onGround || DashDirection.y != 0) && !HeroController.instance.inAcid)
+            if ((!HeroController.instance.cState.onGround || Math.Abs(DashDirection.y) > 0.001f) && !HeroController.instance.inAcid)
             {
                 getPrivateField("airDashed").SetValue(HeroController.instance, true);
             }
@@ -298,7 +303,14 @@ namespace redwing
 
         private bool airDashed()
         {
-            return (bool) getPrivateField("airDashed").GetValue(HeroController.instance);
+            bool didAirDash = (bool) getPrivateField("airDashed").GetValue(HeroController.instance);
+
+            // Weird but basically if you have already airdashed but you have dashmaster,
+            // then you can dash exactly once again.
+            if ((!didAirDash || !PlayerData.instance.GetBool("equippedCharm_31")) && !secondWind) return didAirDash;
+
+            secondWind = false;
+            return false;
         }
 
 
