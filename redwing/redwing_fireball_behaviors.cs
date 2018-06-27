@@ -187,22 +187,25 @@ namespace redwing
             }
             else if (targetLayer == 11)
             {
-                FSMUtility.SendEventToGameObject(hitbox.gameObject, "TAKE DAMAGE", false);
-                HitTaker.Hit(hitbox.gameObject, new HitInstance
+                HealthManager targetHP = hitbox.gameObject.GetComponent<HealthManager>();
+                if (targetHP != null)
                 {
-                    Source = base.gameObject,
-                    AttackType = AttackTypes.Generic,
-                    CircleDirection = false,
-                    DamageDealt = fireballDmg,
-                    Direction = 0f,
-                    IgnoreInvulnerable = true,
-                    MagnitudeMultiplier = 1.0f,
-                    MoveAngle = 0f,
-                    MoveDirection = false,
-                    Multiplier = 1f,
-                    SpecialType = SpecialTypes.None,
-                    IsExtraDamage = false
-                }, 3);
+                    targetHP.Hit(new HitInstance
+                    {
+                        Source = base.gameObject,
+                        AttackType = AttackTypes.Spell,
+                        CircleDirection = false,
+                        DamageDealt = fireballDmg,
+                        Direction = 0f,
+                        IgnoreInvulnerable = true,
+                        MagnitudeMultiplier = 1f,
+                        MoveAngle = 0f,
+                        MoveDirection = false,
+                        Multiplier = 1f,
+                        SpecialType = SpecialTypes.None,
+                        IsExtraDamage = false
+                    });
+                }
 
                 if (doPhysics)
                 {

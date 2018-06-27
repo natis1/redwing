@@ -22,6 +22,8 @@ namespace redwing
             ModHooks.Instance.DashPressedHook -= setTrailCooldown;
             ModHooks.Instance.SlashHitHook -= reduceFSCooldown;
             
+            ModHooks.Instance.HitInstanceHook -= nailArtFireballs;
+            
             if (overrideBlackmothNailDmg)
             {
                 ModHooks.Instance.HitInstanceHook -= overrideBlackmothDamage;
@@ -44,6 +46,8 @@ namespace redwing
             ModHooks.Instance.DashVectorHook += fireballsAndTrail;
             ModHooks.Instance.DashPressedHook += setTrailCooldown;
             ModHooks.Instance.SlashHitHook += reduceFSCooldown;
+
+            ModHooks.Instance.HitInstanceHook += nailArtFireballs;
 
             if (overrideBlackmothNailDmg)
             {
@@ -413,23 +417,26 @@ namespace redwing
                 
                 GameObject target = collider.gameObject;
                 log("Doing laser damage to target with name " + target.name);
-                
-                FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
-                HitTaker.Hit(target, new HitInstance
+
+                HealthManager targetHP = target.GetComponent<HealthManager>();
+                if (targetHP != null)
                 {
-                    Source = base.gameObject,
-                    AttackType = AttackTypes.Generic,
-                    CircleDirection = false,
-                    DamageDealt = laserDamageBase + laserDamagePerNail *PlayerData.instance.GetInt("nailSmithUpgrades"),
-                    Direction = 0f,
-                    IgnoreInvulnerable = true,
-                    MagnitudeMultiplier = 1f,
-                    MoveAngle = 0f,
-                    MoveDirection = false,
-                    Multiplier = 1f,
-                    SpecialType = SpecialTypes.None,
-                    IsExtraDamage = false
-                }, 3);
+                    targetHP.Hit(new HitInstance
+                    {
+                        Source = base.gameObject,
+                        AttackType = AttackTypes.Generic,
+                        CircleDirection = false,
+                        DamageDealt = laserDamageBase + laserDamagePerNail *PlayerData.instance.GetInt("nailSmithUpgrades"),
+                        Direction = 0f,
+                        IgnoreInvulnerable = true,
+                        MagnitudeMultiplier = 1f,
+                        MoveAngle = 0f,
+                        MoveDirection = false,
+                        Multiplier = 1f,
+                        SpecialType = SpecialTypes.None,
+                        IsExtraDamage = false
+                    });
+                }
             }
 
         }
@@ -444,17 +451,6 @@ namespace redwing
             
             
             voidKnightSpellControl = FSMUtility.LocateFSM(voidKnight, "ProxyFSM");
-            
-            // ReSharper disable once InvertIf because idk it also looks dumb here.
-            if (sharpShadow == null || !sharpShadow.CompareTag("Sharp Shadow"))
-                foreach (GameObject ssGameObject in Resources.FindObjectsOfTypeAll<GameObject>())
-                {                    
-                    if (ssGameObject == null || !ssGameObject.CompareTag("Sharp Shadow")) continue;
-                    sharpShadow = ssGameObject;
-                    sharpShadowFsm = FSMUtility.LocateFSM(sharpShadow, "damages_enemy");
-
-                    log("Found sharpshadow");
-                }
             
             setupFlamePillar();
             createFlameShield();

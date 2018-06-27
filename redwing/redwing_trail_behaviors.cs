@@ -45,8 +45,6 @@ namespace redwing
             
             cachedPrimaryDmg = damagePriBase + damagePriNail * PlayerData.instance.GetInt("nailSmithUpgrades");
             cachedSecondaryDmg = damageSecBase + damageSecNail * PlayerData.instance.GetInt("nailSmithUpgrades");
-
-            
             cachedAudio.loop = false;
             cachedAudio.volume = (GameManager.instance.gameSettings.masterVolume *
                                   GameManager.instance.gameSettings.soundVolume * 0.01f * 0.4f);
@@ -60,9 +58,6 @@ namespace redwing
             initPosition = voidKnightCollider.gameObject.transform.localPosition;
             const int pixelsPerUnit = 75;
             buildTextureInital(75);
-            
-            
-            
             
             yield return null;
             int maxDashLength = memeTextureUsed.width;
@@ -233,25 +228,25 @@ namespace redwing
             foreach (Collider2D collider in enteredColliders.ToList())
             {
 
-                GameObject target = collider.gameObject;
-                FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
-                
-                // first hit counts as a spell because we want it to stagger.
-                HitTaker.Hit(target, new HitInstance
+                HealthManager targetHP = collider.gameObject.GetComponent<HealthManager>();
+                if (targetHP != null)
                 {
-                    Source = base.gameObject,
-                    AttackType = AttackTypes.Generic,
-                    CircleDirection = false,
-                    DamageDealt = cachedSecondaryDmg,
-                    Direction = 0f,
-                    IgnoreInvulnerable = true,
-                    MagnitudeMultiplier = 1f,
-                    MoveAngle = 0f,
-                    MoveDirection = false,
-                    Multiplier = 1f,
-                    SpecialType = SpecialTypes.None,
-                    IsExtraDamage = false
-                }, 3);
+                    targetHP.Hit(new HitInstance
+                    {
+                        Source = base.gameObject,
+                        AttackType = AttackTypes.Generic,
+                        CircleDirection = false,
+                        DamageDealt = cachedSecondaryDmg,
+                        Direction = 0f,
+                        IgnoreInvulnerable = true,
+                        MagnitudeMultiplier = 1f,
+                        MoveAngle = 0f,
+                        MoveDirection = false,
+                        Multiplier = 1f,
+                        SpecialType = SpecialTypes.None,
+                        IsExtraDamage = false
+                    });
+                }
             }
             
         }
@@ -286,22 +281,25 @@ namespace redwing
 
         private void burnThatMotherTrucker(GameObject enemy)
         {
-            FSMUtility.SendEventToGameObject(enemy, "TAKE DAMAGE", false);
-            HitTaker.Hit(enemy, new HitInstance
+            HealthManager targetHP = enemy.GetComponent<HealthManager>();
+            if (targetHP != null)
             {
-                Source = base.gameObject,
-                AttackType = AttackTypes.Generic,
-                CircleDirection = false,
-                DamageDealt = cachedPrimaryDmg,
-                Direction = 0f,
-                IgnoreInvulnerable = true,
-                MagnitudeMultiplier = 1.0f,
-                MoveAngle = 0f,
-                MoveDirection = false,
-                Multiplier = 1f,
-                SpecialType = SpecialTypes.None,
-                IsExtraDamage = false
-            }, 3);
+                targetHP.Hit(new HitInstance
+                {
+                    Source = base.gameObject,
+                    AttackType = AttackTypes.Spell,
+                    CircleDirection = false,
+                    DamageDealt = cachedPrimaryDmg,
+                    Direction = 0f,
+                    IgnoreInvulnerable = true,
+                    MagnitudeMultiplier = 1f,
+                    MoveAngle = 0f,
+                    MoveDirection = false,
+                    Multiplier = 1f,
+                    SpecialType = SpecialTypes.None,
+                    IsExtraDamage = false
+                });
+            }
         }
         
         

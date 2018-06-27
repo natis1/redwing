@@ -70,25 +70,25 @@ namespace redwing
         {
             foreach (Collider2D collider in enteredColliders.ToList())
             {
-                GameObject target = collider.gameObject;
-                FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
-                
-                // first hit counts as a spell because we want it to stagger.
-                HitTaker.Hit(target, new HitInstance
+                HealthManager targetHP = collider.gameObject.GetComponent<HealthManager>();
+                if (targetHP != null)
                 {
-                    Source = base.gameObject,
-                    AttackType = AttackTypes.Spell,
-                    CircleDirection = false,
-                    DamageDealt = cachedPrimaryDmg,
-                    Direction = 0f,
-                    IgnoreInvulnerable = true,
-                    MagnitudeMultiplier = 1f,
-                    MoveAngle = 0f,
-                    MoveDirection = false,
-                    Multiplier = 1f,
-                    SpecialType = SpecialTypes.None,
-                    IsExtraDamage = false
-                }, 3);
+                    targetHP.Hit(new HitInstance
+                    {
+                        Source = base.gameObject,
+                        AttackType = AttackTypes.Spell,
+                        CircleDirection = false,
+                        DamageDealt = cachedPrimaryDmg,
+                        Direction = 0f,
+                        IgnoreInvulnerable = true,
+                        MagnitudeMultiplier = 1f,
+                        MoveAngle = 0f,
+                        MoveDirection = false,
+                        Multiplier = 1f,
+                        SpecialType = SpecialTypes.None,
+                        IsExtraDamage = false
+                    });
+                }
             }
 
         }
@@ -104,25 +104,25 @@ namespace redwing
             foreach (Collider2D collider in enteredColliders.ToList())
             {
 
-                GameObject target = collider.gameObject;
-                FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
-                
-                // first hit counts as a spell because we want it to stagger.
-                HitTaker.Hit(target, new HitInstance
+                HealthManager targetHP = collider.gameObject.GetComponent<HealthManager>();
+                if (targetHP != null)
                 {
-                    Source = base.gameObject,
-                    AttackType = AttackTypes.Generic,
-                    CircleDirection = false,
-                    DamageDealt = cachedSecondaryDmg,
-                    Direction = 0f,
-                    IgnoreInvulnerable = true,
-                    MagnitudeMultiplier = 1f,
-                    MoveAngle = 0f,
-                    MoveDirection = false,
-                    Multiplier = 1f,
-                    SpecialType = SpecialTypes.None,
-                    IsExtraDamage = false
-                }, 3);
+                    targetHP.Hit(new HitInstance
+                    {
+                        Source = base.gameObject,
+                        AttackType = AttackTypes.Generic,
+                        CircleDirection = false,
+                        DamageDealt = cachedSecondaryDmg,
+                        Direction = 0f,
+                        IgnoreInvulnerable = true,
+                        MagnitudeMultiplier = 1f,
+                        MoveAngle = 0f,
+                        MoveDirection = false,
+                        Multiplier = 1f,
+                        SpecialType = SpecialTypes.None,
+                        IsExtraDamage = false
+                    });
+                }
             }
             
         }
