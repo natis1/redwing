@@ -17,11 +17,13 @@ namespace redwing
         private readonly Texture2D[] fireballMagmas = new Texture2D[12];
         private readonly Texture2D[] fireballMagmaBalls = new Texture2D[4];
         
-        private readonly Texture2D[] fireTrails = new Texture2D[4];
+        
         
         private readonly Texture2D[] firePillars = new Texture2D[10];
         private readonly Texture2D[] fireSpikes = new Texture2D[16];
         private readonly Texture2D[] fireShields = new Texture2D[20];
+
+        private readonly Texture2D[] fireTrails = new Texture2D[4];
         
         
         private const int TESTING_CLIP = 2;
@@ -78,6 +80,9 @@ namespace redwing
 
         public const int FTTEXTURE_WIDTH = 1800;
         public const int FTTEXTURE_HEIGHT = 150;
+        
+        // the caps are as tall as the regular fire trails.
+        public const int FTCAPTEXTURE_WIDTH = 150;
 
         public const int FPTEXTURE_WIDTH = 150;
         public const int FPTEXTURE_HEIGHT = 1080;
@@ -112,6 +117,9 @@ namespace redwing
         private const int FS_INTERPOLATE_PIXELS = 50;
 
         private const int FB_MAGMA_INTERPOLATE_PIXELS = 15;
+        
+        // pick a factor of FTTEXTURE_HEIGHT
+        private const int FT_CAP_INTERPOLATE_PIXELS = 15;
 
         
         
@@ -527,8 +535,8 @@ namespace redwing
                 
                 double sinePitchTime = (AUDIO_SAMPLE_HZ / actualFreq) / 2.0;
                 
-                if (i % 500 == 0)
-                    log("sine pitch time is " + sinePitchTime + " because the freq is " + actualFreq);
+                //if (i % 500 == 0)
+                //    log("sine pitch time is " + sinePitchTime + " because the freq is " + actualFreq);
                 // Will this work? Who knows.
                 fx[i] += (float)(volume * (Math.Sin( randomPointOnSin + ( ((double) i) / sinePitchTime) )));
             }
@@ -817,7 +825,8 @@ namespace redwing
 
         private void generateFlameTextures()
         {
-
+            
+            
             try
             {
                 for (int i = 0; i < fireBalls.Length; i++)
@@ -830,17 +839,7 @@ namespace redwing
                 log("Unable to build fireballs. Error " + e);
             }
 
-            try
-            {
-                for (int i = 0; i < fireTrails.Length; i++)
-                {
-                    fireTrails[i] = generateFireTrail();
-                    fireTrails[i].Apply();
-                }
-            } catch (Exception e)
-            {
-                log("Unable to build fire trails. Error " + e);
-            }
+            
 
             try
             {
@@ -906,10 +905,145 @@ namespace redwing
                 log("Unable to build fire shields. Error " + e);
             }
             
+            Texture2D[] fireTrailMiddles = new Texture2D[4];
+            Texture2D[] fireTrailCaps = new Texture2D[4];
+            Texture2D[] reverseFireTrailCaps = new Texture2D[4];
+            try
+            {
+                for (int i = 0; i < fireTrails.Length; i++)
+                {
+                    fireTrailMiddles[i] = generateFireTrail();
+                    fireTrailMiddles[i].Apply();
+                    
+                    fireTrailCaps[i] = generateFireTrailCap();
+                    fireTrailCaps[i].Apply();
+                    
+                    reverseFireTrailCaps[i] = generateReverseFireTrailCap();
+                    reverseFireTrailCaps[i].Apply();
+                    
+                    fireTrails[i] = new Texture2D(
+                        fireTrailMiddles[i].width  + fireTrailCaps[i].width  + reverseFireTrailCaps[i].width,
+                        fireTrailMiddles[i].height);
 
+                    for (int x = 0; x < reverseFireTrailCaps[i].width; x++)
+                    {
+                        for (int y = 0; y < reverseFireTrailCaps[i].height; y++)
+                        {
+                            fireTrails[i].SetPixel(x, y, reverseFireTrailCaps[i].GetPixel(x, y));
+                        }
+                    }
+
+                    int offset = reverseFireTrailCaps[i].width;
+                    
+                    for (int x = 0; x < fireTrailMiddles[i].width; x++)
+                    {
+                        for (int y = 0; y < fireTrailMiddles[i].height; y++)
+                        {
+                            fireTrails[i].SetPixel(x + offset, y, fireTrailMiddles[i].GetPixel(x, y));
+                        }
+                    }
+
+                    offset += fireTrailMiddles[i].width;
+                    
+                    for (int x = 0; x < fireTrailCaps[i].width; x++)
+                    {
+                        for (int y = 0; y < fireTrailCaps[i].height; y++)
+                        {
+                            fireTrails[i].SetPixel(x + offset, y, fireTrailCaps[i].GetPixel(x, y));
+                        }
+                    }
+                    
+                    
+                    
+                    fireTrails[i].Apply();
+                }
+            } catch (Exception e)
+            {
+                log("Unable to build fire trails. Error " + e);
+            }
+            
             log("Built all flame textures.");
 
             
+        }
+
+        private Texture2D generateReverseFireTrailCap()
+        {
+            Texture2D meme = generateFireTrailCap();
+            Texture2D newMeme = new Texture2D(FTCAPTEXTURE_WIDTH, FTTEXTURE_HEIGHT);
+            
+            // Just reverse it manually because computers are fast and who cares.
+            for (int x = 0; x < FTCAPTEXTURE_WIDTH; x++)
+            {
+                for (int y = 0; y < FTTEXTURE_HEIGHT; y++)
+                {
+                    newMeme.SetPixel(x, y, meme.GetPixel(FTCAPTEXTURE_WIDTH - 1 - x, y));
+                }
+            }
+
+            return newMeme;
+        }
+
+        private Texture2D generateFireTrailCap()
+        {
+            Texture2D ftc = new Texture2D(FTCAPTEXTURE_WIDTH, FTTEXTURE_HEIGHT);
+            double[] horzIntensity150 = new double[FTTEXTURE_HEIGHT];
+            double[] horzOpacity150 = new double[FTTEXTURE_HEIGHT];
+
+            for (int i = 0; i < FTTEXTURE_HEIGHT; i++)
+            {
+                if (i % FT_CAP_INTERPOLATE_PIXELS != 0) continue;
+
+                horzIntensity150[i] = rng.NextDouble();
+                horzOpacity150[i] = rng.NextDouble();
+                horzIntensity150[i] = 0.5;
+                horzOpacity150[i] = 0.5;
+                
+                // because c# sucks NextDouble can't return arbitrary numbers
+                // so apply a transformation to map horzIntensity150 -> -2- -1
+                // and horzOpacity150 -> -1.5 - -1
+
+                horzIntensity150[i] = (horzIntensity150[i]) * 0.2;
+                horzOpacity150[i] = (horzOpacity150[i] * 0.2) - 0.6;
+            }
+            
+            // Interpolation
+            for (int i = 0; i < FTTEXTURE_HEIGHT - FT_CAP_INTERPOLATE_PIXELS; i++)
+            {
+                if (i % FT_CAP_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FT_CAP_INTERPOLATE_PIXELS;
+                double avgWeighting = (double) offset / (double) FT_CAP_INTERPOLATE_PIXELS;
+                
+                horzIntensity150[i] = horzIntensity150[i - offset + FT_CAP_INTERPOLATE_PIXELS] * avgWeighting + horzIntensity150[i - offset] * (1.0 - avgWeighting);
+                horzOpacity150[i] = horzOpacity150[i - offset + FT_CAP_INTERPOLATE_PIXELS] * avgWeighting + horzOpacity150[i - offset] * (1.0 - avgWeighting);
+            }
+            
+            // Interpolation phase pt 2 (for wrap around)
+            for (int i = FTTEXTURE_HEIGHT - FT_CAP_INTERPOLATE_PIXELS; i < FTTEXTURE_HEIGHT; i++)
+            {
+                if (i % FT_CAP_INTERPOLATE_PIXELS == 0) continue;
+                int offset = i % FT_CAP_INTERPOLATE_PIXELS;
+                double avgWeighting = (double)offset / (double)FT_CAP_INTERPOLATE_PIXELS;
+
+                horzIntensity150[i] = horzIntensity150[0] * avgWeighting + horzIntensity150[i - offset] * (1.0 - avgWeighting);
+                horzOpacity150[i] = horzOpacity150[0] * avgWeighting + horzOpacity150[i - offset] * (1.0 - avgWeighting);
+            }
+            
+            
+            // Actually set the colors
+            for (int x = 0; x < FTCAPTEXTURE_WIDTH; x++)
+            {
+                for (int y = 0; y < FTTEXTURE_HEIGHT; y++)
+                {
+                    double distance = Math.Sqrt( 1.5* (x * x) + 1.0 * ( (y - FTTEXTURE_HEIGHT/ 2) * (y - FTTEXTURE_HEIGHT/ 2)));
+                    
+                    ftc.SetPixel(x, y, getFireColor
+                    (distance, horzIntensity150[y], horzOpacity150[y],
+                        FTCAPTEXTURE_WIDTH / 2, FTCAPTEXTURE_WIDTH/2, 3.4, 9.0));
+                }
+            }
+            
+            return ftc;
         }
         
         
@@ -928,8 +1062,8 @@ namespace redwing
                 vertOpacity150[i] = rng.NextDouble();
                 
                 // because c# sucks NextDouble can't return arbitrary numbers
-                // so apply a transformation to map verticalIntensity150 -> 0-0.2
-                // and verticalOpacity150 -> -1 - -0.7
+                // so apply a transformation to map vertIntensity150 -> 0-0.2
+                // and vertOpacity150 -> -1 - -0.7
                 vertOpacity150[i] = (vertOpacity150[i] * 0.3) - 1.0f;
                 vertIntensity150[i] = (vertIntensity150[i] * 0.2) - 1.5f * index;
             }
@@ -974,7 +1108,7 @@ namespace redwing
                     
                     fbm.SetPixel(x, y, getFireColor
                         ((netDistance), vertIntensity150[x], vertOpacity150[x], FBTEXTURE_WIDTH,
-                        (FBTEXTURE_WIDTH - (int) (FBTEXTURE_WIDTH * index * 0.0834)), 9.0));
+                        (FBTEXTURE_WIDTH - (int) (FBTEXTURE_WIDTH * index * 0.0834)), 3.4, 9.0));
                 }
             }
 
@@ -1040,13 +1174,13 @@ namespace redwing
                     {
                         fs.SetPixel(x, y, getFireColor
                         ((realDistance), horzIntensity20[y], horzOpacity20[y], LASERTEXTURE_WIDTH / 2,
-                            LASERTEXTURE_WIDTH / 2.0, 9.0));
+                            LASERTEXTURE_WIDTH / 2.0, 3.4, 9.0));
                     }
                     else
                     {
                         fs.SetPixel(x, y, getFireColor
                         ((int)( ((double)y / 50.0) * (double)realDistance), horzIntensity20[y], horzOpacity20[y], LASERTEXTURE_WIDTH / 2,
-                            LASERTEXTURE_WIDTH / 2.0, 9.0));
+                            LASERTEXTURE_WIDTH / 2.0, 3.4, 9.0));
                     }
                     
                 }
@@ -1107,7 +1241,7 @@ namespace redwing
                 {
                     fp.SetPixel(x, y, getFireColor
                         ((x - FPTEXTURE_WIDTH / 2), horzIntensity150[y], horzOpacity150[y],
-                        FPTEXTURE_WIDTH / 2, FPTEXTURE_WIDTH / 2.0, 9.0));
+                        FPTEXTURE_WIDTH / 2, FPTEXTURE_WIDTH / 2.0, 3.4, 9.0));
                 }
             }
 
@@ -1127,6 +1261,8 @@ namespace redwing
                 
                 verticalIntensity150[i] = rng.NextDouble();
                 verticalOpacity150[i] = rng.NextDouble();
+                verticalIntensity150[i] = 0.5;
+                verticalOpacity150[i] = 0.5;
 
                 // because c# sucks NextDouble can't return arbitrary numbers
                 // so apply a transformation to map verticalIntensity150 -> 0 - 0.2
@@ -1165,7 +1301,7 @@ namespace redwing
                 {
                     ft.SetPixel(x, y, getFireColor
                         ( (y - FTTEXTURE_HEIGHT / 2), verticalIntensity150[x], verticalOpacity150[x],
-                        FTTEXTURE_HEIGHT / 2, FTTEXTURE_HEIGHT / 2.0, 9.0));
+                        FTTEXTURE_HEIGHT / 2, FTTEXTURE_HEIGHT / 2.0, 3.4, 9.0));
                 }
             }
             return ft;
@@ -1218,7 +1354,7 @@ namespace redwing
                     int angel = (int) getNearestAngel(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT);
                     fb.SetPixel(x, y, getFireColor
                         (getDistance(x, y, FBMBTEXTURE_WIDTH, FBMBTEXTURE_HEIGHT), radialIntensity400[angel],
-                        radialOpacity400[angel], FBMBTEXTURE_WIDTH/2, FBMBTEXTURE_HEIGHT/2.0, 9.0));
+                        radialOpacity400[angel], FBMBTEXTURE_WIDTH/2, FBMBTEXTURE_HEIGHT/2.0, 3.4, 9.0));
                 }
             }
             return fb;
@@ -1271,7 +1407,7 @@ namespace redwing
                     int angel = (int) getNearestAngel(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT);
                     fb.SetPixel(x, y, getFireColor
                         (getDistance(x, y, FBTEXTURE_WIDTH, FBTEXTURE_HEIGHT), radialIntensity400[angel],
-                        radialOpacity400[angel], FBTEXTURE_HEIGHT/2, FBTEXTURE_HEIGHT/2.0, 9.0));
+                        radialOpacity400[angel], FBTEXTURE_HEIGHT/2, FBTEXTURE_HEIGHT/2.0, 3.4, 9.0));
                 }
             }
             return fb;
@@ -1334,7 +1470,7 @@ namespace redwing
                         int angel = (int) getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
                         fShield.SetPixel(x, y, getFireColor
                         ( ringStartAt - dist, radialIntensityEdge[angel],
-                            0.0, 15, 15.0, 1.0));
+                            0.0, 15, 15.0, 3.4, 1.0));
                     }
                     else
                     {
@@ -1342,16 +1478,17 @@ namespace redwing
                         int angel = (int) getNearestAngel(x, y, FSHIELDTEXTURE_WIDTH, FSHIELDTEXTURE_HEIGHT);
                         fShield.SetPixel(x, y, getFireColor
                         (dist - ringStartAt, radialIntensityEdge[angel],
-                            radialOpacityEdge[angel], (int)ringSize, (int)ringSize, 1.5));
+                            radialOpacityEdge[angel], (int)ringSize, (int)ringSize, 3.4, 1.5));
                     }
                 }
             }
             return fShield;
         }
 
-        private Color getFireColor(double distance, double intensity400, double opacity400, int intensInterpolateDist, double opacInterpDist, double opacSharpness)
+        private Color getFireColor(double distance, double intensity400, double opacity400, int intensInterpolateDist,
+            double opacInterpDist, double intensWighting, double opacSharpness)
         {
-            double intensity = getRealIntensity(distance, intensity400, intensInterpolateDist);
+            double intensity = getRealIntensity(distance, intensity400, intensInterpolateDist, intensWighting);
             // ReSharper disable once UseObjectOrCollectionInitializer because it looks dumb
             Color c = new Color();
 
@@ -1406,14 +1543,15 @@ namespace redwing
             return opactReal;
         }
 
-        private static double getRealIntensity(double distance, double intensity400, int interpolateDistance)
+        private static double getRealIntensity(double distance, double intensity400, int interpolateDistance,
+            double intensityWeighting)
         {
             if (distance < 0.0)
             {
                 distance = -distance;
             }
             double averageWeighting = distance / (double)interpolateDistance;
-            double intenReal = intensity400 * averageWeighting + ((1.0 - averageWeighting) * 3.4);
+            double intenReal = intensity400 * averageWeighting + ((1.0 - averageWeighting) * intensityWeighting);
             if (intenReal < 0.0)
             {
                 intenReal = 0.0;

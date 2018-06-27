@@ -189,6 +189,8 @@ namespace redwing
 
         public static Texture2D[] flameShieldTextures;
         public static Texture2D[] fireTrailTextures;
+        public static Texture2D[] fireTrailCaps;
+        public static Texture2D[] reverseFireTrailCaps;
         public static AudioClip shieldSoundEffect;
         public static AudioClip fireTrailSoundEffect;
         public static AudioClip shieldChargeSoundEffect;
@@ -342,7 +344,8 @@ namespace redwing
             float angle = (float) redwing_flame_gen.getNearestAngel((int) (delta.x * 10000), (int) (delta.y * 10000), 0, 0);
 
             GameObject trail = new GameObject("redwingFireTrail", typeof(redwing_trail_behavior),
-                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer), typeof(AudioSource));
+                typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(MeshFilter), typeof(MeshRenderer),
+                typeof(AudioSource));
 
             GameObject trailMemeSpawner = new GameObject("redwingFireTrailSpawner");
             Vector3 voidKnightPos = voidKnight.transform.position;
@@ -359,8 +362,11 @@ namespace redwing
 
             redwing_trail_behavior meme = trail.GetComponent<redwing_trail_behavior>();
 
-            meme.drawEm = trail.GetComponent<SpriteRenderer>();
-            meme.spriteUsed = fireTrailTextures[currentTrailSprite];
+            
+            
+            meme.memeFilter = trail.GetComponent<MeshFilter>();
+            meme.memeRenderer = trail.GetComponent<MeshRenderer>();
+            meme.memeTextureUsed = fireTrailTextures[currentTrailSprite];
             meme.voidKnightCollider = voidKnight.GetComponent<BoxCollider2D>();
             meme.cachedAudio = trail.GetComponent<AudioSource>();
             meme.cachedAudio.clip = fireTrailSoundEffect;

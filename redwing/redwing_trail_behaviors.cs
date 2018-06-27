@@ -2,10 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using InControl.NativeProfile;
 using UnityEngine;
 
 namespace redwing
 {
+
+    
     public class redwing_trail_behavior : MonoBehaviour
     {
         private const float LIFESPAN = 1.6f;
@@ -19,9 +22,15 @@ namespace redwing
         public static int damageSecNail;
         private int cachedPrimaryDmg;
         private int cachedSecondaryDmg;
-
-        public SpriteRenderer drawEm;
-        public Texture2D spriteUsed;
+        
+        public MeshFilter memeFilter;
+        public MeshRenderer memeRenderer;
+        
+        public Texture2D memeTextureUsed;
+        
+        private float currentTime;
+        
+        
         private bool stopAnimation;
         public BoxCollider2D voidKnightCollider;
         public List<Collider2D> enteredColliders;
@@ -50,28 +59,29 @@ namespace redwing
         private IEnumerator dashAnimation()
         {
             initPosition = voidKnightCollider.gameObject.transform.localPosition;
+            const int pixelsPerUnit = 75;
+            buildTextureInital(75);
+            
+            
+            
             
             yield return null;
-            int maxDashLength = spriteUsed.width;
-            int currentDashLength = 0;
-            float estimatedPixelsMoved = 0f;
-            const int pixelsPerUnit = 75;
+            int maxDashLength = memeTextureUsed.width;
+            float estimatedDistanceMoved = 0f;
             BoxCollider2D cachedCollider = gameObject.GetComponent<BoxCollider2D>();
             while ( (HeroController.instance.cState.dashing || HeroController.instance.cState.shadowDashing ||
-                   HeroController.instance.cState.backDashing) && currentDashLength < maxDashLength && !stopAnimation)
+                   HeroController.instance.cState.backDashing) && !stopAnimation)
             {
                 Vector2 currentPosition = voidKnightCollider.gameObject.transform.localPosition;
                 Vector2 deltaPosition = currentPosition - initPosition;
                 
                 //log($@"currentPos is {currentPosition} and init position is {initPosition}");
-                estimatedPixelsMoved += deltaPosition.magnitude * pixelsPerUnit;
+                estimatedDistanceMoved += deltaPosition.magnitude;
                 
-                currentDashLength = (int) estimatedPixelsMoved;
-                Rect spriteRect = new Rect(0, 0, currentDashLength, spriteUsed.height);
-                drawEm.sprite = Sprite.Create(spriteUsed, spriteRect, new Vector2(0, 0.5f), pixelsPerUnit);
-
+                updateTextureInProgress(pixelsPerUnit, estimatedDistanceMoved);
+                
                 Vector2 cachedColliderSize = cachedCollider.size;
-                cachedColliderSize.x = estimatedPixelsMoved / pixelsPerUnit;
+                cachedColliderSize.x = estimatedDistanceMoved;
                 cachedColliderSize.y = voidKnightCollider.size.y;
                 
                 cachedCollider.size = cachedColliderSize;
@@ -85,23 +95,113 @@ namespace redwing
                 log("stopped animation because stopanimation true");
             }
 
-            if (currentDashLength >= maxDashLength)
+        }
+
+        private void updateTextureInProgress(int pixelsPerUnit, float distanceMoved)
+        {
+            
+            float capWidth = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) pixelsPerUnit;
+            float capHeight = redwing_flame_gen.FTTEXTURE_HEIGHT / (float) pixelsPerUnit;
+            
+            float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
+            float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
+            
+            memeFilter.mesh.vertices[4] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            memeFilter.mesh.vertices[5] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            memeFilter.mesh.vertices[6] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            memeFilter.mesh.vertices[7] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            
+            /*
+            Mesh m = new Mesh
             {
-                log("Stopped animation because your sprite is too small. fix it");
-            }
+                name = "redwingtrailmesh",
+                vertices = new Vector3[]
+                {
+                    new Vector3(0, 0, 0.01f),
+                    new Vector3(capWidth, 0, 0.01f),
+                    new Vector3(capWidth, capHeight, 0.01f),
+                    new Vector3(0, capHeight, 0.01f),
+                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
+                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
+                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
+                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f)
+                },
+                uv = new Vector2[8]
+                {
+                    new Vector2(0, 0),
+                    new Vector2(0, 1),
+                    new Vector2(leftCapWidthPercentage, 1),
+                    new Vector2(leftCapWidthPercentage, 0),
+                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
+                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
+                    new Vector2(1, 1),
+                    new Vector2(1, 1)
+                },
+                triangles = new int[] { 0, 1, 2, 0, 2, 3, 2, 3, 4, 2, 4, 5, 4, 5, 6, 4, 6, 7}
+            };
+            m.RecalculateNormals();
+            memeFilter.mesh.Clear();
+            */
+            
+            memeFilter.mesh = m;
+
+        }
+
+        private void buildTextureInital(int pixelsPerUnit)
+        {
+            float capWidth = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) pixelsPerUnit;
+            float capHeight = redwing_flame_gen.FTTEXTURE_HEIGHT / (float) pixelsPerUnit;
+
+            float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
+            float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
+            
+            Mesh m = new Mesh
+            {
+                name = "redwingtrailmesh",
+                vertices = new Vector3[]
+                {
+                    new Vector3(0, 0, 0.01f),
+                    new Vector3(capWidth, 0, 0.01f),
+                    new Vector3(capWidth, capHeight, 0.01f),
+                    new Vector3(0, capHeight, 0.01f),
+                    new Vector3(capWidth, capHeight, 0.01f),
+                    new Vector3(capWidth, capHeight, 0.01f),
+                    new Vector3(capWidth, capHeight, 0.01f),
+                    new Vector3(capWidth, capHeight, 0.01f)
+                },
+                uv = new Vector2[8]
+                {
+                    new Vector2(0, 0),
+                    new Vector2(0, 1),
+                    new Vector2(leftCapWidthPercentage, 1),
+                    new Vector2(leftCapWidthPercentage, 0),
+                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
+                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 0),
+                    new Vector2(1, 1),
+                    new Vector2(1, 0)
+                },
+                triangles = new int[] { 0, 1, 2, 0, 2, 3, 2, 3, 4, 2, 4, 5, 4, 5, 6, 4, 6, 7}
+            };
+            
+            m.RecalculateNormals();
+
+            memeFilter.mesh = m;
+            memeRenderer.material.shader = Shader.Find("Particles/Additive");
+            memeRenderer.material.mainTexture = memeTextureUsed;
+            memeRenderer.material.color = Color.white;
         }
 
 
         private IEnumerator playAnimation()
         {
-            float currentTime = 0f;
-            Color cachedColor = drawEm.color;
+            currentTime = 0f;
+            Color cachedColor = memeRenderer.material.color;
             
             while (currentTime < LIFESPAN)
             {
                 currentTime += Time.unscaledDeltaTime;
                 cachedColor.a = (float) ((LIFESPAN - currentTime) / LIFESPAN);
-                drawEm.color = cachedColor;
+                memeRenderer.material.color = cachedColor;
                 yield return null;
             }
 

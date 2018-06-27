@@ -9,7 +9,7 @@ using HutongGames.PlayMaker.Actions;
 
 namespace redwing
 {
-    internal class redwing_greymoth : MonoBehaviour
+    internal class greymoth : MonoBehaviour
     {
 
         /*

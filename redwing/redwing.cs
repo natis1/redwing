@@ -155,7 +155,7 @@ namespace redwing
             {
                 if (!blackmothExists && GlobalSettings.useGreymothDashWhenBlackmothMissing)
                 {
-                    GameManager.instance.gameObject.AddComponent<redwing_greymoth>();
+                    GameManager.instance.gameObject.AddComponent<greymoth>();
                     // no blackmoth so no need to override it.
                     redwing_hooks.overrideBlackmothNailDmg = false;
                     log("Unable to find Blackmoth, loading Greymoth instead.");
