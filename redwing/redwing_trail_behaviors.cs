@@ -106,10 +106,22 @@ namespace redwing
             float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
             float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
             
-            memeFilter.mesh.vertices[4] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            memeFilter.mesh.vertices[5] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            memeFilter.mesh.vertices[6] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            memeFilter.mesh.vertices[7] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            //memeFilter.mesh.vertices[4] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            //memeFilter.mesh.vertices[5] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            //memeFilter.mesh.vertices[6] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            //memeFilter.mesh.vertices[7] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
+            
+            memeFilter.mesh.vertices = new []{
+                memeFilter.mesh.vertices[0],
+                memeFilter.mesh.vertices[1],
+                memeFilter.mesh.vertices[2],
+                memeFilter.mesh.vertices[3],
+                new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
+                new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
+                new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
+                new Vector3(capWidth + distanceMoved, capHeight, 0.01f)
+            };
+            
             
             /*
             Mesh m = new Mesh
@@ -143,7 +155,7 @@ namespace redwing
             memeFilter.mesh.Clear();
             */
             
-            memeFilter.mesh = m;
+            //memeFilter.mesh = m;
 
         }
 
