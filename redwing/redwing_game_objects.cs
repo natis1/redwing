@@ -215,13 +215,5 @@ namespace redwing
             physics.isKinematic = true;
             physics.gravityScale = 0f;
         }
-
-        private static void log(string str)
-        {
-            Modding.Logger.Log("[Redwing] " + str);
-        }
-
-
-
     }
 }

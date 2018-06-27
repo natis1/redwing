@@ -169,9 +169,7 @@ namespace redwing
             
             yield return new WaitForSeconds(lifespan);
 
-            if (!despawnBall) yield break;
-            Modding.Logger.Log("[REDWING] Despawning fb because time ran out I guess");
-            
+            if (!despawnBall) yield break;            
             Destroy(fireball);
             Destroy(this.gameObject);
             
@@ -206,7 +204,6 @@ namespace redwing
                     IsExtraDamage = false
                 }, 3);
 
-                log("Did damage to enemy probably with fireball.");
                 if (doPhysics)
                 {
                     fireballDmg = 0;
@@ -230,9 +227,7 @@ namespace redwing
                                         GameManager.instance.gameSettings.soundVolume * 0.01f * 0.12f);
             cachedAudioPlayer.loop = false;
             cachedAudioPlayer.Play();
-            
-            log("Hit a layer 8 object with on trigger enter. obj name is " + hitbox.name);
-            
+                        
             doPhysics = false;
             
             //center of the object. if we above it and within the bounds we hit it from the top
@@ -492,8 +487,6 @@ namespace redwing
             go.transform.position = point;
             CircleCollider2D c = go.AddComponent<CircleCollider2D>();
             c.radius = 0.1f;
-            Modding.Logger.Log("[circlecolliderthingy] c " + c.bounds.center.x + ", " + c.bounds.center.y +
-                               ", " + c.bounds.center.z);
             bool collideWithCol = c.IsTouching(col);
             UnityEngine.Object.Destroy(go);
             return collideWithCol;

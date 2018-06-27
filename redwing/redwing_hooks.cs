@@ -267,10 +267,7 @@ namespace redwing
             {
                 alpha = 1.0f;
                 if (playFSSound && UIManager.instance.uiState == UIState.PLAYING)
-                {
-                    log("current sound fx volume is " + GameManager.instance.gameSettings.masterVolume *
-                        GameManager.instance.gameSettings.soundVolume);
-                    
+                {                    
                     flameShieldAudio.Stop();
                     flameShieldAudio.volume = (GameManager.instance.gameSettings.masterVolume *
                                                GameManager.instance.gameSettings.soundVolume * 0.01f);
@@ -462,26 +459,9 @@ namespace redwing
             setupFlamePillar();
             createFlameShield();
         }
-        
-        private GameObject fireSoul(GameObject go, Fsm fsm)
-        {
-            log("event sent. game object is: " + go.name + " and the fsm is: " + fsm.Name);
-            if (go == sharpShadow)
-            {
-                PlayMakerFSM hm = FSMUtility.LocateFSM(fsm.GameObject, "health_manager") ?? FSMUtility.LocateFSM(fsm.GameObject, "health_manager_enemy");
-                if (!Equals(hm, null))
-                {
-                    log("You hit an enemy with sharp shadow. Wow. Awesome...");
-                }
-            }
-            return go;
-        }
 
         private void setupFlamePillar()
-        {
-            log("start flame pillar setup");
-            
-            
+        {            
             // lul... grimm enemy range.
             flamePillarDetect = new GameObject("redwingFlamePillarDetect",
                 typeof(redwing_pillar_detect_behavior), typeof(Rigidbody2D), typeof(CircleCollider2D));
@@ -493,11 +473,7 @@ namespace redwing
             Bounds bounds = fpRangeCollide.bounds;
             bounds.center = flamePillarDetect.transform.position;
             fpRangeCollide.isTrigger = true;
-            fpRangeCollide.radius = FP_RANGE;
-
-            log("detect enemy hitbox centered around " + bounds.center.x + ", " + bounds.center.y + " with radius: " +
-                fpRangeCollide.radius);
-            
+            fpRangeCollide.radius = FP_RANGE;            
 
             Rigidbody2D fpFakePhysics = flamePillarDetect.GetComponent<Rigidbody2D>();
             fpFakePhysics.isKinematic = true;
@@ -526,6 +502,14 @@ namespace redwing
                 log("Unable to add method: error " + e);
             }
             log("got to end of FP method");
+        }
+
+        private HitInstance nailArtFireballs(Fsm hitter, HitInstance hit)
+        {
+            log("detected hitinstance " + hitter.GameObject.name);
+            
+            
+            return hit;
         }
         
         

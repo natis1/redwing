@@ -51,7 +51,6 @@ namespace redwing
             cachedAudio.volume = (GameManager.instance.gameSettings.masterVolume *
                                   GameManager.instance.gameSettings.soundVolume * 0.01f * 0.4f);
             cachedAudio.Play();
-            StartCoroutine(playAnimation());
             StartCoroutine(dashAnimation());
             StartCoroutine(secondaryAttacks());
         }
@@ -74,7 +73,6 @@ namespace redwing
             {
                 Vector2 currentPosition = voidKnightCollider.gameObject.transform.localPosition;
                 Vector2 deltaPosition = currentPosition - initPosition;
-                
                 //log($@"currentPos is {currentPosition} and init position is {initPosition}");
                 estimatedDistanceMoved += deltaPosition.magnitude;
                 
@@ -94,7 +92,27 @@ namespace redwing
             {
                 log("stopped animation because stopanimation true");
             }
+            
+            capTexture(75, estimatedDistanceMoved);
+            StartCoroutine(playAnimation());
+        }
 
+        private void capTexture(int pixelsPerUnit, float distanceMoved)
+        {
+            float capWidth = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) pixelsPerUnit;
+            float capHeight = redwing_flame_gen.FTTEXTURE_HEIGHT / (float) pixelsPerUnit;
+            
+            memeFilter.mesh.vertices = new []{
+                memeFilter.mesh.vertices[0],
+                memeFilter.mesh.vertices[1],
+                memeFilter.mesh.vertices[2],
+                memeFilter.mesh.vertices[3],
+                new Vector3(distanceMoved, -capHeight / 2, 0.01f),
+                new Vector3(distanceMoved, capHeight / 2, 0.01f),
+                new Vector3(capWidth + distanceMoved, -capHeight / 2, 0.01f),
+                new Vector3(capWidth + distanceMoved, capHeight / 2, 0.01f)
+            };
+            memeFilter.mesh.RecalculateBounds();
         }
 
         private void updateTextureInProgress(int pixelsPerUnit, float distanceMoved)
@@ -106,57 +124,18 @@ namespace redwing
             float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
             float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
             
-            //memeFilter.mesh.vertices[4] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            //memeFilter.mesh.vertices[5] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            //memeFilter.mesh.vertices[6] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            //memeFilter.mesh.vertices[7] = new Vector3(capWidth + distanceMoved, capHeight, 0.01f);
-            
             memeFilter.mesh.vertices = new []{
                 memeFilter.mesh.vertices[0],
                 memeFilter.mesh.vertices[1],
                 memeFilter.mesh.vertices[2],
                 memeFilter.mesh.vertices[3],
-                new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
-                new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
-                new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
-                new Vector3(capWidth + distanceMoved, capHeight, 0.01f)
+                new Vector3(distanceMoved, -capHeight / 2, 0.01f),
+                new Vector3(distanceMoved, capHeight / 2, 0.01f),
+                new Vector3(distanceMoved, -capHeight / 2, 0.01f),
+                new Vector3(distanceMoved, capHeight / 2, 0.01f)
             };
+            memeFilter.mesh.RecalculateBounds();
             
-            
-            /*
-            Mesh m = new Mesh
-            {
-                name = "redwingtrailmesh",
-                vertices = new Vector3[]
-                {
-                    new Vector3(0, 0, 0.01f),
-                    new Vector3(capWidth, 0, 0.01f),
-                    new Vector3(capWidth, capHeight, 0.01f),
-                    new Vector3(0, capHeight, 0.01f),
-                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
-                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
-                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f),
-                    new Vector3(capWidth + distanceMoved, capHeight, 0.01f)
-                },
-                uv = new Vector2[8]
-                {
-                    new Vector2(0, 0),
-                    new Vector2(0, 1),
-                    new Vector2(leftCapWidthPercentage, 1),
-                    new Vector2(leftCapWidthPercentage, 0),
-                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
-                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
-                    new Vector2(1, 1),
-                    new Vector2(1, 1)
-                },
-                triangles = new int[] { 0, 1, 2, 0, 2, 3, 2, 3, 4, 2, 4, 5, 4, 5, 6, 4, 6, 7}
-            };
-            m.RecalculateNormals();
-            memeFilter.mesh.Clear();
-            */
-            
-            //memeFilter.mesh = m;
-
         }
 
         private void buildTextureInital(int pixelsPerUnit)
@@ -166,33 +145,41 @@ namespace redwing
 
             float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
             float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
+
+            log("Left cap width is " + leftCapWidthPercentage + " and middle width is " + middleWidthPercentage);
             
             Mesh m = new Mesh
             {
                 name = "redwingtrailmesh",
                 vertices = new Vector3[]
                 {
-                    new Vector3(0, 0, 0.01f),
-                    new Vector3(capWidth, 0, 0.01f),
-                    new Vector3(capWidth, capHeight, 0.01f),
-                    new Vector3(0, capHeight, 0.01f),
-                    new Vector3(capWidth, capHeight, 0.01f),
-                    new Vector3(capWidth, capHeight, 0.01f),
-                    new Vector3(capWidth, capHeight, 0.01f),
-                    new Vector3(capWidth, capHeight, 0.01f)
+                    new Vector3(-capWidth, -capHeight / 2, 0.01f),
+                    new Vector3(0, -capHeight / 2, 0.01f),
+                    new Vector3(0, capHeight / 2, 0.01f),
+                    new Vector3(-capWidth, capHeight / 2, 0.01f),
+                    new Vector3(0, -capHeight / 2, 0.01f),
+                    new Vector3(0, capHeight / 2, 0.01f),
+                    new Vector3(0, -capHeight / 2, 0.01f),
+                    new Vector3(0, capHeight / 2, 0.01f)
                 },
                 uv = new Vector2[8]
                 {
                     new Vector2(0, 0),
-                    new Vector2(0, 1),
-                    new Vector2(leftCapWidthPercentage, 1),
                     new Vector2(leftCapWidthPercentage, 0),
-                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
+                    new Vector2(leftCapWidthPercentage, 1),
+                    new Vector2(0, 1),
                     new Vector2(leftCapWidthPercentage + middleWidthPercentage, 0),
-                    new Vector2(1, 1),
-                    new Vector2(1, 0)
+                    new Vector2(leftCapWidthPercentage + middleWidthPercentage, 1),
+                    new Vector2(1, 0),
+                    new Vector2(1, 1)
                 },
-                triangles = new int[] { 0, 1, 2, 0, 2, 3, 2, 3, 4, 2, 4, 5, 4, 5, 6, 4, 6, 7}
+                triangles = new int[] {
+                    2, 1, 0, 
+                    3, 2, 0,
+                    5, 4, 1,
+                    2, 5, 1,
+                    7, 6, 4,
+                    5, 7, 4}
             };
             
             m.RecalculateNormals();
@@ -201,19 +188,21 @@ namespace redwing
             memeRenderer.material.shader = Shader.Find("Particles/Additive");
             memeRenderer.material.mainTexture = memeTextureUsed;
             memeRenderer.material.color = Color.white;
+            
+            
         }
 
 
         private IEnumerator playAnimation()
         {
             currentTime = 0f;
-            Color cachedColor = memeRenderer.material.color;
+            Color cachedColor = memeRenderer.material.GetColor("_TintColor");
             
             while (currentTime < LIFESPAN)
             {
                 currentTime += Time.unscaledDeltaTime;
-                cachedColor.a = (float) ((LIFESPAN - currentTime) / LIFESPAN);
-                memeRenderer.material.color = cachedColor;
+                cachedColor.a = (float) ((LIFESPAN - currentTime) / ( LIFESPAN * 2));
+                memeRenderer.material.SetColor("_TintColor", cachedColor);
                 yield return null;
             }
 
@@ -241,16 +230,10 @@ namespace redwing
                     enteredColliders.RemoveAt(index);
             }
             
-            log("dealing secondary dmg to " + enteredColliders.Count + " enemies");
-            
-            
-            
             foreach (Collider2D collider in enteredColliders.ToList())
             {
 
                 GameObject target = collider.gameObject;
-                log("Doing primary pillar damage to target with name " + target.name);
-
                 FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
                 
                 // first hit counts as a spell because we want it to stagger.

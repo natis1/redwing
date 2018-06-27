@@ -22,7 +22,6 @@ namespace redwing
 		private IEnumerator despawn()
 		{
 			yield return new WaitForSecondsRealtime(lifespan);
-			Modding.Logger.Log("[REDWING] Despawning laser spawner because time ran out");
 			Destroy(this.gameObject);
 		}
 	}
@@ -148,66 +147,14 @@ namespace redwing
 				return;
 			}
 
-			
+
 
 			if (!this.enteredColliders.Contains(collision))
 			{
 				enteredColliders.Add(collision);
 			}
-		}	
-		
-		/*
-		private void hurtEnemies()
-		{
-			log("Hurting enemies. There are " + enteredColliders.Count + " enemies to hurt");
-			for (int i = this.enteredColliders.Count - 1; i >= 0; i--)
-			{
-				Collider2D collider2D = this.enteredColliders[i];
-				if (collider2D == null || !collider2D.isActiveAndEnabled)
-				{
-					this.enteredColliders.RemoveAt(i);
-				}
-				else
-				{
-					this.doDamage(collider2D.gameObject);
-				}
-			}
 		}
 
-		private void doDamage(GameObject target)
-		{
-			if (this.damageDealt <= 0)
-			{
-				return;
-			}
-
-			FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
-			HitTaker.Hit(target, new HitInstance
-			{
-				Source = base.gameObject,
-				AttackType = AttackTypes.Generic,
-				CircleDirection = this.circleDirection,
-				DamageDealt = damageDealt,
-				Direction = this.direction,
-				IgnoreInvulnerable = ignoreInvuln,
-				MagnitudeMultiplier = magnitudeMult,
-				MoveAngle = 0f,
-				MoveDirection = moveDirection,
-				Multiplier = 1f,
-				SpecialType = specialType,
-				IsExtraDamage = false
-			}, 3);
-		}
-
-		public AttackTypes attackType = AttackTypes.Generic;
-		public bool circleDirection = false;
-		public float direction = 0f;
-		public bool ignoreInvuln = true;
-		public float magnitudeMult = 1.0f;
-		public bool moveDirection = false;
-		public SpecialTypes specialType = SpecialTypes.None;
-		*/
-		
 		public List<Collider2D> enteredColliders;
 
 

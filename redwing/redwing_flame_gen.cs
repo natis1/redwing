@@ -1261,8 +1261,16 @@ namespace redwing
                 
                 verticalIntensity150[i] = rng.NextDouble();
                 verticalOpacity150[i] = rng.NextDouble();
-                verticalIntensity150[i] = 0.5;
-                verticalOpacity150[i] = 0.5;
+                
+                
+                // makes the caps look alright.
+                if (i == 0 || i == 0 + FT_INTERPOLATE_PIXELS || i == FTTEXTURE_WIDTH - FT_INTERPOLATE_PIXELS ||
+                    i == FTTEXTURE_WIDTH - 2 * FT_INTERPOLATE_PIXELS)
+                {
+                    //log("Fixing cap because i is " + i);
+                    verticalIntensity150[i] = 0.5;
+                    verticalOpacity150[i] = 0.5;
+                }
 
                 // because c# sucks NextDouble can't return arbitrary numbers
                 // so apply a transformation to map verticalIntensity150 -> 0 - 0.2

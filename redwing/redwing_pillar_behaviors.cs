@@ -22,7 +22,6 @@ namespace redwing
         
         private void Start()
         {
-            log("started firepillar");
             enteredColliders = new List<Collider2D>();
 
             cachedPrimaryDmg = damagePriBase + damagePriNail * PlayerData.instance.GetInt("nailSmithUpgrades");
@@ -63,20 +62,15 @@ namespace redwing
                 secondaryDamage();
                 secondaryAttacks++;
             }
-            log("ending firepillar");
             Destroy(this.gameObject);
         }
 
 
         private void primaryDamage()
         {
-            
-            log("dealing primary dmg to " + enteredColliders.Count + " enemies");
             foreach (Collider2D collider in enteredColliders.ToList())
             {
                 GameObject target = collider.gameObject;
-                log("Doing primary pillar damage to target with name " + target.name);
-
                 FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
                 
                 // first hit counts as a spell because we want it to stagger.
@@ -100,26 +94,17 @@ namespace redwing
         }
 
         private void secondaryDamage()
-        {
-            log("removing dead enemies from colliders");
-            
+        {            
             for (int index = enteredColliders.Count - 1; index >= 0; index--)
             {
                 Collider2D enteredCollider = enteredColliders[index];
                 if ((UnityEngine.Object) enteredCollider == (UnityEngine.Object) null || !enteredCollider.isActiveAndEnabled)
                     enteredColliders.RemoveAt(index);
             }
-            
-            log("dealing secondary dmg to " + enteredColliders.Count + " enemies");
-            
-            
-            
             foreach (Collider2D collider in enteredColliders.ToList())
             {
 
                 GameObject target = collider.gameObject;
-                log("Doing primary pillar damage to target with name " + target.name);
-
                 FSMUtility.SendEventToGameObject(target, "TAKE DAMAGE", false);
                 
                 // first hit counts as a spell because we want it to stagger.
@@ -195,8 +180,6 @@ namespace redwing
         // ReSharper disable once UnusedMember.Global - Used implicitly
         public void spawnFirePillar()
         {
-            log("meme");
-            
             firePillar = new GameObject("redwingFlamePillar", typeof(redwing_pillar_behavior),
                 typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(BoxCollider2D));
             firePillar.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -210,7 +193,7 @@ namespace redwing
                 }
                 catch (Exception e)
                 {
-                    log("meme failed with error " + e);
+                    log("spawn fire pillar failed with error " + e);
                 }
             }
 
@@ -248,16 +231,11 @@ namespace redwing
             hitEnemies.offset = new Vector2(img.size.x / 2, 0);
             
             firePillar.SetActive(true);
-            log("meme done. Random texture number is " + randomTextureToUse + " and that sprite texture is " +
-                pillarTextures[randomTextureToUse].width + ", " + pillarTextures[randomTextureToUse].height);
-            
-            
         }
         
         // From grimmchild upgrades and: Token: 0x0600006E RID: 110 RVA: 0x00005168 File Offset: 0x00003368
         private GameObject firePillarTarget()
         {
-            log("found enemy list. there are " + enemyList.Count + " enemies");
             GameObject result = null;
             float num = 99999f;
             if (enemyList.Count <= 0) return null;
@@ -284,7 +262,6 @@ namespace redwing
         private void OnTriggerEnter2D(Collider2D otherCollider)
         {
             if (otherCollider.gameObject.layer != 11) return;
-            log("found 'enemy' with name " + otherCollider.name);
             enemyList.Add(otherCollider.gameObject);
         }
 
