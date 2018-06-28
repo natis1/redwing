@@ -149,7 +149,6 @@ namespace redwing
 
             redwing_game_objects.fireBalls = fireBalls;
             redwing_game_objects.fireLasers = fireSpikes;
-            redwing_game_objects.firePillars = firePillars;
             redwing_game_objects.fireballMagmas = fireballMagmas;
             redwing_game_objects.fireballMagmaFireballs = fireballMagmaBalls;
 
@@ -191,8 +190,8 @@ namespace redwing
             sizzleSoundFX = AudioClip.Create("sizzle", (int) (AUDIO_SAMPLE_HZ * 1.5), 1, AUDIO_SAMPLE_HZ, false);
             sizzleSoundFX.SetData(generateSizzleSound((int) (AUDIO_SAMPLE_HZ * 1.5)), 0);
             
-            shieldRechargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 0.6), 1, AUDIO_SAMPLE_HZ, false);
-            shieldRechargeSoundFX.SetData(generateShieldChargeSound((int) (AUDIO_SAMPLE_HZ * 0.6)), 0);
+            shieldRechargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 0.7), 1, AUDIO_SAMPLE_HZ, false);
+            shieldRechargeSoundFX.SetData(generateShieldChargeSound((int) (AUDIO_SAMPLE_HZ * 0.7)), 0);
             
             shieldDischargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 0.4), 1, AUDIO_SAMPLE_HZ, false);
             shieldDischargeSoundFX.SetData(generateShieldDischargeSound((int) (AUDIO_SAMPLE_HZ * 0.4)), 0);
@@ -218,7 +217,7 @@ namespace redwing
             float[] fx = new float[length];
             fx = generateChirp(1.0, 200.0, 400.0, 0, fx.Length, fx);
             //fx = generateNoiseAtHz(1.0, 400.0, fx, fx.Length / 2, fx.Length);
-            fx = fadeAudio(0.0, fx.Length / 2, fx.Length - 4000, fx);
+            fx = fadeAudio(0.0, fx.Length / 2, fx.Length - 8000, fx);
             fx = normalizeVolume(fx);
             
             return fx;

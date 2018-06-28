@@ -4,7 +4,7 @@ namespace redwing
 {
     public static class version_info
     {
-        public const int SETTINGS_VER = 3;
+        public const int SETTINGS_VER = 4;
     }
 
     public class redwing_global_settings : IModSettings
@@ -23,6 +23,8 @@ namespace redwing
             overrideBlackmothNailDamage = true;
             overrideBlackmothLore = true;
             overrideBlackmothCloak = true;
+            
+            handicapAllNonFireAttacks = false;
 
             fireballDamageBase = 6;
             fireballDamagePerNailLvl = 3;
@@ -41,6 +43,8 @@ namespace redwing
 
             // Causes lasers to only fire when damage taken
             lasersWhenShieldBlocksAllDmg = false;
+
+            
 
             fireballCooldownBase = 10f;
             laserCooldownBase = 5f;
@@ -63,6 +67,15 @@ namespace redwing
         
         // Set to false ONLY if you have a non-blackmoth dashing mod.
         public bool useGreymothDashWhenBlackmothMissing { get => GetBool(); private set => SetBool(value); }
+        
+        // Set to true to make ALL non-redwing damage equal to 1. this includes spells. Although possibly not
+        // fluke because bad programming.
+        //
+        // This is 100% non-canon as confirmed by team cherry. You are only making yourself weaker.
+        // but if that's what it takes for you to have fun go for it.
+        // you are a fire god and like any gods you can choose to intentionally hurt yourself.
+        public bool handicapAllNonFireAttacks { get => GetBool(); private set => SetBool(value); }
+        
         
         public int fireballDamageBase { get => GetInt(); private set => SetInt(value); }
         public int fireballDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }

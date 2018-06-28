@@ -45,7 +45,8 @@ namespace redwing
 
         public float maxHeight = 8f;
         public float maxySpeed = 30f;
-        
+
+        public bool realisticPhysics;
         public bool doPhysics;
         public bool despawnBall;
         public Texture2D[] fireballMagmas;
@@ -74,11 +75,15 @@ namespace redwing
         public void Start()
         {
             StartCoroutine(despawn());
-            StartCoroutine(cartoonPhysics());
+
+            StartCoroutine(realisticPhysics ? semiRealPhysics() : cartoonPhysics());
+
             StartCoroutine(ballAppear());
             
             fireballDmg = fbDamageBase + fbDamageScale * PlayerData.instance.GetInt("nailSmithUpgrades");
         }
+
+        
 
         private IEnumerator ballAppear()
         {
@@ -103,6 +108,33 @@ namespace redwing
             spriteColor.a = 1.0f;
             fireballSprite.color = spriteColor;
             this.transform.localScale = ballSize;
+        }
+        
+        private IEnumerator semiRealPhysics()
+        {
+            while (!doPhysics)
+            {
+                yield return null;
+            }
+            
+            while (doPhysics)
+            {
+                float timePassed = Time.deltaTime;
+                
+                float actualYForce = (2 * G_FORCE) + (8 * G_FORCE) *
+                                     ((TERMINAL_VELOCITY_Y + yVelocity) / TERMINAL_VELOCITY_Y);
+                yVelocity += actualYForce * timePassed;
+                
+                selfPosition.x += xVelocity * timePassed;
+                selfPosition.y += yVelocity * timePassed;
+                
+                selfTranform.position = selfPosition;
+                fireball.transform.Rotate(0f, 0f, rotationalVelocity);
+                
+                yield return null;
+            }
+            
+            
         }
 
         private IEnumerator cartoonPhysics()
@@ -187,25 +219,8 @@ namespace redwing
             }
             else if (targetLayer == 11)
             {
-                HealthManager targetHP = hitbox.gameObject.GetComponent<HealthManager>();
-                if (targetHP != null)
-                {
-                    targetHP.Hit(new HitInstance
-                    {
-                        Source = base.gameObject,
-                        AttackType = AttackTypes.Spell,
-                        CircleDirection = false,
-                        DamageDealt = fireballDmg,
-                        Direction = 0f,
-                        IgnoreInvulnerable = true,
-                        MagnitudeMultiplier = 1f,
-                        MoveAngle = 0f,
-                        MoveDirection = false,
-                        Multiplier = 1f,
-                        SpecialType = SpecialTypes.None,
-                        IsExtraDamage = false
-                    });
-                }
+                redwing_game_objects.applyHitInstance(hitbox.gameObject,
+                    fireballDmg, AttackTypes.Generic, this.gameObject);
 
                 if (doPhysics)
                 {

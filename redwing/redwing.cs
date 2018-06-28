@@ -8,11 +8,11 @@ namespace redwing
 {
     public class redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "0.0.8";
+        private const string VERSION = "0.1.1";
         private const int LOAD_ORDER = 90;
 
-        private bool blackmothExists = false;
-        private bool blackmothError = false;
+        private bool blackmothExists;
+        private bool blackmothError;
 
         // Version detection code originally by Seanpr, used with permission.
         public override string GetVersion()
@@ -36,15 +36,13 @@ namespace redwing
 
             if (blackmothError)
             {
-                ver += " (Error: Blackmoth too old - either remove it or update it)";
+                ver += " (Error: Blackmoth too old - either remove it or update it to 1.7.2 or newer)";
             }
-            
-            
 
             bool apiTooLow = Convert.ToInt32(ModHooks.Instance.ModVersion.Split('-')[1]) < minApi;
             bool noModCommon = !(from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "ModCommon" select type).Any();
 
-            if (apiTooLow) ver += " (Error: ModAPI too old)";
+            if (apiTooLow) ver += " (Error: ModAPI too old... Minimum version is 43... seriously)";
             if (noModCommon) ver += " (Error: Redwing requires ModCommon)";
 
             return ver;
@@ -71,12 +69,19 @@ namespace redwing
             redwing_hooks.laserDamageBase = GlobalSettings.laserDamageBase;
             redwing_hooks.laserDamagePerNail = GlobalSettings.laserDamagePerNailLvl;
             redwing_hooks.blackmothSymbolsExist = false;
+            redwing_hooks.balancedMode = GlobalSettings.handicapAllNonFireAttacks;
 
             try
             {
                 if (blackmothExists)
                 {
                     checkBlackmothVersion();
+                    if (redwing_hooks.balancedMode)
+                    {
+                        redwing_hooks.balancedMode = false;
+                        log("You cannot handicap yourself with blackmoth installed.");
+                        log("Blackmoth makes you a god and there's no handicapping that can change that.");
+                    }
                 }
             }
             catch (Exception e)
@@ -135,7 +140,7 @@ namespace redwing
                     log("Settings not found, rebuilding... File will be saved to: " + settingsFilePath);
                 }
 
-                GlobalSettings.reset();
+                GlobalSettings?.reset();
             }
             SaveGlobalSettings();
         }
@@ -200,7 +205,7 @@ namespace redwing
             
         }
 
-        public void log(string str)
+        private static void log(string str)
         {
             Modding.Logger.Log("[Redwing] " + str);
         }

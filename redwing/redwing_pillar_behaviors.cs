@@ -70,25 +70,8 @@ namespace redwing
         {
             foreach (Collider2D collider in enteredColliders.ToList())
             {
-                HealthManager targetHP = collider.gameObject.GetComponent<HealthManager>();
-                if (targetHP != null)
-                {
-                    targetHP.Hit(new HitInstance
-                    {
-                        Source = base.gameObject,
-                        AttackType = AttackTypes.Spell,
-                        CircleDirection = false,
-                        DamageDealt = cachedPrimaryDmg,
-                        Direction = 0f,
-                        IgnoreInvulnerable = true,
-                        MagnitudeMultiplier = 1f,
-                        MoveAngle = 0f,
-                        MoveDirection = false,
-                        Multiplier = 1f,
-                        SpecialType = SpecialTypes.None,
-                        IsExtraDamage = false
-                    });
-                }
+                redwing_game_objects.applyHitInstance(collider.gameObject, cachedPrimaryDmg, AttackTypes.Spell,
+                    gameObject);
             }
 
         }
@@ -103,26 +86,8 @@ namespace redwing
             }
             foreach (Collider2D collider in enteredColliders.ToList())
             {
-
-                HealthManager targetHP = collider.gameObject.GetComponent<HealthManager>();
-                if (targetHP != null)
-                {
-                    targetHP.Hit(new HitInstance
-                    {
-                        Source = base.gameObject,
-                        AttackType = AttackTypes.Generic,
-                        CircleDirection = false,
-                        DamageDealt = cachedSecondaryDmg,
-                        Direction = 0f,
-                        IgnoreInvulnerable = true,
-                        MagnitudeMultiplier = 1f,
-                        MoveAngle = 0f,
-                        MoveDirection = false,
-                        Multiplier = 1f,
-                        SpecialType = SpecialTypes.None,
-                        IsExtraDamage = false
-                    });
-                }
+                redwing_game_objects.applyHitInstance(collider.gameObject, cachedSecondaryDmg, AttackTypes.Generic,
+                    gameObject);
             }
             
         }

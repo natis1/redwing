@@ -110,13 +110,15 @@ namespace redwing
                 if (dashInvulTimer > 0)
                 {
                     HeroController.instance.cState.invulnerable = true;
-                    antiTurboLeft = FUCK_TURBO_FRAMES;
+                    antiTurboLeft = FUCK_TURBO_FRAMES + (int) (Time.fixedDeltaTime / Time.deltaTime);
                 }
                 else
                 {
-                    HeroController.instance.cState.invulnerable = false;
                     if (antiTurboLeft > 0)
+                    {
                         antiTurboLeft--;
+                        HeroController.instance.cState.invulnerable = false;
+                    }
                 }
             }
             catch (NullReferenceException e)

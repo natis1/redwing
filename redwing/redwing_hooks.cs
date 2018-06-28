@@ -7,7 +7,6 @@ using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using Modding;
-using RandomizerMod.Extensions;
 using UnityEngine;
 using Bounds = UnityEngine.Bounds;
 
@@ -21,12 +20,13 @@ namespace redwing
             ModHooks.Instance.DashVectorHook -= fireballsAndTrail;
             ModHooks.Instance.DashPressedHook -= setTrailCooldown;
             ModHooks.Instance.SlashHitHook -= reduceFSCooldown;
-            
-            ModHooks.Instance.HitInstanceHook -= nailArtFireballs;
-            
+                        
             if (overrideBlackmothNailDmg)
             {
                 ModHooks.Instance.HitInstanceHook -= overrideBlackmothDamage;
+            } else if (balancedMode)
+            {
+                ModHooks.Instance.HitInstanceHook -= overrideAllNonFireDamage;
             }
             
             voidKnightSpellControl = null;
@@ -47,11 +47,12 @@ namespace redwing
             ModHooks.Instance.DashPressedHook += setTrailCooldown;
             ModHooks.Instance.SlashHitHook += reduceFSCooldown;
 
-            ModHooks.Instance.HitInstanceHook += nailArtFireballs;
-
             if (overrideBlackmothNailDmg)
             {
                 ModHooks.Instance.HitInstanceHook += overrideBlackmothDamage;
+            } else if (balancedMode)
+            {
+                ModHooks.Instance.HitInstanceHook += overrideAllNonFireDamage;
             }
             
         }
@@ -74,7 +75,7 @@ namespace redwing
         }
 
         private Vector2 fireballsAndTrail(Vector2 change)
-        {            
+        {
             if (blackmothSymbolsExist)
             {
                 // Why does this work but not just checking it directly?
@@ -182,6 +183,8 @@ namespace redwing
                 StartCoroutine(freezeKnight(0.3f));
                 StartCoroutine(firinMaLaser());
             }
+            
+            invulnTime = IFRAMES;
 
             return damage;
         }
@@ -201,6 +204,7 @@ namespace redwing
         public static AudioClip shieldDischargeSoundEffect;
 
         public static bool overrideBlackmothNailDmg;
+        public static bool balancedMode;
         
         // True if the Blackmoth DLL is there and is of a high enough version to work with Redwing
         // If true you can directly use Blackmoth instead of through reflection which is a lot faster.
@@ -213,6 +217,7 @@ namespace redwing
 
         private GameObject flamePillarDetect;
         private PlayMakerFSM voidKnightSpellControl;
+        private PlayMakerFSM voidKnightNailArts;
 
         private bool justDidLaserAttack;
         private double ftTime = 0;
@@ -229,7 +234,7 @@ namespace redwing
         public static bool zeroDmgLaser;
         
         
-        private const double IFRAMES = 0.4f;
+        private const double IFRAMES = 0.8f;
 
         private int currentTrailSprite = 0;
         private int netTrailDistance = 0;
@@ -244,7 +249,7 @@ namespace redwing
         private const float FS_UPDATE_TIME = 0.2f;
         private float fsLastUpdate = 0f;
         private bool useFT = false;
-        private bool playFSSound = true;
+        private bool playFSSound;
         
         //private readonly Rect = new Rect(50, 50, 100, 100);
         
@@ -417,26 +422,11 @@ namespace redwing
                 
                 GameObject target = collider.gameObject;
                 log("Doing laser damage to target with name " + target.name);
-
-                HealthManager targetHP = target.GetComponent<HealthManager>();
-                if (targetHP != null)
-                {
-                    targetHP.Hit(new HitInstance
-                    {
-                        Source = base.gameObject,
-                        AttackType = AttackTypes.Generic,
-                        CircleDirection = false,
-                        DamageDealt = laserDamageBase + laserDamagePerNail *PlayerData.instance.GetInt("nailSmithUpgrades"),
-                        Direction = 0f,
-                        IgnoreInvulnerable = true,
-                        MagnitudeMultiplier = 1f,
-                        MoveAngle = 0f,
-                        MoveDirection = false,
-                        Multiplier = 1f,
-                        SpecialType = SpecialTypes.None,
-                        IsExtraDamage = false
-                    });
-                }
+                
+                
+                redwing_game_objects.applyHitInstance(collider.gameObject,
+                    laserDamageBase + laserDamagePerNail * PlayerData.instance.GetInt("nailSmithUpgrades"),
+                    AttackTypes.Generic, voidKnight);
             }
 
         }
@@ -447,13 +437,73 @@ namespace redwing
                 yield return null;
             
             voidKnight = GameObject.Find("Knight");
-            redwingSpawner.voidKnight = voidKnight;
+            redwing_game_objects.voidKnight = voidKnight;
             
             
             voidKnightSpellControl = FSMUtility.LocateFSM(voidKnight, "ProxyFSM");
+            voidKnightNailArts = FSMUtility.LocateFSM(voidKnight, "Nail Arts");
             
             setupFlamePillar();
+            setupNailArtFireballs();
             createFlameShield();
+        }
+
+        private void setupNailArtFireballs()
+        {
+            try
+            {
+                addAction(voidKnightNailArts, "G Slash", new CallMethod
+                {
+                    behaviour = GameManager.instance.gameObject.GetComponent<redwing_hooks>(),
+                    methodName = "greatSlashFireballs",
+                    parameters = new FsmVar[0],
+                    everyFrame = false
+                }
+                );
+                log("Added fireballs to great slash.");
+            }
+            catch (Exception e)
+            {
+                log("Unable to add fireball method to greatslash " + e);
+            }
+            
+            try
+            {
+                addAction(voidKnightNailArts, "Cyclone Spin", new CallMethod
+                    {
+                        behaviour = GameManager.instance.gameObject.GetComponent<redwing_hooks>(),
+                        methodName = "cycloneSlashFireballs",
+                        parameters = new FsmVar[0],
+                        everyFrame = false
+                    }
+                );
+                
+                log("Added fireballs to cyclone slash.");
+            }
+            catch (Exception e)
+            {
+                log("Unable to add fireball method to cyclone " + e);
+            }
+            
+            try
+            {
+                addAction(voidKnightNailArts, "Dash Slash", new CallMethod
+                    {
+                        behaviour = GameManager.instance.gameObject.GetComponent<redwing_hooks>(),
+                        methodName = "dashSlashFireballs",
+                        parameters = new FsmVar[0],
+                        everyFrame = false
+                    }
+                );
+                
+                log("Added fireballs to dash slash.");
+            }
+            catch (Exception e)
+            {
+                log("Unable to add fireball method to the slash nobody uses " + e);
+            }
+            
+            
         }
 
         private void setupFlamePillar()
@@ -474,14 +524,6 @@ namespace redwing
             Rigidbody2D fpFakePhysics = flamePillarDetect.GetComponent<Rigidbody2D>();
             fpFakePhysics.isKinematic = true;
             
-            
-            
-            
-            
-            //GrimmEnemyRange fpGrimmRange = flamePillarDetect.GetComponent<GrimmEnemyRange>();
-            //fpGrimmRange
-            
-            
             try
             {
                 CallMethod firePillarOnRecover = new CallMethod
@@ -491,23 +533,115 @@ namespace redwing
                     parameters = new FsmVar[0],
                     everyFrame = false
                 };
-
-                voidKnightSpellControl.getState("Focus Completed").addAction(firePillarOnRecover);
+                
+                addAction(voidKnightSpellControl, "Focus Completed", firePillarOnRecover);
             } catch (Exception e)
             {
                 log("Unable to add method: error " + e);
             }
             log("got to end of FP method");
         }
-
-        private HitInstance nailArtFireballs(Fsm hitter, HitInstance hit)
+        
+        // ReSharper disable once UnusedMember.Global because used implicitly
+        public void greatSlashFireballs()
         {
-            log("detected hitinstance " + hitter.GameObject.name);
+            log("did great slash");
+
+            float[] yVelo = {14f, 11f, 8f, 5f};
+            float[] yTrans = {0.5f, 0.5f, 0.5f, 0.5f};
+            float[] xVelo = {5f, 8f, 11f, 14f};
+            float[] xTrans = {1f, 1f, 1f, 1f};
+
+            bool right = HeroController.instance.cState.facingRight;
+            for (int i = 0; i < 4; i++)
+            {
+                if (right)
+                {
+                    redwing_game_objects.addSingleFireball(xVelo[i], yVelo[i], xTrans[i], yTrans[i], "s" + i);
+                }
+                else
+                {
+                    redwing_game_objects.addSingleFireball(-xVelo[i], yVelo[i], -xTrans[i], yTrans[i], "s" + i);
+                }
+            }
+
+        }
+
+        // ReSharper disable once UnusedMember.Global because used implicitly
+        public void cycloneSlashFireballs()
+        {
+            log("did cyclone slash");
+            StartCoroutine(randomCycloneBalls());
+
+
+        }
+
+        // ReSharper disable once UnusedMember.Global because used implicitly
+        public void dashSlashFireballs()
+        {
+            log("did dash slash");
             
+            float[] yVelo = {17f, 15f, 13f, 10f};
+            float[] yTrans = {0.5f, 0.5f, 0.5f, 0.5f};
+            float[] xVelo = {2f, 4f, 6f, 8f};
+            float[] xTrans = {1f, 1f, 1f, 1f};
+
+            bool right = HeroController.instance.cState.facingRight;
+            for (int i = 0; i < 4; i++)
+            {
+                if (right)
+                {
+                    redwing_game_objects.addSingleFireball(xVelo[i], yVelo[i], xTrans[i], yTrans[i], "s" + i);
+                }
+                else
+                {
+                    redwing_game_objects.addSingleFireball(-xVelo[i], yVelo[i], -xTrans[i], yTrans[i], "s" + i);
+                }
+            }
+
+            redwing_game_objects.addSingleLaser(right ? 270 : 90);
+        }
+
+        private IEnumerator randomCycloneBalls()
+        {
+            const float timeBetweenBalls = 0.08f;
+            float timePassed = 0f;
+            float maxTime = HeroController.instance.INVUL_TIME_CYCLONE;
+            log("max time is " + maxTime);
+            while (timePassed < maxTime)
+            {
+                float xVelo = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5) * 12.0);
+                float yVelo = (float) ((redwing_flame_gen.rng.NextDouble() + 0.5) * 11.0);
+                float xTrans = 0f;
+                float yTrans = 1.0f;
+
+                if (xVelo < 2.0f && xVelo > 0f)
+                {
+                    xVelo += 1.5f;
+                    xVelo *= 3f;
+                } else if (xVelo <= 0f && xVelo > -2.0f)
+                {
+                    xVelo -= 1.5f;
+                    xVelo *= 3f;
+                }
+                if (xVelo < 3.0f && xVelo > -3.0f)
+                {
+                    xVelo *= 1.5f;
+                }
+                
+                redwing_game_objects.addSingleFireball(xVelo, yVelo, xTrans, yTrans, "s");
+                
+                yield return new WaitForSeconds(timeBetweenBalls);
+                timePassed += timeBetweenBalls;
+            }
             
-            return hit;
         }
         
+        private HitInstance overrideAllNonFireDamage(Fsm owner, HitInstance hit)
+        {
+            hit.DamageDealt = 1;
+            return hit;
+        }
         
         private HitInstance overrideBlackmothDamage(Fsm hitter, HitInstance hit)
         {
@@ -551,8 +685,19 @@ namespace redwing
             return hit;
         }
         
-        
-        
+        private static void addAction(PlayMakerFSM fsm, string stateName, FsmStateAction action)
+        {
+            foreach (FsmState t in fsm.FsmStates)
+            {
+                if (t.Name != stateName) continue;
+                FsmStateAction[] actions = t.Actions;
+
+                Array.Resize(ref actions, actions.Length + 1);
+                actions[actions.Length - 1] = action;
+
+                t.Actions = actions;
+            }
+        }
         
         private static void log(string str)
         {
