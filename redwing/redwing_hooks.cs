@@ -62,7 +62,8 @@ namespace redwing
             
             ModHooks.Instance.BeforeSavegameSaveHook += restoreCharmCost;
             ModHooks.Instance.SavegameSaveHook += ruinCharmCost;
-
+            
+            ruinCharmCost(0);
         }
 
         private bool greatSlashFromStart(string originalset)
