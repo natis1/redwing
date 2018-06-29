@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using InControl.NativeProfile;
+using ModCommon;
 using UnityEngine;
 
 namespace redwing
@@ -238,7 +239,7 @@ namespace redwing
         private void OnTriggerEnter2D(Collider2D collision)
         {
             int layer = collision.gameObject.layer;
-            if (layer != 11) return;
+            if (layer != 11 && !collision.gameObject.IsGameEnemy()) return;
 
             if (this.enteredColliders.Contains(collision)) return;
             
@@ -249,7 +250,7 @@ namespace redwing
         private void OnTriggerExit2D(Collider2D other)
         {
             int layer = other.gameObject.layer;
-            if (layer != 11) return;
+            if (layer != 11 && !other.gameObject.IsGameEnemy()) return;
 
             try
             {

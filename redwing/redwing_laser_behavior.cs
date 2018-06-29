@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using ModCommon;
 using UnityEngine;
 
 namespace redwing
@@ -180,7 +181,7 @@ namespace redwing
 		{
 			
 			int layer = collision.gameObject.layer;
-			if (layer != 11) return;
+			if (layer != 11 && !collision.gameObject.IsGameEnemy()) return;
 
 			if (collision.CompareTag("Geo"))
 			{

@@ -8,6 +8,7 @@ using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using Modding;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Bounds = UnityEngine.Bounds;
 
 namespace redwing
@@ -27,7 +28,6 @@ namespace redwing
             } else if (balancedMode)
             {
                 ModHooks.Instance.HitInstanceHook -= overrideAllNonFireDamage;
-                ModHooks.Instance.GetPlayerBoolHook -= greatSlashFromStart;
             }
             
             ModHooks.Instance.BeforeSavegameSaveHook -= restoreCharmCost;
@@ -41,6 +41,9 @@ namespace redwing
         
         public void Start()
         {
+            hasGreatSlash = PlayerData.instance.GetBool("hasDashSlash");
+            hasNailArt = PlayerData.instance.GetBool("hasNailArt");
+            
             
             StartCoroutine(getHeroFSMs());
             redwingSpawner = new redwing_game_objects();
@@ -57,7 +60,7 @@ namespace redwing
             } else if (balancedMode)
             {
                 ModHooks.Instance.HitInstanceHook += overrideAllNonFireDamage;
-                ModHooks.Instance.GetPlayerBoolHook += greatSlashFromStart;
+                UnityEngine.SceneManagement.SceneManager.activeSceneChanged += checkForSheoRoom;
             }
             
             ModHooks.Instance.BeforeSavegameSaveHook += restoreCharmCost;
@@ -66,21 +69,51 @@ namespace redwing
             ruinCharmCost(0);
         }
 
-        private bool greatSlashFromStart(string originalset)
+        private void checkForSheoRoom(Scene from, Scene to)
         {
-            return originalset == "hasDashSlash" || PlayerData.instance.GetBoolInternal(originalset);
+            if (to.name == "Room_nailmaster_02" || to.name == "Room_nailmaster_01" || to.name == "Room_nailmaster")
+            {
+                restoreNailArts();
+            } else if (from.name == "Room_nailmaster_02" || from.name == "Room_nailmaster_01" ||
+                       from.name == "Room_nailmaster")
+            {
+                hasGreatSlash = PlayerData.instance.GetBool("hasDashSlash");
+                hasNailArt = PlayerData.instance.GetBool("hasNailArt");
+                
+                ruinNailArts();
+            }
+            else
+            {
+                ruinNailArts();
+            }
+        }
+
+        private void ruinNailArts()
+        {
+            if (!balancedMode || overrideBlackmothNailDmg) return;
+            
+            PlayerData.instance.hasDashSlash = true;
+            PlayerData.instance.hasNailArt = true;
+        }
+        
+        private void restoreNailArts()
+        {
+            if (!balancedMode || overrideBlackmothNailDmg) return;
+            
+            PlayerData.instance.hasDashSlash = hasGreatSlash;
+            PlayerData.instance.hasNailArt = hasNailArt;
         }
 
         private void ruinCharmCost(int id)
         {
             PlayerData.instance.charmCost_40 = nailmasterGloryNotchCost;
+            ruinNailArts();
         }
 
         private void restoreCharmCost(SaveGameData data)
         {
-            
             PlayerData.instance.charmCost_26 = 1;
-            
+            restoreNailArts();
         }
 
 
@@ -278,6 +311,9 @@ namespace redwing
         private float fsLastUpdate = 0f;
         private bool useFT = false;
         private bool playFSSound;
+
+        private bool hasNailArt;
+        private bool hasGreatSlash;
         
         //private readonly Rect = new Rect(50, 50, 100, 100);
         
@@ -574,13 +610,12 @@ namespace redwing
         public void greatSlashFireballs()
         {
 
-            float[] yVelo = {14f, 11f, 8f, 5f};
+            float[] yVelo = {8f, 11f, 14f, 5f};
             float[] yTrans = {0.5f, 0.5f, 0.5f, 0.5f};
-            float[] xVelo = {5f, 8f, 11f, 14f};
+            float[] xVelo = {11f, 8f, 5f, 14f};
             float[] xTrans = {1f, 1f, 1f, 1f};
 
             bool right = HeroController.instance.cState.facingRight;
-            bool fakeGreatslash = !PlayerData.instance.GetBoolInternal("hasDashSlash");
             
             for (int i = 0; i < 4; i++)
             {
@@ -593,7 +628,7 @@ namespace redwing
                     redwing_game_objects.addSingleFireball(-xVelo[i], yVelo[i], -xTrans[i], yTrans[i], "s" + i);
                 }
 
-                if (fakeGreatslash)
+                if (!hasGreatSlash)
                 {
                     return;
                 }

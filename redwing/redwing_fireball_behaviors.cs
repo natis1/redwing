@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using ModCommon;
 using UnityEngine;
 
 namespace redwing
@@ -219,7 +220,7 @@ namespace redwing
             {
                 return;
             }
-            else if (targetLayer == 11)
+            else if (targetLayer == 11 || hitbox.gameObject.IsGameEnemy())
             {
                 redwing_game_objects.applyHitInstance(hitbox.gameObject,
                     fireballDmg, AttackTypes.Generic, this.gameObject);
