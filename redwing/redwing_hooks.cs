@@ -27,7 +27,11 @@ namespace redwing
             } else if (balancedMode)
             {
                 ModHooks.Instance.HitInstanceHook -= overrideAllNonFireDamage;
+                ModHooks.Instance.GetPlayerBoolHook -= greatSlashFromStart;
             }
+            
+            ModHooks.Instance.BeforeSavegameSaveHook -= restoreCharmCost;
+            ModHooks.Instance.SavegameSaveHook -= ruinCharmCost;
             
             voidKnightSpellControl = null;
             
@@ -53,9 +57,31 @@ namespace redwing
             } else if (balancedMode)
             {
                 ModHooks.Instance.HitInstanceHook += overrideAllNonFireDamage;
+                ModHooks.Instance.GetPlayerBoolHook += greatSlashFromStart;
             }
             
+            ModHooks.Instance.BeforeSavegameSaveHook += restoreCharmCost;
+            ModHooks.Instance.SavegameSaveHook += ruinCharmCost;
+
         }
+
+        private bool greatSlashFromStart(string originalset)
+        {
+            return originalset == "hasDashSlash" || PlayerData.instance.GetBoolInternal(originalset);
+        }
+
+        private void ruinCharmCost(int id)
+        {
+            PlayerData.instance.charmCost_40 = nailmasterGloryNotchCost;
+        }
+
+        private void restoreCharmCost(SaveGameData data)
+        {
+            
+            PlayerData.instance.charmCost_26 = 1;
+            
+        }
+
 
         private void reduceFSCooldown(Collider2D othercollider, GameObject gameobject)
         {
@@ -243,6 +269,7 @@ namespace redwing
 
         public static int laserDamageBase;
         public static int laserDamagePerNail;
+        public static int nailmasterGloryNotchCost;
 
         private IEnumerable<Collider2D> allLaserEnemies;
 
@@ -545,7 +572,6 @@ namespace redwing
         // ReSharper disable once UnusedMember.Global because used implicitly
         public void greatSlashFireballs()
         {
-            log("did great slash");
 
             float[] yVelo = {14f, 11f, 8f, 5f};
             float[] yTrans = {0.5f, 0.5f, 0.5f, 0.5f};
@@ -553,6 +579,8 @@ namespace redwing
             float[] xTrans = {1f, 1f, 1f, 1f};
 
             bool right = HeroController.instance.cState.facingRight;
+            bool fakeGreatslash = !PlayerData.instance.GetBoolInternal("hasDashSlash");
+            
             for (int i = 0; i < 4; i++)
             {
                 if (right)
@@ -563,6 +591,11 @@ namespace redwing
                 {
                     redwing_game_objects.addSingleFireball(-xVelo[i], yVelo[i], -xTrans[i], yTrans[i], "s" + i);
                 }
+
+                if (fakeGreatslash)
+                {
+                    return;
+                }
             }
 
         }
@@ -572,8 +605,7 @@ namespace redwing
         {
             log("did cyclone slash");
             StartCoroutine(randomCycloneBalls());
-
-
+            redwing_game_objects.addSinglePillar(HeroController.instance.INVUL_TIME_CYCLONE);
         }
 
         // ReSharper disable once UnusedMember.Global because used implicitly

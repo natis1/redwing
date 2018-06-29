@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Language;
 using Modding;
 using UnityEngine;
+// ReSharper disable InconsistentNaming because EN is a language code and so are the other ones
 
 namespace redwing
 {
@@ -12,37 +14,41 @@ namespace redwing
         private static readonly Dictionary<string, Dictionary<string, string>> langStrings = new Dictionary<string, Dictionary<string, string>>();
 
         public static bool overrideBlackmothLore;
-        
+        public static bool englishLore;
+
+        private void OnDestroy()
+        {
+            ModHooks.Instance.LanguageGetHook -= printRealLore;
+        }
+
         private void Start()
         {
-            log("Adding lore to a game without it.");
-            try
+            if (englishLore || isEnglish())
             {
                 setupLoreEN();
+                if (overrideBlackmothLore)
+                {
+                    setupBlackmothLoreEN();
+                }
             }
-            catch (Exception e)
-            {
-                log("cannot setup lore because " + e);
-            }
+
+
+            log("Added lore to a game without it.");
 
             ModHooks.Instance.LanguageGetHook += printRealLore;
         }
-
-        // ReSharper disable once InconsistentNaming because ur dumb and EN is a language code
+        
+        public static bool isEnglish()
+        {
+            LanguageCode locale = Language.Language.CurrentLanguage();
+            return (locale == LanguageCode.EN || locale == LanguageCode.EN_AU || locale == LanguageCode.EN_CA
+                    || locale == LanguageCode.EN_CB || locale == LanguageCode.EN_GB || locale == LanguageCode.EN_IE
+                    || locale == LanguageCode.EN_JM || locale == LanguageCode.EN_NZ || locale == LanguageCode.EN_TT
+                    || locale == LanguageCode.EN_US || locale == LanguageCode.EN_ZA);
+        }
+        
         private static void setupLoreEN()
         {
-            //string s = "Starting stupid language dump: {0}", Language.Language.settings.sheetTitles
-            log($@"Starting stupid language dump: {Language.Language.settings.sheetTitles}");
-
-            foreach (string meme in Language.Language.settings.sheetTitles)
-            {
-                log("sheet title: " + meme);
-            }
-
-            if (overrideBlackmothLore)
-            {
-                setupBlackmothLoreEN();
-            }
             
             // Testing only. Not actual lore.
             /*langStrings["Titles"] = new Dictionary<string, string>
@@ -58,7 +64,7 @@ namespace redwing
             */
 
         }
-
+        
         // only used once blackmoth actually gets lore
         private static void setupBlackmothLoreEN()
         {

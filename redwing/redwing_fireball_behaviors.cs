@@ -69,6 +69,8 @@ namespace redwing
         public static int fbDamageScale;
         public static int fbmDamageBase;
         public static int fbmDamageScale;
+
+        public static int fireballMana;
         
         public AudioSource cachedAudioPlayer;
 
@@ -232,6 +234,7 @@ namespace redwing
                     cachedAudioPlayer.loop = false;
                     cachedAudioPlayer.Play();
                     ballExplode();
+                    HeroController.instance.AddMPChargeSpa(fireballMana);
                 }
 
             }

@@ -8,7 +8,7 @@ namespace redwing
 {
     public class redwing_pillar_behavior : MonoBehaviour
     {
-        private const float LIFESPAN = 1.0f;
+        public float lifespan = 1.0f;
         public static int damagePriBase;
         public static int damagePriNail;
         public static int damageSecBase;
@@ -37,10 +37,10 @@ namespace redwing
             SpriteRenderer cachedSprite = this.gameObject.GetComponent<SpriteRenderer>();
             Color cachedColor = cachedSprite.color;
 
-            while (life < LIFESPAN)
+            while (life < lifespan)
             {
                 life += Time.deltaTime;
-                cachedColor.a = (0.1f + LIFESPAN - life) / LIFESPAN;
+                cachedColor.a = (0.1f + lifespan - life) / lifespan;
                 cachedSprite.color = cachedColor;
                 yield return null;
             }
@@ -58,7 +58,7 @@ namespace redwing
             
             while (secondaryAttacks < damageSecondaryTimes)
             {
-                yield return new WaitForSeconds(LIFESPAN / damageSecondaryTimes);
+                yield return new WaitForSeconds(lifespan / damageSecondaryTimes);
                 secondaryDamage();
                 secondaryAttacks++;
             }

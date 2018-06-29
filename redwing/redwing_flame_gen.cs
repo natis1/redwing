@@ -151,6 +151,7 @@ namespace redwing
             redwing_game_objects.fireLasers = fireSpikes;
             redwing_game_objects.fireballMagmas = fireballMagmas;
             redwing_game_objects.fireballMagmaFireballs = fireballMagmaBalls;
+            redwing_game_objects.pillarTextures = firePillars;
 
             redwing_pillar_detect_behavior.pillarTextures = firePillars;
 

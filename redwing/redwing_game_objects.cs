@@ -13,6 +13,7 @@ namespace redwing
         public static Texture2D[] fireBalls;
         public static Texture2D[] fireballMagmas;
         public static Texture2D[] fireballMagmaFireballs;
+        public static Texture2D[] pillarTextures;
         
         public static Texture2D[] fireLasers;
         
@@ -33,6 +34,35 @@ namespace redwing
         
         private GameObject shield;
         public readonly GameObject[] lasers = new GameObject[16];
+
+        public static void addSinglePillar(float lifespan)
+        {
+            GameObject firePillar = new GameObject("redwingFlamePillar", typeof(redwing_pillar_behavior),
+                typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(BoxCollider2D));
+            firePillar.transform.localScale = new Vector3(1f, 1f, 1f);
+            
+            firePillar.transform.parent = voidKnight.transform;
+            firePillar.transform.localPosition = Vector3.zero;
+            
+            int randomTextureToUse = redwing_flame_gen.rng.Next(0, pillarTextures.Length - 1);
+            SpriteRenderer img = firePillar.GetComponent<SpriteRenderer>();
+            Rect pillarSpriteRect = new Rect(0, 0,
+                redwing_flame_gen.FPTEXTURE_WIDTH, redwing_flame_gen.FPTEXTURE_HEIGHT);
+            img.sprite = Sprite.Create(pillarTextures[randomTextureToUse], pillarSpriteRect,
+                new Vector2(0.5f, 0.5f), 30f);
+            img.color = Color.white;
+
+            Rigidbody2D fakePhysics = firePillar.GetComponent<Rigidbody2D>();
+            fakePhysics.isKinematic = true;
+            BoxCollider2D hitEnemies = firePillar.GetComponent<BoxCollider2D>();
+            hitEnemies.isTrigger = true;
+            hitEnemies.size = img.size;
+            hitEnemies.offset = new Vector2(img.size.x / 2, 0);
+
+            firePillar.GetComponent<redwing_pillar_behavior>().lifespan = lifespan;
+            
+            firePillar.SetActive(true);
+        }
         
 
         public void addLasers()

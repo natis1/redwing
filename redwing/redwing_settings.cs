@@ -4,7 +4,7 @@ namespace redwing
 {
     public static class version_info
     {
-        public const int SETTINGS_VER = 4;
+        public const int SETTINGS_VER = 9;
     }
 
     public class redwing_global_settings : IModSettings
@@ -26,6 +26,8 @@ namespace redwing
             
             handicapAllNonFireAttacks = false;
 
+            nailmasterGloryCost = 3;
+            fireballSoulAddOnHit = 11;
             fireballDamageBase = 6;
             fireballDamagePerNailLvl = 3;
             fireballMagmaDamageBase = 3;
@@ -44,6 +46,11 @@ namespace redwing
             // Causes lasers to only fire when damage taken
             lasersWhenShieldBlocksAllDmg = false;
 
+            useEnglishLoreWhenLanguageMissing = false;
+            useEnglishWarningInfoWhenLanguageMissing = true;
+
+            redwingFirstLaunch = true;
+
             
 
             fireballCooldownBase = 10f;
@@ -55,6 +62,10 @@ namespace redwing
         }
         public int settingsVersion { get => GetInt();
             private set => SetInt(value); }
+        
+        // Set to true on first launch and auto sets to false after. To give player warning info when they load into
+        // a new game, and ruin Monomon's poem.
+        public bool redwingFirstLaunch { get => GetBool(); set => SetBool(value); }
         
         // sets the nail damage to what it should be and not what blackmoth wants it to be.
         public bool overrideBlackmothNailDamage { get => GetBool(); private set => SetBool(value); }
@@ -76,11 +87,17 @@ namespace redwing
         // you are a fire god and like any gods you can choose to intentionally hurt yourself.
         public bool handicapAllNonFireAttacks { get => GetBool(); private set => SetBool(value); }
         
+        public bool useEnglishWarningInfoWhenLanguageMissing { get => GetBool(); private set => SetBool(value); }
+        public bool useEnglishLoreWhenLanguageMissing { get => GetBool(); private set => SetBool(value); }
+        
+        
+        public int nailmasterGloryCost { get => GetInt(); private set => SetInt(value); }
         
         public int fireballDamageBase { get => GetInt(); private set => SetInt(value); }
         public int fireballDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
         public int fireballMagmaDamageBase { get => GetInt(); private set => SetInt(value); }
         public int fireballMagmaDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
+        public int fireballSoulAddOnHit { get => GetInt(); private set => SetInt(value); }
         public int laserDamageBase { get => GetInt(); private set => SetInt(value); }
         public int laserDamagePerNailLvl { get => GetInt(); private set => SetInt(value); }
         public int pillarDamageBase { get => GetInt(); private set => SetInt(value); }
