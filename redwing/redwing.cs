@@ -13,7 +13,7 @@ namespace redwing
     {
         private const string VERSION = "1.0.0";
         private const int LOAD_ORDER = 90;
-        private const int minApi = 43;
+        private const int minApi = 44;
 
 
         private bool blackmothExists;

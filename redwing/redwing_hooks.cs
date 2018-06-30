@@ -139,13 +139,16 @@ namespace redwing
             }
         }
 
-        private void setTrailCooldown()
+        private bool setTrailCooldown()
         {
             if (ftTime <= 0.0)
             {
                 useFT = true;
             }
             ftTime = HeroController.instance.SHADOW_DASH_COOLDOWN;
+            
+            // never override original dash if you can.
+            return false;
         }
 
         private Vector2 fireballsAndTrail(Vector2 change)

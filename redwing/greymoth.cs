@@ -154,10 +154,10 @@ namespace redwing
 
         
         
-        private void dashTapped()
+        private bool dashTapped()
         {
             if (antiTurboLeft != 0)
-                return;
+                return true;
             
             getPrivateField("dashQueueSteps").SetValue(HeroController.instance, 0);
             getPrivateField("dashQueuing").SetValue(HeroController.instance, false);
@@ -212,8 +212,8 @@ namespace redwing
             
             // Fixes TC problem where after tink sharp shadow is broken
             sharpShadowFSM.SetState("Idle");
-
-        } 
+            return true;
+        }
 
         private void doDash()
         {

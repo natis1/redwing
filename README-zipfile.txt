@@ -1,10 +1,10 @@
 # redwing
 
-A massive firey Hollow Knight mod! Redwing provides your character with numerous radiant, flaming abilities which give you more damage and make you stronger. It's fully configurable, and even includes a hard mode, if you're up for the challenge. Its designed to work with other total overhaul mods, including Lightbringer and Blackmoth.
+A massive fiery Hollow Knight mod! Redwing provides your character with numerous radiant, flaming abilities which give you more damage and make you stronger. It's fully configurable, and even includes a hard mode, if you're up for the challenge. Its designed to work with other total overhaul mods, including Lightbringer and Blackmoth.
 
 ### Features
 
-* Become a God, with 8 new firey effects which augment your attacks and dashes, and help you when you get hit.
+* Become a God, with 8 new fiery effects which augment your attacks and dashes, and help you when you get hit.
 * A "hard" mode which forces you to use these flames as your primary weapon.
 * 14 unique assets, all generated procedurally by the most advanced engine in any Hollow Knight mod. Enjoy unique fire every time you load the game.
 * All damage and power values fully configurable. With Redwing, you get the final say on balance.
