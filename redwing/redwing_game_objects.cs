@@ -290,6 +290,7 @@ namespace redwing
             behavior.fireballMagmaFireballWidth = redwing_flame_gen.FBMBTEXTURE_WIDTH;
 
             behavior.cachedAudioPlayer = fireballSprite.GetComponent<AudioSource>();
+            
 
         }
 
@@ -368,24 +369,24 @@ namespace redwing
             int realDamage = expectedDamage;
             
             HealthManager targetHP = target.GetComponent<HealthManager>();
-            if (targetHP != null)
+            if (targetHP == null) return;
+
+
+            targetHP.Hit(new HitInstance
             {
-                targetHP.Hit(new HitInstance
-                {
-                    Source = source.gameObject,
-                    AttackType = damageType,
-                    CircleDirection = false,
-                    DamageDealt = realDamage,
-                    Direction = 0f,
-                    IgnoreInvulnerable = true,
-                    MagnitudeMultiplier = 1f,
-                    MoveAngle = 0f,
-                    MoveDirection = false,
-                    Multiplier = 1f,
-                    SpecialType = SpecialTypes.None,
-                    IsExtraDamage = false
-                });
-            }
+                Source = target,
+                AttackType = damageType,
+                CircleDirection = false,
+                DamageDealt = realDamage,
+                Direction = 0f,
+                IgnoreInvulnerable = true,
+                MagnitudeMultiplier = 1f,
+                MoveAngle = 0f,
+                MoveDirection = false,
+                Multiplier = 1f,
+                SpecialType = SpecialTypes.None,
+                IsExtraDamage = false
+            });
         }
     }
 }

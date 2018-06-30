@@ -97,7 +97,7 @@ namespace redwing
         private void OnTriggerEnter2D(Collider2D collision)
         {
             int layer = collision.gameObject.layer;
-            if (layer != 11 && !collision.gameObject.IsGameEnemy()) return;
+            if (layer != 11) return;
 
             if (!this.enteredColliders.Contains(collision))
             {
@@ -108,7 +108,7 @@ namespace redwing
         private void OnTriggerExit2D(Collider2D other)
         {
             int layer = other.gameObject.layer;
-            if (layer != 11 && !other.gameObject.IsGameEnemy()) return;
+            if (layer != 11) return;
 
             try
             {
@@ -168,10 +168,10 @@ namespace redwing
                 firePillar.transform.parent = null;
                 firePillar.transform.localPosition = Vector3.zero;
                 Vector3 pillarRelativePosition = new Vector3(
-                    fireAtJerk.transform.position.x,
+                    fireAtJerk.gameObject.transform.position.x,
                     this.gameObject.transform.position.y,
-                    fireAtJerk.transform.position.z);
-                firePillar.transform.position = fireAtJerk.gameObject.transform.position;
+                    fireAtJerk.gameObject.transform.position.z);
+                firePillar.transform.position = pillarRelativePosition;
             }
             else
             {
@@ -227,13 +227,13 @@ namespace redwing
         
         private void OnTriggerEnter2D(Collider2D otherCollider)
         {
-            if (otherCollider.gameObject.layer != 11 && !otherCollider.gameObject.IsGameEnemy()) return;
+            if (otherCollider.gameObject.layer != 11) return;
             enemyList.Add(otherCollider.gameObject);
         }
 
         private void OnTriggerExit2D(Collider2D otherCollider)
         {
-            if (otherCollider.gameObject.layer != 11 && !otherCollider.gameObject.IsGameEnemy()) return;
+            if (otherCollider.gameObject.layer != 11) return;
             enemyList.Remove(otherCollider.gameObject);
         }
 

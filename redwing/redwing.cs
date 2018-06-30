@@ -76,6 +76,7 @@ namespace redwing
             redwing_fireball_behavior.fbDamageScale = GlobalSettings.fireballDamagePerNailLvl;
             redwing_fireball_behavior.fbmDamageBase = GlobalSettings.fireballMagmaDamageBase;
             redwing_fireball_behavior.fbmDamageScale = GlobalSettings.fireballMagmaDamagePerNailLvl;
+            redwing_fireball_behavior.fireballMana = GlobalSettings.fireballSoulAddOnHit;
 
             redwing_hooks.fbCooldown = GlobalSettings.fireballCooldownBase;
             redwing_hooks.fsRecharge = GlobalSettings.shieldCooldownBase;

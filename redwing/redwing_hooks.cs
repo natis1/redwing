@@ -28,6 +28,7 @@ namespace redwing
             } else if (balancedMode)
             {
                 ModHooks.Instance.HitInstanceHook -= overrideAllNonFireDamage;
+                UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= checkForSheoRoom;
             }
             
             ModHooks.Instance.BeforeSavegameSaveHook -= restoreCharmCost;
@@ -41,6 +42,7 @@ namespace redwing
         
         public void Start()
         {
+            log("Setting internal slash values.");
             hasGreatSlash = PlayerData.instance.GetBool("hasDashSlash");
             hasNailArt = PlayerData.instance.GetBool("hasNailArt");
             
@@ -71,14 +73,26 @@ namespace redwing
 
         private void checkForSheoRoom(Scene from, Scene to)
         {
+            log(("from is " + from.name + " and to is " + to.name + " and has great slash " + hasGreatSlash +
+                 " and has nail art " + hasNailArt));
+            
             if (to.name == "Room_nailmaster_02" || to.name == "Room_nailmaster_01" || to.name == "Room_nailmaster")
             {
                 restoreNailArts();
             } else if (from.name == "Room_nailmaster_02" || from.name == "Room_nailmaster_01" ||
                        from.name == "Room_nailmaster")
             {
-                hasGreatSlash = PlayerData.instance.GetBool("hasDashSlash");
-                hasNailArt = PlayerData.instance.GetBool("hasNailArt");
+                // sheo...
+                if (from.name == "Room_nailmaster_02")
+                {
+                    log("Left sheo's room, adding great slash if you got it.");
+                    hasGreatSlash = PlayerData.instance.hasDashSlash;
+                }
+
+                hasNailArt = PlayerData.instance.hasNailArt;
+                
+                log("Internal values has great slash " + hasGreatSlash +
+                    " and has nail art " + hasNailArt);
                 
                 ruinNailArts();
             }
@@ -163,7 +177,6 @@ namespace redwing
             if (useFT)
             {
                 currentTrailSprite = redwing_flame_gen.rng.Next(0, fireTrailTextures.Length - 1);
-                netTrailDistance = 0;
                 spawnFireTrail(change);
                 useFT = false;
             }
@@ -285,7 +298,9 @@ namespace redwing
         private double laserTime = 0;
         private double fsCharge = 0;
         private double invulnTime = 0;
-        
+        private double cycloneTime = 0;
+
+        private const double CYCLONE_COOLDOWN = 0.22;
         
         public static double fbCooldown;
         public static double laserCooldown;
@@ -297,7 +312,6 @@ namespace redwing
         private const double IFRAMES = 0.8f;
 
         private int currentTrailSprite = 0;
-        private int netTrailDistance = 0;
 
         private const float FP_RANGE = 15f;
 
@@ -324,6 +338,16 @@ namespace redwing
         public void Update()
         {
             attackCooldownUpdate();
+
+            /*
+            memeDebugFrames++;
+
+            if (memeDebugFrames % 300 == 0)
+            {
+                log("insert debug code to log here");
+                
+            }
+            */
             
             if (flameShieldSprite != null)
                 flameShieldUpdate();
@@ -343,7 +367,7 @@ namespace redwing
                 {                    
                     flameShieldAudio.Stop();
                     flameShieldAudio.volume = (GameManager.instance.gameSettings.masterVolume *
-                                               GameManager.instance.gameSettings.soundVolume * 0.01f);
+                                               GameManager.instance.gameSettings.soundVolume * 0.01f * 0.6f);
                     // make sound less annoying before you play it or maybe make it not loop
                     flameShieldAudio.clip = shieldChargeSoundEffect;
                     flameShieldAudio.Play();
@@ -406,6 +430,11 @@ namespace redwing
             if (ftTime > 0.0)
             {
                 ftTime -= Time.deltaTime;
+            }
+
+            if (cycloneTime > 0.0)
+            {
+                cycloneTime -= Time.deltaTime;
             }
         }
 
@@ -639,15 +668,20 @@ namespace redwing
         // ReSharper disable once UnusedMember.Global because used implicitly
         public void cycloneSlashFireballs()
         {
-            log("did cyclone slash");
-            StartCoroutine(randomCycloneBalls());
-            redwing_game_objects.addSinglePillar(HeroController.instance.INVUL_TIME_CYCLONE);
+            //log("did cyclone slash");
+
+            if (cycloneTime <= 0.0)
+            {
+                StartCoroutine(randomCycloneBalls());
+            }
+
+            //redwing_game_objects.addSinglePillar(HeroController.instance.INVUL_TIME_CYCLONE);
         }
 
         // ReSharper disable once UnusedMember.Global because used implicitly
         public void dashSlashFireballs()
         {
-            log("did dash slash");
+            //log("did dash slash");
             
             float[] yVelo = {17f, 15f, 13f, 10f};
             float[] yTrans = {0.5f, 0.5f, 0.5f, 0.5f};
@@ -672,10 +706,10 @@ namespace redwing
 
         private IEnumerator randomCycloneBalls()
         {
-            const float timeBetweenBalls = 0.08f;
+            const float timeBetweenBalls = 0.05f;
             float timePassed = 0f;
-            float maxTime = HeroController.instance.INVUL_TIME_CYCLONE;
-            log("max time is " + maxTime);
+            float maxTime = HeroController.instance.INVUL_TIME_CYCLONE * 4;
+            //log("max time is " + maxTime);
             while (timePassed < maxTime)
             {
                 float xVelo = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5) * 12.0);
@@ -698,7 +732,8 @@ namespace redwing
                 }
                 
                 redwing_game_objects.addSingleFireball(xVelo, yVelo, xTrans, yTrans, "s");
-                
+
+                cycloneTime = CYCLONE_COOLDOWN;
                 yield return new WaitForSeconds(timeBetweenBalls);
                 timePassed += timeBetweenBalls;
             }
@@ -707,7 +742,13 @@ namespace redwing
         
         private HitInstance overrideAllNonFireDamage(Fsm owner, HitInstance hit)
         {
-            hit.DamageDealt = 1;
+            
+            //if (owner.GameObject.name.Contains("Plant Trap"))
+            //    owner.GameObject.PrintSceneHierarchyTree("Plantmeme.txt");
+            
+            if (hit.AttackType != AttackTypes.Generic)
+                hit.DamageDealt = 1;
+            
             return hit;
         }
         
@@ -741,14 +782,14 @@ namespace redwing
                 fsmMultiplier = 1;
             }
             nailDamage = (int) Math.Round( (double)nailDamage * multiplier);
-            log("game wants to do " + hit.DamageDealt + " dmg with multiplier " + hit.Multiplier);
+            //log("game wants to do " + hit.DamageDealt + " dmg with multiplier " + hit.Multiplier);
             hit.DamageDealt = nailDamage;
             hit.Multiplier = fsmMultiplier;
             
             
-            log("damage dealt is  " + nailDamage + " dmg with multiplier " + fsmMultiplier);
+            //log("damage dealt is  " + nailDamage + " dmg with multiplier " + fsmMultiplier);
                 
-            log("running override for hitter of name " + hitter.GameObject.name);
+            //log("running override for hitter of name " + hitter.GameObject.name);
             
             return hit;
         }

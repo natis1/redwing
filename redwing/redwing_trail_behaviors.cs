@@ -56,7 +56,7 @@ namespace redwing
 
         private IEnumerator dashAnimation()
         {
-            initPosition = voidKnightCollider.gameObject.transform.localPosition;
+            initPosition = voidKnightCollider.gameObject.transform.position;
             const int pixelsPerUnit = 75;
             buildTextureInital(75);
             
@@ -67,10 +67,12 @@ namespace redwing
             while ( (HeroController.instance.cState.dashing || HeroController.instance.cState.shadowDashing ||
                    HeroController.instance.cState.backDashing) && !stopAnimation)
             {
-                Vector2 currentPosition = voidKnightCollider.gameObject.transform.localPosition;
+                Vector2 currentPosition = voidKnightCollider.gameObject.transform.position;
                 Vector2 deltaPosition = currentPosition - initPosition;
                 //log($@"currentPos is {currentPosition} and init position is {initPosition}");
                 estimatedDistanceMoved += deltaPosition.magnitude;
+
+                //log("void knight moved " + estimatedDistanceMoved + " units total");
                 
                 updateTextureInProgress(pixelsPerUnit, estimatedDistanceMoved);
                 
@@ -114,12 +116,8 @@ namespace redwing
         private void updateTextureInProgress(int pixelsPerUnit, float distanceMoved)
         {
             
-            float capWidth = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) pixelsPerUnit;
             float capHeight = redwing_flame_gen.FTTEXTURE_HEIGHT / (float) pixelsPerUnit;
-            
-            float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
-            float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
-            
+                        
             memeFilter.mesh.vertices = new []{
                 memeFilter.mesh.vertices[0],
                 memeFilter.mesh.vertices[1],
@@ -140,10 +138,7 @@ namespace redwing
             float capHeight = redwing_flame_gen.FTTEXTURE_HEIGHT / (float) pixelsPerUnit;
 
             float leftCapWidthPercentage = redwing_flame_gen.FTCAPTEXTURE_WIDTH / (float) memeTextureUsed.width;
-            float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;
-
-            log("Left cap width is " + leftCapWidthPercentage + " and middle width is " + middleWidthPercentage);
-            
+            float middleWidthPercentage = redwing_flame_gen.FTTEXTURE_WIDTH / (float) memeTextureUsed.width;            
             Mesh m = new Mesh
             {
                 name = "redwingtrailmesh",
@@ -239,7 +234,7 @@ namespace redwing
         private void OnTriggerEnter2D(Collider2D collision)
         {
             int layer = collision.gameObject.layer;
-            if (layer != 11 && !collision.gameObject.IsGameEnemy()) return;
+            if (layer != 11) return;
 
             if (this.enteredColliders.Contains(collision)) return;
             
@@ -250,7 +245,7 @@ namespace redwing
         private void OnTriggerExit2D(Collider2D other)
         {
             int layer = other.gameObject.layer;
-            if (layer != 11 && !other.gameObject.IsGameEnemy()) return;
+            if (layer != 11) return;
 
             try
             {

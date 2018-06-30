@@ -7,7 +7,7 @@ namespace redwing
 {
     internal class redwing_fireball_spawner_behavior : MonoBehaviour
     {
-        public readonly float lifespan = 3.0f;
+        public readonly float lifespan = 4.0f;
 
         public void Start()
         {
@@ -25,7 +25,7 @@ namespace redwing
 
     internal class redwing_fireball_behavior : MonoBehaviour
     {
-        public readonly float lifespan = 2.25f;
+        public readonly float lifespan = 3.25f;
         
         public float xVelocity;
         public float yVelocity;
@@ -220,7 +220,7 @@ namespace redwing
             {
                 return;
             }
-            else if (targetLayer == 11 || hitbox.gameObject.IsGameEnemy())
+            else if (targetLayer == 11)
             {
                 redwing_game_objects.applyHitInstance(hitbox.gameObject,
                     fireballDmg, AttackTypes.Generic, this.gameObject);

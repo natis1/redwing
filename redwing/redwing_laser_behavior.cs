@@ -181,21 +181,16 @@ namespace redwing
 		{
 			
 			int layer = collision.gameObject.layer;
-			if (layer != 11 && !collision.gameObject.IsGameEnemy()) return;
+			if (layer != 11) return;
 
 			if (collision.CompareTag("Geo"))
 			{
 				return;
 			}
 			
-			log("triggered an enemy collider " + collision.gameObject.name);
-			log("enteredColliders has " + enteredColliders.Count + " objs and enteredColliders.Contains(collision) is "
-			    + enteredColliders.Contains(collision));
 			if (!this.enteredColliders.Contains(collision))
 			{
-				log("adding enemy to colliders list");
 				enteredColliders.Add(collision);
-				log("added enemy. entered colliders is now " + enteredColliders.Count);
 			}
 		}
 

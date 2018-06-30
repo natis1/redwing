@@ -78,7 +78,7 @@ namespace redwing
         public const int FBTEXTURE_WIDTH = 150;
         public const int FBTEXTURE_HEIGHT = 150;
 
-        public const int FTTEXTURE_WIDTH = 1800;
+        public const int FTTEXTURE_WIDTH = 600;
         public const int FTTEXTURE_HEIGHT = 150;
         
         // the caps are as tall as the regular fire trails.
