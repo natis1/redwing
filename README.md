@@ -44,6 +44,7 @@ You should probably install these from the [google drive, linked here](https://d
 Credits:
 
 Main Developer: Avenging Angle
+
 In Collaboration with: [Gradow](https://gitlab.com/gradow), [KDT](https://github.com/kaydeetee), and [Seanpr](https://github.com/seanpr96)
 
 Art: FoldingPapers, Purple PyrOz
@@ -52,8 +53,11 @@ Bug Testing: Finch
 
 Special thanks:
 [56](https://github.com/5fiftysix6)
+
 The Grimm Crime Sindicate
+
 The Ascended Mothposters
+
 and most of all, YOU, for reading the README.
 
 [Join us on our mini mod Discord to get the latest beta versions, or to hang out.](https://discord.gg/cED7ZGr)
