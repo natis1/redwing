@@ -12,48 +12,37 @@ A massive firey Hollow Knight mod! Redwing provides your character with numerous
 
 ### Effects
 
-![Art By Purple](pictures/purple1.png)
-(drawn by Purple PyrOZ)
-
-Redwing features numerous effects including:
-
-![Fireballs](pictures/papersfireball.png)
-
-![Pillars](pictures/paperspillar.png)
-(drawn by FoldingPapers)
-
-...and so much more, why not [watch this semi-outdated trailer video](https://www.youtube.com/watch?v=IoE9GuWDzPw) to see more of them.
+Redwing features numerous effects. Why not watch this semi-outdated trailer video: https://www.youtube.com/watch?v=IoE9GuWDzPw to see them in action?
 
 ### How to install
 
 This mod depends on:
 
-[ModCommon](https://github.com/Kerr1291/ModCommon) by Kerr1291
-
-[Modding API](https://github.com/seanpr96/HollowKnight.Modding) by Wyza, Firzen, and Seanpr
+ModCommon by Kerr1291 and Modding API by Wyza, Firzen, and Seanpr
 
 It is also highly recommended you install this with:
 
-[Blackmoth](https://github.com/Ayugradow/Blackmoth) by Gradow
+Blackmoth by Gradow
 
-You should probably install these from the [google drive, linked here](https://drive.google.com/drive/folders/0B_b9PFqx_PR9Um9MeFZMV21oWGs), or, if you know what you're doing, you can compile them from source code.
-
+You should probably install these from the google drive, linked here: https://drive.google.com/drive/folders/0B_b9PFqx_PR9Um9MeFZMV21oWGs
 
 ---
 
 Credits:
 
 Main Developer: Avenging Angle
-In Collaboration with: [Gradow](https://gitlab.com/gradow), [KDT](https://github.com/kaydeetee), and [Seanpr](https://github.com/seanpr96)
+In Collaboration with: Gradow, KDT, and Seanpr
 
 Art: FoldingPapers, Purple PyrOz
 
 Bug Testing: Finch
 
 Special thanks:
-[56](https://github.com/5fiftysix6)
+56
 The Grimm Crime Sindicate
 The Ascended Mothposters
 and most of all, YOU, for reading the README.
 
-[Join us on our mini mod Discord to get the latest beta versions, or to hang out.](https://discord.gg/cED7ZGr)
+Join us on our mini mod Discord to get the latest beta versions, or to hang out.
+
+https://discord.gg/cED7ZGr

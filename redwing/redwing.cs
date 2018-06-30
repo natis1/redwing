@@ -11,7 +11,7 @@ namespace redwing
     // ReSharper disable once UnusedMember.Global because it's used implicitly but importing rider extensions is dumb.
     public class Redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "1.0.0";
+        private const string VERSION = "1.0.0rc2";
         private const int LOAD_ORDER = 90;
         private const int minApi = 43;
 

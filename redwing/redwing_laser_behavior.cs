@@ -55,13 +55,13 @@ namespace redwing
 			const float waitTime = 0.15f;
 			yield return new WaitForSecondsRealtime(waitTime);
 
-			log("there are " + enteredColliders.Count + " enemies in your list");
+			//log("there are " + enteredColliders.Count + " enemies in your list");
 			
 			foreach (Collider2D collider in enteredColliders)
 			{
                 
 				GameObject target = collider.gameObject;
-				log("Doing laser damage to target with name " + target.name);
+				//log("Doing laser damage to target with name " + target.name);
                 
                 
 				redwing_game_objects.applyHitInstance(collider.gameObject,

@@ -419,8 +419,6 @@ namespace redwing
                 target = target.transform.parent.gameObject;
                 i--;
             }
-            
-            Modding.Logger.Log("[Redwing] i is " + i);
             return targetHP;
         }
         
