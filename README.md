@@ -17,9 +17,9 @@ A massive firey Hollow Knight mod! Redwing provides your character with numerous
 
 Redwing features numerous effects including:
 
-![Fireballs](pictures/papersfireball.png)
+Fireballs ![Fireballs](pictures/papersfireball.png)
 
-![Pillars](pictures/paperspillar.png)
+Pillars ![Pillars](pictures/paperspillar.png)
 (drawn by FoldingPapers)
 
 ...and so much more, why not [watch this semi-outdated trailer video](https://www.youtube.com/watch?v=IoE9GuWDzPw) to see more of them.
