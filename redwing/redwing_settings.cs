@@ -4,7 +4,7 @@ namespace redwing
 {
     public static class version_info
     {
-        public const int SETTINGS_VER = 9;
+        public const int SETTINGS_VER = 10;
     }
 
     public class redwing_global_settings : IModSettings
@@ -28,20 +28,20 @@ namespace redwing
 
             nailmasterGloryCost = 3;
             fireballSoulAddOnHit = 11;
-            fireballDamageBase = 6;
+            fireballDamageBase = 8;
             fireballDamagePerNailLvl = 3;
             fireballMagmaDamageBase = 3;
             fireballMagmaDamagePerNailLvl = 2;
             laserDamageBase = 15;
             laserDamagePerNailLvl = 3;
             pillarDamageBase = 10;
-            pillarDamagePerNailLvl = 5;
+            pillarDamagePerNailLvl = 6;
             pillarSecondaryDamageBase = 5;
             pillarSecondaryAttacks = 4;
-            trailDamageBase = 3;
-            trailDamagePerNailLvl = 2;
-            trailSecondaryDamageBase = 2;
-            trailSecondaryDamagePerNailLvl = 1;
+            trailDamageBase = 5;
+            trailDamagePerNailLvl = 4;
+            trailSecondaryDamageBase = 0;
+            trailSecondaryDamagePerNailLvl = 0;
 
             // Causes lasers to only fire when damage taken
             lasersWhenShieldBlocksAllDmg = false;
@@ -53,8 +53,8 @@ namespace redwing
 
             
 
-            fireballCooldownBase = 10f;
-            laserCooldownBase = 5f;
+            fireballCooldownBase = 7f;
+            laserCooldownBase = 10f;
             shieldCooldownBase = 30f;
             shieldCooldownReductionPerNailHit = 0.5f;
             
