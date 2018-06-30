@@ -368,13 +368,33 @@ namespace redwing
             
             int realDamage = expectedDamage;
             
-            HealthManager targetHP = target.GetComponent<HealthManager>();
+            double multiplier = 1;
+            if (PlayerData.instance.GetBool("equippedCharm_25"))
+            {
+                multiplier *= 1.5;
+            }
+            if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
+            {
+                multiplier *= 1.75f;
+            }
+
+            realDamage = (int) Math.Round(realDamage * multiplier);
+            
+            if (realDamage <= 0)
+            {
+                return;
+            }
+
+            HealthManager targetHP = getHealthManagerRecursive(target);
+
             if (targetHP == null) return;
-
-
+            
+            //Modding.Logger.Log("[Redwing] Doing " + realDamage + " damage with attack name " + source.name);
+            
+            
             targetHP.Hit(new HitInstance
             {
-                Source = target,
+                Source = source,
                 AttackType = damageType,
                 CircleDirection = false,
                 DamageDealt = realDamage,
@@ -388,5 +408,21 @@ namespace redwing
                 IsExtraDamage = false
             });
         }
+
+        private static HealthManager getHealthManagerRecursive(GameObject target)
+        {
+            HealthManager targetHP = null;
+            int i = 30;
+            while (target != null && targetHP == null && i > 0)
+            {
+                targetHP = target.GetComponent<HealthManager>();
+                target = target.transform.parent.gameObject;
+                i--;
+            }
+            
+            Modding.Logger.Log("[Redwing] i is " + i);
+            return targetHP;
+        }
+        
     }
 }

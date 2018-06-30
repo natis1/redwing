@@ -73,8 +73,8 @@ namespace redwing
 
         private void checkForSheoRoom(Scene from, Scene to)
         {
-            log(("from is " + from.name + " and to is " + to.name + " and has great slash " + hasGreatSlash +
-                 " and has nail art " + hasNailArt));
+            //log(("from is " + from.name + " and to is " + to.name + " and has great slash " + hasGreatSlash +
+            //     " and has nail art " + hasNailArt));
             
             if (to.name == "Room_nailmaster_02" || to.name == "Room_nailmaster_01" || to.name == "Room_nailmaster")
             {
@@ -133,7 +133,7 @@ namespace redwing
 
         private void reduceFSCooldown(Collider2D othercollider, GameObject gameobject)
         {
-            if (fsCharge >= 0.0 && othercollider.gameObject.IsGameEnemy())
+            if (fsCharge >= 0.0 && othercollider.gameObject.layer == 11)
             {
                 fsCharge -= fsReduceOnHit;
             }
@@ -706,9 +706,9 @@ namespace redwing
 
         private IEnumerator randomCycloneBalls()
         {
-            const float timeBetweenBalls = 0.05f;
+            const float timeBetweenBalls = 0.10f;
             float timePassed = 0f;
-            float maxTime = HeroController.instance.INVUL_TIME_CYCLONE * 4;
+            float maxTime = HeroController.instance.INVUL_TIME_CYCLONE * 2;
             //log("max time is " + maxTime);
             while (timePassed < maxTime)
             {

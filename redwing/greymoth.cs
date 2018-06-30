@@ -241,9 +241,16 @@ namespace redwing
             invokePrivateMethod("ResetLook");
 
             HeroController.instance.cState.recoiling = false;
-            if (HeroController.instance.cState.wallSliding)
+                if (HeroController.instance.cState.wallSliding)
             {
                 HeroController.instance.FlipSprite();
+                if (HeroController.instance.cState.facingRight && Math.Abs(DashDirection.y) < 0.001f )
+                {
+                    DashDirection.x = 1f;
+                } else if (Math.Abs(DashDirection.y) < 0.001f)
+                {
+                    DashDirection.x = -1f;
+                }
             }
             else if (GameManager.instance.inputHandler.inputActions.right.IsPressed)
             {

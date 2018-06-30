@@ -12,9 +12,9 @@ namespace redwing
     
     public class redwing_trail_behavior : MonoBehaviour
     {
-        private const float LIFESPAN = 1.6f;
+        private const float LIFESPAN = 0.6f;
         private const float DAMAGEPERIOD = 0.3f;
-        private const int SECONDARYDAMAGETIMES = 5;
+        private const int SECONDARYDAMAGETIMES = 0;
 
         // woah... that's strong. especially when combined with the blackmoth dash.
         public static int damagePriBase;
@@ -29,7 +29,7 @@ namespace redwing
         
         public Texture2D memeTextureUsed;
         
-        private float currentTime;
+        private float currentTime = 0f;
         
         
         private bool stopAnimation;
@@ -213,7 +213,7 @@ namespace redwing
         }
 
         private void secondaryDamage()
-        {            
+        {
             for (int index = enteredColliders.Count - 1; index >= 0; index--)
             {
                 Collider2D enteredCollider = enteredColliders[index];
@@ -239,9 +239,10 @@ namespace redwing
             if (this.enteredColliders.Contains(collision)) return;
             
             enteredColliders.Add(collision);
-            burnThatMotherTrucker(collision.gameObject);
+            StartCoroutine(burnThatMotherTrucker(collision.gameObject));
         }
 
+        /*
         private void OnTriggerExit2D(Collider2D other)
         {
             int layer = other.gameObject.layer;
@@ -256,10 +257,16 @@ namespace redwing
                 log("failed to remove collider. error " + e);
             }
             
-        }
+        }*/
 
-        private void burnThatMotherTrucker(GameObject enemy)
+        private IEnumerator burnThatMotherTrucker(GameObject enemy)
         {
+            // wait for sharp shadow Iframes to be gone
+            if (currentTime < 0.01f)
+            {
+                yield return new WaitForSeconds(0.23f);
+            }
+
             redwing_game_objects.applyHitInstance(enemy, cachedPrimaryDmg, AttackTypes.Spell, gameObject);
         }
         

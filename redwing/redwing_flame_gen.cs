@@ -185,8 +185,8 @@ namespace redwing
             shieldWavySoundFX = AudioClip.Create("shieldwavy", AUDIO_SAMPLE_HZ * 3, 1, AUDIO_SAMPLE_HZ, false);
             shieldWavySoundFX.SetData(generateShieldSound(AUDIO_SAMPLE_HZ * 3), 0);
             
-            fireTrailSoundFX = AudioClip.Create("firetrail", AUDIO_SAMPLE_HZ * 2, 1, AUDIO_SAMPLE_HZ, false);
-            fireTrailSoundFX.SetData(generateFireTrailSound(AUDIO_SAMPLE_HZ * 2), 0);
+            fireTrailSoundFX = AudioClip.Create("firetrail", (int) (AUDIO_SAMPLE_HZ * 0.8), 1, AUDIO_SAMPLE_HZ, false);
+            fireTrailSoundFX.SetData(generateFireTrailSound((int) (AUDIO_SAMPLE_HZ * 0.8)), 0);
             
             sizzleSoundFX = AudioClip.Create("sizzle", (int) (AUDIO_SAMPLE_HZ * 1.5), 1, AUDIO_SAMPLE_HZ, false);
             sizzleSoundFX.SetData(generateSizzleSound((int) (AUDIO_SAMPLE_HZ * 1.5)), 0);
@@ -245,7 +245,7 @@ namespace redwing
             fx = slowDownEffect(0.6666, fx);
             
             fx = fadeAudio(2.0, 0, AUDIO_SAMPLE_HZ / 4, fx);
-            fx = fadeAudio(0.0, AUDIO_SAMPLE_HZ / 2, length - AUDIO_SAMPLE_HZ, fx);
+            fx = fadeAudio(0.0, AUDIO_SAMPLE_HZ / 2, length - 4000, fx);
             
             return fx;
         }

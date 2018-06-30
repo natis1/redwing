@@ -11,7 +11,7 @@ namespace redwing
     // ReSharper disable once UnusedMember.Global because it's used implicitly but importing rider extensions is dumb.
     public class Redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "0.9.7";
+        private const string VERSION = "1.0.0";
         private const int LOAD_ORDER = 90;
         private const int minApi = 43;
 
@@ -121,8 +121,8 @@ namespace redwing
 
             redwing_trail_behavior.damagePriBase = GlobalSettings.trailDamageBase;
             redwing_trail_behavior.damagePriNail = GlobalSettings.trailDamagePerNailLvl;
-            redwing_trail_behavior.damageSecBase = GlobalSettings.trailSecondaryDamageBase;
-            redwing_trail_behavior.damageSecNail = GlobalSettings.trailSecondaryDamagePerNailLvl;
+            redwing_trail_behavior.damageSecBase = 0;
+            redwing_trail_behavior.damageSecNail = 0;
 
             redwing_lore.englishLore = GlobalSettings.useEnglishLoreWhenLanguageMissing;
             redwing_error.englishLore = GlobalSettings.useEnglishLoreWhenLanguageMissing;

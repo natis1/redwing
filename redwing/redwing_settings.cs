@@ -39,9 +39,11 @@ namespace redwing
             pillarSecondaryDamageBase = 5;
             pillarSecondaryAttacks = 4;
             trailDamageBase = 5;
-            trailDamagePerNailLvl = 4;
-            trailSecondaryDamageBase = 0;
-            trailSecondaryDamagePerNailLvl = 0;
+            trailDamagePerNailLvl = 8;
+            
+            // not actually implemented
+            //trailSecondaryDamageBase = 2;
+            //trailSecondaryDamagePerNailLvl = 1;
 
             // Causes lasers to only fire when damage taken
             lasersWhenShieldBlocksAllDmg = false;
