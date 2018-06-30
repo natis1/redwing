@@ -411,11 +411,15 @@ namespace redwing
 
         private static HealthManager getHealthManagerRecursive(GameObject target)
         {
-            HealthManager targetHP = null;
-            int i = 30;
-            while (target != null && targetHP == null && i > 0)
+            HealthManager targetHP = target.GetComponent<HealthManager>();
+            int i = 6;
+            while (targetHP == null && i > 0)
             {
                 targetHP = target.GetComponent<HealthManager>();
+                if (target.transform.parent == null)
+                {
+                    return targetHP;
+                }
                 target = target.transform.parent.gameObject;
                 i--;
             }
