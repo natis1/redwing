@@ -181,7 +181,7 @@ namespace redwing
             
             
             
-            int randomTextureToUse = redwing_flame_gen.rng.Next(0, pillarTextures.Length - 1);
+            int randomTextureToUse = redwing_flame_gen.rng.Next(0, pillarTextures.Length);
             SpriteRenderer img = firePillar.GetComponent<SpriteRenderer>();
             Rect pillarSpriteRect = new Rect(0, 0,
                 redwing_flame_gen.FPTEXTURE_WIDTH, redwing_flame_gen.FPTEXTURE_HEIGHT);

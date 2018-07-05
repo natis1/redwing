@@ -20,6 +20,7 @@ namespace redwing
         private bool blackmothError;
         private bool apiTooLow;
         private bool noModCommon;
+        private bool shitmothst;
         private int problemCode;
 
         // Version detection code originally by Seanpr, used with permission.
@@ -31,6 +32,10 @@ namespace redwing
             if (blackmothExists)
             {
                 ver += " (Blackmoth)";
+            }
+            else if (shitmothst)
+            {
+                ver += " (Shitmoth)";
             }
             else if (GlobalSettings.useGreymothDashWhenBlackmothMissing)
             {
@@ -45,7 +50,7 @@ namespace redwing
                 ver += " (Error: Blackmoth too old - either remove it or update it to 1.7.2 or newer)";
 
             if (apiTooLow)
-                ver += " (Error: ModAPI too old... Minimum version is 43... seriously)";
+                ver += " (Error: ModAPI too old... Minimum version is 44... seriously)";
             
 
             if (noModCommon)
@@ -71,6 +76,9 @@ namespace redwing
             // report if the user has blackmoth.
             blackmothExists = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "BlackmothMod" select type).Any();
             log("does blackmoth exist? " + blackmothExists);
+            
+            // report if the user is using shitmothst... lol
+            shitmothst = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "shitmothst" select type).Any();
             
             redwing_fireball_behavior.fbDamageBase = GlobalSettings.fireballDamageBase;
             redwing_fireball_behavior.fbDamageScale = GlobalSettings.fireballDamagePerNailLvl;
@@ -206,7 +214,7 @@ namespace redwing
         {
             log("Adding Redwing to game.");
 
-            if (!blackmothExists && GlobalSettings.useGreymothDashWhenBlackmothMissing)
+            if ( ( !blackmothExists && !shitmothst) && GlobalSettings.useGreymothDashWhenBlackmothMissing)
             {
                 GameManager.instance.gameObject.AddComponent<greymoth>();
                 // no blackmoth so no need to override it.

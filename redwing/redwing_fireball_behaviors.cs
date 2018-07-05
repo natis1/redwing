@@ -359,7 +359,7 @@ namespace redwing
             
             fireball.transform.rotation = Quaternion.identity;           
             fireball.transform.Rotate(new Vector3(0f, 0f, (float) (direction * 90.0)));
-            int balls = redwing_flame_gen.rng.Next(0, 4);
+            int balls = redwing_flame_gen.rng.Next(0, 5);
             
             
             

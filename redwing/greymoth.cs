@@ -35,6 +35,8 @@ namespace redwing
         public bool dashRegular;
         public bool shadowDash;
 
+        public bool hasSharpShadowCached;
+
         private bool secondWind;
 
         private bool completedCoroutines;
@@ -87,7 +89,7 @@ namespace redwing
 
         private float getDashLength()
         {
-            return HeroController.instance.cState.shadowDashing ?
+            return hasSharpShadowCached ?
                 HeroController.instance.DASH_SPEED_SHARP : HeroController.instance.DASH_SPEED;
         }
 
@@ -158,6 +160,8 @@ namespace redwing
         {
             if (antiTurboLeft != 0)
                 return true;
+
+            hasSharpShadowCached = PlayerData.instance.GetBool("equippedCharm_16");
             
             getPrivateField("dashQueueSteps").SetValue(HeroController.instance, 0);
             getPrivateField("dashQueuing").SetValue(HeroController.instance, false);
@@ -319,8 +323,6 @@ namespace redwing
             if (!didAirDash || !PlayerData.instance.GetBool("equippedCharm_31") || !secondWind) return didAirDash;
             secondWind = false;
             return false;
-
-
         }
 
 

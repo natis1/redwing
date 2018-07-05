@@ -179,7 +179,7 @@ namespace redwing
             // ReSharper disable once InvertIf This looks really dumb
             if (useFT)
             {
-                currentTrailSprite = redwing_flame_gen.rng.Next(0, fireTrailTextures.Length - 1);
+                currentTrailSprite = redwing_flame_gen.rng.Next(0, fireTrailTextures.Length);
                 spawnFireTrail(change);
                 useFT = false;
             }

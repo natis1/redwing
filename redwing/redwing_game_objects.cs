@@ -44,7 +44,7 @@ namespace redwing
             firePillar.transform.parent = voidKnight.transform;
             firePillar.transform.localPosition = Vector3.zero;
             
-            int randomTextureToUse = redwing_flame_gen.rng.Next(0, pillarTextures.Length - 1);
+            int randomTextureToUse = redwing_flame_gen.rng.Next(0, pillarTextures.Length);
             SpriteRenderer img = firePillar.GetComponent<SpriteRenderer>();
             Rect pillarSpriteRect = new Rect(0, 0,
                 redwing_flame_gen.FPTEXTURE_WIDTH, redwing_flame_gen.FPTEXTURE_HEIGHT);
@@ -128,7 +128,7 @@ namespace redwing
                 typeof(BoxCollider2D), typeof(redwing_laser_behavior));
             laser.transform.parent = laserSpawnObj.transform;
             laser.transform.localPosition = Vector3.zero;
-            int randomTexture = redwing_flame_gen.rng.Next(0, fireLasers.Length - 1);
+            int randomTexture = redwing_flame_gen.rng.Next(0, fireLasers.Length);
             redwing_laser_behavior shootEm = laser.GetComponent<redwing_laser_behavior>();
             Rect r = new Rect(0, 0, redwing_flame_gen.LASERTEXTURE_WIDTH, redwing_flame_gen.LASERTEXTURE_HEIGHT);
             SpriteRenderer s = laser.GetComponent<SpriteRenderer>();
@@ -348,7 +348,7 @@ namespace redwing
         private static void setupFireballSprite(SpriteRenderer sprite)
         {
             Rect r = new Rect(0, 0, redwing_flame_gen.FBTEXTURE_WIDTH, redwing_flame_gen.FBTEXTURE_HEIGHT);
-            int randomFireball = redwing_flame_gen.rng.Next(0, fireBalls.Length - 1);
+            int randomFireball = redwing_flame_gen.rng.Next(0, fireBalls.Length);
             sprite.sprite = Sprite.Create(fireBalls[randomFireball], r, new Vector2(0.5f, 0.5f));
             sprite.enabled = true;
             sprite.color = Color.white;
