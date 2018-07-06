@@ -22,7 +22,7 @@ namespace redwing
          * 
          * */
 
-        private readonly float dashCooldownTime = HeroController.instance.DASH_COOLDOWN_CH;
+        //private readonly float dashCooldownTime = HeroController.instance.DASH_COOLDOWN_CH;
         private static float dashCooldown = 0f;
         private float dashInvulTimer = 0f;
         private int antiTurboLeft = 0;
@@ -50,14 +50,15 @@ namespace redwing
         public void Start()
         {
             completedCoroutines = false;
-            privateFields = new Dictionary<string, FieldInfo>();
-            privateMethods = new Dictionary<string, MethodInfo>();
             
             try
             {
                 StartCoroutine(configureHero());
                 ModHooks.Instance.DashPressedHook += dashTapped;
                 ModHooks.Instance.DashVectorHook += doDashDirection;
+                
+                privateFields = new Dictionary<string, FieldInfo>();
+                privateMethods = new Dictionary<string, MethodInfo>();
             }
             catch (Exception e)
             {
@@ -269,10 +270,8 @@ namespace redwing
             HeroController.instance.dashBurst.transform.localPosition = new Vector3(4.11f, -0.55f, 0.001f);
             HeroController.instance.dashBurst.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
             HeroController.instance.dashingDown = false;
-
-                
-            dashCooldown = dashCooldownTime;
-                
+            
+            dashCooldown = HeroController.instance.DASH_COOLDOWN_CH;
 
             getPrivateField("shadowDashTimer").SetValue(HeroController.instance, getPrivateField("dashCooldownTimer").GetValue(HeroController.instance));
             HeroController.instance.proxyFSM.SendEvent("HeroCtrl-ShadowDash");

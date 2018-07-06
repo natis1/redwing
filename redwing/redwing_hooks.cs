@@ -120,7 +120,7 @@ namespace redwing
 
         private void ruinCharmCost(int id)
         {
-            PlayerData.instance.charmCost_40 = nailmasterGloryNotchCost;
+            PlayerData.instance.charmCost_26 = nailmasterGloryNotchCost;
             ruinNailArts();
         }
 
