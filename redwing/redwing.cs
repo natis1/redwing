@@ -3,15 +3,16 @@ using System.Linq;
 using Modding;
 using UnityEngine;
 using System.IO;
+using angleintegration;
 using ModCommon;
 
 namespace redwing
 {
     // ReSharper disable once InconsistentNaming because it's the name I want to appear on Modding API.
     // ReSharper disable once UnusedMember.Global because it's used implicitly but importing rider extensions is dumb.
-    public class Redwing : Mod <redwing_settings, redwing_global_settings>, ITogglableMod
+    public class redwing : modern_mod<redwing_settings, redwing_global_settings>, ITogglableMod
     {
-        private const string VERSION = "1.0.1";
+        private const string VERSION = "1.1.0";
         private const int LOAD_ORDER = 90;
         private const int minApi = 44;
 
@@ -23,27 +24,32 @@ namespace redwing
         private bool shitmothst;
         private int problemCode;
 
-        // Version detection code originally by Seanpr, used with permission.
-        public override string GetVersion()
+        // ReSharper disable once ArrangeTypeMemberModifiers
+        public redwing()
         {
-            string ver = VERSION;
+            log("Doing meme mod loading I guess");
+            setupModVars(new modern_mod_vars("Redwing", VERSION, 11, LOAD_ORDER));
+        }
 
-
+        // Version detection code originally by Seanpr, used with permission.
+        public override string getVersionAppend()
+        {
+            string ver = "";
             if (blackmothExists)
             {
-                ver += " (Blackmoth)";
+                ver += "(Blackmoth)";
             }
             else if (shitmothst)
             {
-                ver += " (Shitmoth)";
+                ver += "(Shitmoth)";
             }
-            else if (GlobalSettings.useGreymothDashWhenBlackmothMissing)
+            else if (globalSettings.useGreymothDashWhenBlackmothMissing)
             {
-                ver += " (Greymoth)";
+                ver += "(Greymoth)";
             }
             else
             {
-                ver += " (Othermoth?)";
+                ver += "(Othermoth?)";
             }
 
             if (blackmothError)
@@ -62,10 +68,12 @@ namespace redwing
         public override void Initialize()
         {
             setupSettings();
-
+            
+            lore.createLore(globalSettings.overrideBlackmothLore, globalSettings.useEnglishLoreWhenLanguageMissing);
+            
             problemCode = 0;
 
-            if (GlobalSettings.redwingFirstLaunch)
+            if (globalSettings.redwingFirstLaunch)
                 problemCode += 1;
             
             // report if the user has modcommon.
@@ -80,29 +88,29 @@ namespace redwing
             // report if the user is using shitmothst... lol
             shitmothst = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "shitmothst" select type).Any();
             
-            redwing_fireball_behavior.fbDamageBase = GlobalSettings.fireballDamageBase;
-            redwing_fireball_behavior.fbDamageScale = GlobalSettings.fireballDamagePerNailLvl;
-            redwing_fireball_behavior.fbmDamageBase = GlobalSettings.fireballMagmaDamageBase;
-            redwing_fireball_behavior.fbmDamageScale = GlobalSettings.fireballMagmaDamagePerNailLvl;
-            redwing_fireball_behavior.fireballMana = GlobalSettings.fireballSoulAddOnHit;
+            redwing_fireball_behavior.fbDamageBase = globalSettings.fireballDamageBase;
+            redwing_fireball_behavior.fbDamageScale = globalSettings.fireballDamagePerNailLvl;
+            redwing_fireball_behavior.fbmDamageBase = globalSettings.fireballMagmaDamageBase;
+            redwing_fireball_behavior.fbmDamageScale = globalSettings.fireballMagmaDamagePerNailLvl;
+            redwing_fireball_behavior.fireballMana = globalSettings.fireballSoulAddOnHit;
 
-            redwing_hooks.fbCooldown = GlobalSettings.fireballCooldownBase;
-            redwing_hooks.fsRecharge = GlobalSettings.shieldCooldownBase;
-            redwing_hooks.fsReduceOnHit = GlobalSettings.shieldCooldownReductionPerNailHit;
-            redwing_hooks.laserCooldown = GlobalSettings.laserCooldownBase;
-            redwing_hooks.zeroDmgLaser = GlobalSettings.lasersWhenShieldBlocksAllDmg;
-            redwing_hooks.laserDamageBase = GlobalSettings.laserDamageBase;
-            redwing_hooks.laserDamagePerNail = GlobalSettings.laserDamagePerNailLvl;
+            redwing_hooks.fbCooldown = globalSettings.fireballCooldownBase;
+            redwing_hooks.fsRecharge = globalSettings.shieldCooldownBase;
+            redwing_hooks.fsReduceOnHit = globalSettings.shieldCooldownReductionPerNailHit;
+            redwing_hooks.laserCooldown = globalSettings.laserCooldownBase;
+            redwing_hooks.zeroDmgLaser = globalSettings.lasersWhenShieldBlocksAllDmg;
+            redwing_hooks.laserDamageBase = globalSettings.laserDamageBase;
+            redwing_hooks.laserDamagePerNail = globalSettings.laserDamagePerNailLvl;
             redwing_hooks.blackmothSymbolsExist = false;
-            redwing_hooks.balancedMode = GlobalSettings.handicapAllNonFireAttacks;
-            redwing_hooks.nailmasterGloryNotchCost = GlobalSettings.nailmasterGloryCost;
+            redwing_hooks.balancedMode = globalSettings.handicapAllNonFireAttacks;
+            redwing_hooks.nailmasterGloryNotchCost = globalSettings.nailmasterGloryCost;
 
             try
             {
                 if (blackmothExists)
                 {
                     checkBlackmothVersion();
-                    redwing_lore.overrideBlackmothLore = GlobalSettings.overrideBlackmothLore;
+                    //redwing_lore.overrideBlackmothLore = globalSettings.overrideBlackmothLore;
                     if (redwing_hooks.balancedMode)
                     {
                         redwing_hooks.balancedMode = false;
@@ -113,7 +121,7 @@ namespace redwing
                 }
                 else
                 {
-                    redwing_lore.overrideBlackmothLore = false;
+                    //redwing_lore.overrideBlackmothLore = false;
                 }
             }
             catch (Exception e)
@@ -121,20 +129,19 @@ namespace redwing
                 log("Blackmoth not found. Error: " + e);
             }
 
-            redwing_pillar_behavior.damagePriBase = GlobalSettings.pillarDamageBase;
-            redwing_pillar_behavior.damagePriNail = GlobalSettings.pillarDamagePerNailLvl;
-            redwing_pillar_behavior.damageSecBase = GlobalSettings.pillarSecondaryDamageBase;
-            redwing_pillar_behavior.damageSecNail = GlobalSettings.pillarSecondaryDamagePerNailLvl;
-            redwing_pillar_behavior.damageSecondaryTimes = GlobalSettings.pillarSecondaryAttacks;
+            redwing_pillar_behavior.damagePriBase = globalSettings.pillarDamageBase;
+            redwing_pillar_behavior.damagePriNail = globalSettings.pillarDamagePerNailLvl;
+            redwing_pillar_behavior.damageSecBase = globalSettings.pillarSecondaryDamageBase;
+            redwing_pillar_behavior.damageSecNail = globalSettings.pillarSecondaryDamagePerNailLvl;
+            redwing_pillar_behavior.damageSecondaryTimes = globalSettings.pillarSecondaryAttacks;
 
-            redwing_trail_behavior.damagePriBase = GlobalSettings.trailDamageBase;
-            redwing_trail_behavior.damagePriNail = GlobalSettings.trailDamagePerNailLvl;
+            redwing_trail_behavior.damagePriBase = globalSettings.trailDamageBase;
+            redwing_trail_behavior.damagePriNail = globalSettings.trailDamagePerNailLvl;
             redwing_trail_behavior.damageSecBase = 0;
             redwing_trail_behavior.damageSecNail = 0;
 
-            redwing_lore.englishLore = GlobalSettings.useEnglishLoreWhenLanguageMissing;
-            redwing_error.englishLore = GlobalSettings.useEnglishLoreWhenLanguageMissing;
-            redwing_error.englishWarnings = GlobalSettings.useEnglishWarningInfoWhenLanguageMissing;
+            redwing_error.englishLore = globalSettings.useEnglishLoreWhenLanguageMissing;
+            redwing_error.englishWarnings = globalSettings.useEnglishWarningInfoWhenLanguageMissing;
             
             apiTooLow = (Convert.ToInt32(ModHooks.Instance.ModVersion.Split('-')[1]) < minApi);
             if (noModCommon || blackmothError || apiTooLow)
@@ -145,7 +152,7 @@ namespace redwing
             
             ModHooks.Instance.AfterSavegameLoadHook += saveGame;
             ModHooks.Instance.NewGameHook += addComponent;
-            ModHooks.Instance.ApplicationQuitHook += SaveGlobalSettings;
+            ModHooks.Instance.ApplicationQuitHook += saveGlobalSettings;
             printErrors();
         }
 
@@ -170,7 +177,7 @@ namespace redwing
         {
             string settingsFilePath = Application.persistentDataPath + ModHooks.PathSeperator + GetType().Name + ".GlobalSettings.json";
 
-            bool forceReloadGlobalSettings = (GlobalSettings != null && GlobalSettings.settingsVersion != version_info.SETTINGS_VER);
+            bool forceReloadGlobalSettings = (globalSettings != null && globalSettings.settingsVersion != version_info.SETTINGS_VER);
 
             if (forceReloadGlobalSettings || !File.Exists(settingsFilePath))
             {
@@ -183,9 +190,9 @@ namespace redwing
                     log("Settings not found, rebuilding... File will be saved to: " + settingsFilePath);
                 }
 
-                GlobalSettings?.reset();
+                globalSettings?.reset();
             }
-            SaveGlobalSettings();
+            saveGlobalSettings();
         }
 
         private void saveGame(SaveGameData data)
@@ -206,7 +213,7 @@ namespace redwing
 
             if (problemCode == 1)
             {
-                GlobalSettings.redwingFirstLaunch = false;
+                globalSettings.redwingFirstLaunch = false;
             }
         }
 
@@ -214,7 +221,7 @@ namespace redwing
         {
             log("Adding Redwing to game.");
 
-            if ( ( !blackmothExists && !shitmothst) && GlobalSettings.useGreymothDashWhenBlackmothMissing)
+            if ( ( !blackmothExists && !shitmothst) && globalSettings.useGreymothDashWhenBlackmothMissing)
             {
                 GameManager.instance.gameObject.AddComponent<greymoth>();
                 // no blackmoth so no need to override it.
@@ -224,11 +231,11 @@ namespace redwing
             else if (blackmothExists)
             {
                 log("Found Blackmoth...");
-                log(GlobalSettings.overrideBlackmothNailDamage
+                log(globalSettings.overrideBlackmothNailDamage
                     ? "The God of fire and void has arrived."
                     : "Enter the knight, on flaming wings.");
 
-                redwing_hooks.overrideBlackmothNailDmg = GlobalSettings.overrideBlackmothNailDamage;
+                redwing_hooks.overrideBlackmothNailDmg = globalSettings.overrideBlackmothNailDamage;
             }
             else
             {
@@ -237,8 +244,7 @@ namespace redwing
 
             GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
             GameManager.instance.gameObject.AddComponent<redwing_hooks>();
-            GameManager.instance.gameObject.AddComponent<redwing_lore>();
-
+            
             if (!noModCommon)
                 modcommonAddRedwingError();
             
@@ -246,14 +252,9 @@ namespace redwing
         }
 
         // put in separate function to avoid weird errors caused by optimization.
-        private void modcommonAddRedwingError()
+        private static void modcommonAddRedwingError()
         {
             GameManager.instance.gameObject.GetOrAddComponent<redwing_error>();
-        }
-
-        public override int LoadPriority()
-        {
-            return LOAD_ORDER;
         }
 
         public void Unload()
@@ -268,7 +269,5 @@ namespace redwing
         {
             Modding.Logger.Log("[Redwing] " + str);
         }
-
-
     }
 }

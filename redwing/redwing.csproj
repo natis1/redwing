@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AAAAArdvarkAngleIntegration, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\AAAAArdvarkAngleIntegration.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\mods\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -56,6 +59,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="lore.cs" />
+    <Compile Include="napalm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="redwing.cs" />
     <Compile Include="greymoth.cs" />
@@ -66,7 +71,6 @@
     <Compile Include="redwing_hacky_workarounds.cs" />
     <Compile Include="redwing_hooks.cs" />
     <Compile Include="redwing_laser_behavior.cs" />
-    <Compile Include="redwing_lore.cs" />
     <Compile Include="redwing_pillar_behaviors.cs" />
     <Compile Include="redwing_settings.cs" />
     <Compile Include="redwing_trail_behaviors.cs" />
