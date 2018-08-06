@@ -194,7 +194,7 @@ namespace redwing
             BoxCollider2D hitEnemies = firePillar.GetComponent<BoxCollider2D>();
             hitEnemies.isTrigger = true;
             hitEnemies.size = img.size;
-            hitEnemies.offset = new Vector2(img.size.x / 2, 0);
+            hitEnemies.offset = new Vector2(0, 0);
             
             firePillar.SetActive(true);
         }

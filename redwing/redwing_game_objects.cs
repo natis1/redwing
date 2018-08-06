@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 
 namespace redwing
@@ -57,7 +58,7 @@ namespace redwing
             BoxCollider2D hitEnemies = firePillar.GetComponent<BoxCollider2D>();
             hitEnemies.isTrigger = true;
             hitEnemies.size = img.size;
-            hitEnemies.offset = new Vector2(img.size.x / 2, 0);
+            hitEnemies.offset = new Vector2(0, 0);
 
             firePillar.GetComponent<redwing_pillar_behavior>().lifespan = lifespan;
             
@@ -275,7 +276,8 @@ namespace redwing
             behavior.fireballPhysics = behavior.gameObject.GetComponent<Rigidbody2D>();
             collide.size = behavior.fireballSprite.size;
             Vector2 spriteSize = behavior.fireballSprite.size;
-            collide.offset = new Vector2(spriteSize.x / 2, 0);
+            //collide.offset = new Vector2(spriteSize.x / 2, 0);
+            collide.offset = new Vector2(0, 0);
             behavior.rotationalVelocity = (float) ((redwing_flame_gen.rng.NextDouble() - 0.5 ) * 10.0 * 180.0 / Math.PI);
 
             behavior.xVelocity = xVelocity;
@@ -390,8 +392,26 @@ namespace redwing
             if (targetHP == null) return;
             
             //Modding.Logger.Log("[Redwing] Doing " + realDamage + " damage with attack name " + source.name);
+
+            targetHP.hp -= realDamage;
+
+            if (targetHP.hp <= 0f)
+            {
+                targetHP.Die(0f, AttackTypes.Generic, true);
+            }
             
+            FSMUtility.SendEventToGameObject(targetHP.gameObject, "BLOCKED HIT", false);
             
+            FSMUtility.SendEventToGameObject(source, "HIT LANDED", false);
+            if ((Object) targetHP.gameObject.GetComponent<DontClinkGates>() != (Object) null) return;
+            
+            FSMUtility.SendEventToGameObject(targetHP.gameObject, "HIT", false);    
+            GameManager.instance.FreezeMoment(1);
+            GameCameras.instance.cameraShakeFSM.SendEvent("EnemyKillShake");
+
+            napalm memes = targetHP.gameObject.GetOrAddComponent<napalm>();
+            memes.addNapalm(12.0, Color.green);
+            /*
             targetHP.Hit(new HitInstance
             {
                 Source = source,
@@ -406,7 +426,14 @@ namespace redwing
                 Multiplier = 1f,
                 SpecialType = SpecialTypes.None,
                 IsExtraDamage = false
-            });
+            });*/
+        }
+
+        public static void addNapalm(GameObject target, double fireToAdd, Color fireColor)
+        {
+            HealthManager hm = getHealthManagerRecursive(target);
+            napalm n = hm.gameObject.GetOrAddComponent<napalm>();
+            n.addNapalm(fireToAdd, fireColor);
         }
 
         private static HealthManager getHealthManagerRecursive(GameObject target)

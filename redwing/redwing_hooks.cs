@@ -33,6 +33,8 @@ namespace redwing
             
             ModHooks.Instance.BeforeSavegameSaveHook -= restoreCharmCost;
             ModHooks.Instance.SavegameSaveHook -= ruinCharmCost;
+
+            On.HealthManager.TakeDamage -= addNapalm;
             
             voidKnightSpellControl = null;
             
@@ -67,8 +69,64 @@ namespace redwing
             
             ModHooks.Instance.BeforeSavegameSaveHook += restoreCharmCost;
             ModHooks.Instance.SavegameSaveHook += ruinCharmCost;
+            On.HealthManager.TakeDamage += addNapalm;
             
             ruinCharmCost(0);
+        }
+
+        private void addNapalm(On.HealthManager.orig_TakeDamage orig, HealthManager self, HitInstance hitinstance)
+        {
+            if ((hitinstance.DamageDealt * hitinstance.Multiplier) >= (self.hp))
+            {
+                orig(self, hitinstance);
+                return;
+            }
+            
+            if (hitinstance.Source.name == "Slash")
+            {
+                if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
+                {
+                    redwing_game_objects.addNapalm(self.gameObject, 2.0 * (PlayerData.instance.nailSmithUpgrades + 1.0),
+                        Color.red);
+                }
+                else
+                {
+                    redwing_game_objects.addNapalm(self.gameObject, (PlayerData.instance.nailSmithUpgrades + 1.0),
+                        Color.white);
+                }
+            } else if (hitinstance.Source.name.Contains("Slash"))
+            {
+                if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
+                {
+                    redwing_game_objects.addNapalm(self.gameObject, 6.0 * (PlayerData.instance.nailSmithUpgrades + 1.0),
+                        Color.green);
+                }
+                else
+                {
+                    redwing_game_objects.addNapalm(self.gameObject, 3.0 * (PlayerData.instance.nailSmithUpgrades + 1.0),
+                        Color.green);
+                }
+            } else if (hitinstance.Source.name.Contains("Fireball2"))
+            {
+                redwing_game_objects.addNapalm(self.gameObject,
+                    PlayerData.instance.GetBool("equippedCharm_19") ? 30.0 : 24.0, Color.black);
+            } else if (hitinstance.Source.name.Contains("Fireball"))
+            {
+                redwing_game_objects.addNapalm(self.gameObject,
+                    PlayerData.instance.GetBool("equippedCharm_19") ? 20.0 : 15.0, Color.white);
+            } else if (hitinstance.Source.name.Contains("Q Fall Damage"))
+            {
+                redwing_game_objects.addNapalm(self.gameObject,
+                    PlayerData.instance.GetBool("equippedCharm_19") ? 20.0 : 15.0, Color.white);
+            } else if (hitinstance.Source.name.Contains("Hit"))
+            {
+                redwing_game_objects.addNapalm(self.gameObject, hitinstance.DamageDealt * 0.15, Color.yellow);
+            }
+            
+            log("An enemy with name " + self.gameObject.name + " took damage from " + hitinstance.Source.name);
+            log("Damage taken was " + hitinstance.DamageDealt + " with multiplier " + hitinstance.Multiplier);
+            
+            orig(self, hitinstance);
         }
 
         private void checkForSheoRoom(Scene from, Scene to)
@@ -742,6 +800,14 @@ namespace redwing
             }
             
         }
+
+        private HitInstance napalmEnemy(Fsm owner, HitInstance hit)
+        {
+
+
+            return hit;
+        }
+        
         
         private HitInstance overrideAllNonFireDamage(Fsm owner, HitInstance hit)
         {
@@ -759,8 +825,6 @@ namespace redwing
         {
             
             if (!hitter.GameObject.name.Contains("Slash")) return hit;
-            
-            
             int nailDamage = 5 + PlayerData.instance.GetInt("nailSmithUpgrades") * 4;
             double multiplier = 1;
             float fsmMultiplier = 1;

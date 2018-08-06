@@ -22,7 +22,7 @@ namespace redwing
 
         private void Start()
         {
-            if (englishWarnings || englishLore || redwing_lore.isEnglish())
+            if (englishWarnings || englishLore || lore.isEnglish())
             {
                 setupWarningEN();
             }

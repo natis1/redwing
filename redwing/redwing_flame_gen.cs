@@ -24,6 +24,8 @@ namespace redwing
         private readonly Texture2D[] fireShields = new Texture2D[20];
 
         private readonly Texture2D[] fireTrails = new Texture2D[4];
+
+        public static Texture2D perfectWhiteCircle;
         
         
         private const int TESTING_CLIP = 2;
@@ -961,10 +963,37 @@ namespace redwing
             {
                 log("Unable to build fire trails. Error " + e);
             }
+
+            perfectWhiteCircle = generateWhiteCircle();
+            perfectWhiteCircle.Apply();
             
             log("Built all flame textures.");
 
             
+        }
+
+        private Texture2D generateWhiteCircle()
+        {
+            Texture2D circle = new Texture2D(100, 100);
+            for (int x = 0; x < 100; x++)
+            {
+                for (int y = 0; y < 100; y++)
+                {
+                    double dist = getDistance(x, y, 100, 100);
+                    if (dist < 35.0)
+                    {
+                        circle.SetPixel(x, y, Color.white);
+                    } else if (dist < 50.0)
+                    {
+                        circle.SetPixel(x, y, new Color(1.0f, 1.0f, 1.0f, (float)((50.0 - dist) / 1.5)));
+                    }
+                    else
+                    {
+                        circle.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            return circle;
         }
 
         private Texture2D generateReverseFireTrailCap()
