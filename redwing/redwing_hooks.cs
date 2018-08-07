@@ -800,14 +800,6 @@ namespace redwing
             }
             
         }
-
-        private HitInstance napalmEnemy(Fsm owner, HitInstance hit)
-        {
-
-
-            return hit;
-        }
-        
         
         private HitInstance overrideAllNonFireDamage(Fsm owner, HitInstance hit)
         {

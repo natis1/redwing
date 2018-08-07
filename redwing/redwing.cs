@@ -244,6 +244,7 @@ namespace redwing
 
             GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
             GameManager.instance.gameObject.AddComponent<redwing_hooks>();
+            GameManager.instance.gameObject.AddComponent<room_checker>();
             
             if (!noModCommon)
                 modcommonAddRedwingError();

@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="false_light.cs" />
     <Compile Include="lore.cs" />
     <Compile Include="napalm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +75,11 @@
     <Compile Include="redwing_pillar_behaviors.cs" />
     <Compile Include="redwing_settings.cs" />
     <Compile Include="redwing_trail_behaviors.cs" />
+    <Compile Include="room_checker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="assets\ending1.webm" />
+    <EmbeddedResource Include="assets\ending2.webm" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
