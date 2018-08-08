@@ -27,7 +27,6 @@ namespace redwing
 
         public static Texture2D perfectWhiteCircle;
         
-        
         private const int TESTING_CLIP = 2;
 
         private AudioClip fireballHitSoundFX;

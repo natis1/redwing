@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="false_light.cs" />
+    <Compile Include="load_textures.cs" />
     <Compile Include="lore.cs" />
     <Compile Include="napalm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,10 +77,29 @@
     <Compile Include="redwing_settings.cs" />
     <Compile Include="redwing_trail_behaviors.cs" />
     <Compile Include="room_checker.cs" />
+    <Compile Include="video_blanker.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="assets\ending1.webm" />
-    <EmbeddedResource Include="assets\ending2.webm" />
+    <Content Include="assets\ending1.webm" />
+    <Content Include="assets\ending2.webm" />
+    <Content Include="assets\ending3.webm" />
+    <EmbeddedResource Include="assets\shield\Frame1.png" />
+    <EmbeddedResource Include="assets\shield\Frame10.png" />
+    <EmbeddedResource Include="assets\shield\Frame11.png" />
+    <EmbeddedResource Include="assets\shield\Frame12.png" />
+    <EmbeddedResource Include="assets\shield\Frame13.png" />
+    <EmbeddedResource Include="assets\shield\Frame14.png" />
+    <EmbeddedResource Include="assets\shield\Frame15.png" />
+    <EmbeddedResource Include="assets\shield\Frame2.png" />
+    <EmbeddedResource Include="assets\shield\Frame3.png" />
+    <EmbeddedResource Include="assets\shield\Frame4.png" />
+    <EmbeddedResource Include="assets\shield\Frame5.png" />
+    <EmbeddedResource Include="assets\shield\Frame6.png" />
+    <EmbeddedResource Include="assets\shield\Frame7.png" />
+    <EmbeddedResource Include="assets\shield\Frame8.png" />
+    <EmbeddedResource Include="assets\shield\Frame9.png" />
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -398,6 +398,7 @@ namespace redwing
             if (targetHP.hp <= 0f)
             {
                 targetHP.Die(0f, AttackTypes.Generic, true);
+                return;
             }
             
             FSMUtility.SendEventToGameObject(targetHP.gameObject, "BLOCKED HIT", false);

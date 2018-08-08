@@ -44,6 +44,8 @@ namespace redwing
         
         public void Start()
         {
+            load_textures.loadAllTextures();
+            
             log("Setting internal slash values.");
             hasGreatSlash = PlayerData.instance.GetBool("hasDashSlash");
             hasNailArt = PlayerData.instance.GetBool("hasNailArt");
@@ -259,12 +261,8 @@ namespace redwing
             flameShieldSprite = flameShieldObj.GetComponent<SpriteRenderer>();
             flameShieldObj.transform.parent = voidKnight.transform;
             flameShieldObj.transform.localPosition = Vector3.zero;
-            flameShieldObj.transform.localPosition = new Vector3(0f, -0.4f);
+            flameShieldObj.transform.localPosition = new Vector3(0f, -0.58f);
             flameShieldSprite.color = Color.white;
-            flameShieldSprite.sprite = Sprite.Create(flameShieldTextures[currentFlameShieldTexture],
-                new Rect(0, 0, redwing_flame_gen.FSHIELDTEXTURE_WIDTH, redwing_flame_gen.FSHIELDTEXTURE_HEIGHT),
-                new Vector2(0.5f, 0.5f));
-
             flameShieldAudio = flameShieldObj.GetComponent<AudioSource>();
             //flameShieldAudio.clip = shieldSoundEffect;
             flameShieldAudio.loop = false;
@@ -293,6 +291,7 @@ namespace redwing
             
             if (fsCharge <= 0.0 && damage > 0)
             {
+                lastFSState = -1;
                 log("Shielding one damage");
                 fsCharge = fsRecharge;
                 invulnTime = IFRAMES;
@@ -360,6 +359,7 @@ namespace redwing
         private double fsCharge = 0;
         private double invulnTime = 0;
         private double cycloneTime = 0;
+        private int lastFSState = 3;
 
         private const double CYCLONE_COOLDOWN = 0.22;
         
@@ -382,7 +382,7 @@ namespace redwing
 
         private IEnumerable<Collider2D> allLaserEnemies;
 
-        private const float FS_UPDATE_TIME = 0.2f;
+        private const float FS_UPDATE_TIME = 0.08f;
         private float fsLastUpdate = 0f;
         private bool useFT = false;
         private bool playFSSound;
@@ -417,7 +417,14 @@ namespace redwing
 
         private void flameShieldUpdate()
         {
+            /*
+             * Todo: put code in here that lets you use the new flameshields.
+             * 
+             */
+            
             fsLastUpdate += Time.deltaTime;
+            
+            /*
             Color c = flameShieldSprite.color;
 
             float alpha;
@@ -443,27 +450,112 @@ namespace redwing
             {
                 alpha = (float)( 0.5 * (fsRecharge - fsCharge) / fsRecharge );
             }
-
-            
-
             c.a = alpha;
             
             flameShieldSprite.color = c;
+            */
+            
             
             if (!(fsLastUpdate > FS_UPDATE_TIME)) return;
             
             fsLastUpdate = 0f;
-            currentFlameShieldTexture++;
-            if (currentFlameShieldTexture >= flameShieldTextures.Length)
-            {
-                currentFlameShieldTexture = 0;
-            }
-                
-            flameShieldSprite.sprite = Sprite.Create(flameShieldTextures[currentFlameShieldTexture],
-                new Rect(0, 0, redwing_flame_gen.FSHIELDTEXTURE_WIDTH, redwing_flame_gen.FSHIELDTEXTURE_HEIGHT),
-                new Vector2(0.5f, 0.5f));
+            const float yPivot = 0.5f;
             
+            if (lastFSState < 0)
+            {
+                if (lastFSState == -1)
+                {
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[0],
+                        new Rect(0, 0, load_textures.flameShieldLost[0].width, load_textures.flameShieldLost[0].height - load_textures.flameYOffset),
+                        new Vector2(0.5f, yPivot));
+                    lastFSState--;
+                } else if (lastFSState == -2)
+                {
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[1],
+                        new Rect(0, 0, load_textures.flameShieldLost[1].width, load_textures.flameShieldLost[1].height - load_textures.flameYOffset),
+                        new Vector2(0.5f, yPivot));
+                    lastFSState--;
+                } else if (lastFSState == -3)
+                {
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[2],
+                        new Rect(0, 0, load_textures.flameShieldLost[2].width, load_textures.flameShieldLost[2].height - load_textures.flameYOffset),
+                        new Vector2(0.5f, yPivot));
+                    lastFSState--;
+                }
+                else
+                {
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[3],
+                        new Rect(0, 0, load_textures.flameShieldLost[3].width, load_textures.flameShieldLost[3].height - load_textures.flameYOffset),
+                        new Vector2(0.5f, yPivot));
+                    
+                    lastFSState = 0;
+                    currentFlameShieldTexture = 0;
+                }
 
+                return;
+            }
+
+            if (fsCharge > 20.0)
+            {
+                return;
+            } else if (fsCharge > 10.0)
+            {
+                if (lastFSState == 0)
+                {
+                    currentFlameShieldTexture = -load_textures.flameShieldCharge1IntroFrames;
+                }
+                int i = load_textures.flameShieldCharge1IntroFrames + currentFlameShieldTexture;
+
+                if (i >= load_textures.flameShieldCharge1.Length)
+                {
+                    currentFlameShieldTexture = 0;
+                    i = load_textures.flameShieldCharge1IntroFrames;
+                }
+                flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldCharge1[i],
+                    new Rect(0, 0, load_textures.flameShieldCharge1[i].width, load_textures.flameShieldCharge1[i].height - load_textures.flameYOffset),
+                    new Vector2(0.5f, yPivot));
+                lastFSState = 1;
+                currentFlameShieldTexture++;
+            } else if (fsCharge > 0.0)
+            {
+                if (lastFSState == 1)
+                {
+                    currentFlameShieldTexture = -load_textures.flameShieldCharge2IntroFrames;
+                }
+                
+                int i = load_textures.flameShieldCharge2IntroFrames + currentFlameShieldTexture;
+                if (i >= load_textures.flameShieldCharge2.Length)
+                {
+                    currentFlameShieldTexture = 0;
+                    i = load_textures.flameShieldCharge2IntroFrames;
+                }
+                
+                flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldCharge2[i],
+                    new Rect(0, 0, load_textures.flameShieldCharge2[i].width, load_textures.flameShieldCharge2[i].height - load_textures.flameYOffset),
+                    new Vector2(0.5f, yPivot));
+                lastFSState = 2;
+                currentFlameShieldTexture++;
+            }
+            else if (fsCharge <= 0.0)
+            {
+                if (lastFSState == 2)
+                {
+                    currentFlameShieldTexture = -load_textures.flameShieldChargedIntroFrames;
+                }
+                
+                int i = load_textures.flameShieldChargedIntroFrames + currentFlameShieldTexture;
+                if (i >= load_textures.flameShieldCharged.Length)
+                {
+                    currentFlameShieldTexture = 0;
+                    i = load_textures.flameShieldChargedIntroFrames;
+                }
+                
+                flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldCharged[i],
+                    new Rect(0, 0, load_textures.flameShieldCharged[i].width, load_textures.flameShieldCharged[i].height - load_textures.flameYOffset),
+                    new Vector2(0.5f, 0.5f));
+                lastFSState = 3;
+                currentFlameShieldTexture++;
+            }
         }
         
         private void attackCooldownUpdate()

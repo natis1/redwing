@@ -46,7 +46,7 @@ namespace redwing
             fieryParticleRenderer = fireGenerator.GetComponent<ParticleSystemRenderer>();
             
             
-            fieryParticleRenderer.material.shader = Shader.Find("Particles/Blend");
+            fieryParticleRenderer.material.shader = Shader.Find("Sprites/Default");
             fieryParticleRenderer.material.mainTexture = redwing_flame_gen.perfectWhiteCircle;
             fieryParticleRenderer.material.color = Color.white;
             fieryParticleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
