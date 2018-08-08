@@ -271,8 +271,8 @@ namespace redwing
                 "Here at the edge of the world, no-one could find me... except you.<page>" +
                 "Warriors, knights, kings, even time itself... they have no power over me. Only you.<page>" +
                 "You are the fire... come to consume me."));
-            angleint.addLanguageString(new language_string("Dreamers", "DREAMERS_EC2_1D",
-                "But the Vessel failed.<br>The plague consumes all.<br>They must be undone."));
+            //angleint.addLanguageString(new language_string("Dreamers", "DREAMERS_EC2_1D",
+            //    "But the Vessel failed.<br>The plague consumes all.<br>They must be undone."));
             angleint.addLanguageString(new language_string("Dreamers", "DREAMERS_EC2_1",
                 "It would break the Seals.<br>They cannot be undone.<br>They must be undone.<page>" +
                 "An empty vessel to bring salvation.<br>A flaming vessel to bring life.<br>A radiant vessel to bring dreams.<page>" +
