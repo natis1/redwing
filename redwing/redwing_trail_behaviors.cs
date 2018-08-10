@@ -239,7 +239,7 @@ namespace redwing
             if (this.enteredColliders.Contains(collision)) return;
             
             enteredColliders.Add(collision);
-            StartCoroutine(burnThatMotherTrucker(collision.gameObject));
+            burnThatMotherTrucker(collision.gameObject);
         }
 
         /*
@@ -259,14 +259,8 @@ namespace redwing
             
         }*/
 
-        private IEnumerator burnThatMotherTrucker(GameObject enemy)
+        private void burnThatMotherTrucker(GameObject enemy)
         {
-            // wait for sharp shadow Iframes to be gone
-            if (currentTime < 0.01f)
-            {
-                yield return new WaitForSeconds(0.23f);
-            }
-
             redwing_game_objects.applyHitInstance(enemy, cachedPrimaryDmg, AttackTypes.Spell, gameObject);
         }
         

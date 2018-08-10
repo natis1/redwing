@@ -209,7 +209,7 @@ namespace redwing
             {
                 if (Math.Abs(DashDirection.y) > 0.001f && Math.Abs(DashDirection.x) > 0.001f)
                 {
-                    DashDirection.y = 0f;
+                    DashDirection.x = 0f;
                 }
             }
             

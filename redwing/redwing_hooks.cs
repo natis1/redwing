@@ -261,7 +261,7 @@ namespace redwing
             flameShieldSprite = flameShieldObj.GetComponent<SpriteRenderer>();
             flameShieldObj.transform.parent = voidKnight.transform;
             flameShieldObj.transform.localPosition = Vector3.zero;
-            flameShieldObj.transform.localPosition = new Vector3(0f, -0.58f);
+            flameShieldObj.transform.localPosition = new Vector3(0f, -0.4f);
             flameShieldSprite.color = Color.white;
             flameShieldAudio = flameShieldObj.GetComponent<AudioSource>();
             //flameShieldAudio.clip = shieldSoundEffect;

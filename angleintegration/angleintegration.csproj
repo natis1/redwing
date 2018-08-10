@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>angleintegration</RootNamespace>
-    <AssemblyName>AAAAArdvarkAngleIntegration</AssemblyName>
+    <AssemblyName>AAngleRedwingIntegration</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -12,9 +12,11 @@ namespace redwing
         private GameObject fireGenerator;
 
         public HealthManager cachedEnemyHM;
+        public tk2dSprite cachedEnemySprite;
 
         private double napalmStrength = 0.0;
         private Color flameColor = Color.gray;
+        private bool visible;
 
         private const double damageExponent = 0.7;
 
@@ -48,17 +50,21 @@ namespace redwing
             
             fieryParticleRenderer.material.shader = Shader.Find("Sprites/Default");
             fieryParticleRenderer.material.mainTexture = redwing_flame_gen.perfectWhiteCircle;
-            fieryParticleRenderer.material.color = Color.white;
+            fieryParticleRenderer.material.color = flameColor;
             fieryParticleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
+            partMain.startColor = new ParticleSystem.MinMaxGradient(Color.white);
             
-            ParticleSystem.ColorOverLifetimeModule fadeOut = fieryParticles.colorOverLifetime;
-            fadeOut.color = new ParticleSystem.MinMaxGradient(flameColor, new Color(0.5f, 0.5f, 0.5f, 0f));
-            fadeOut.enabled = true;
-
             cachedEnemyHM = gameObject.GetComponent<HealthManager>();
+            cachedEnemySprite = gameObject.GetComponent<tk2dSprite>();
+            visible = true;
             
             if (cachedEnemyHM != null && cachedEnemyHM.hp > 0)
             {
+                if (gameObject.CompareTag("Nightmare Grimm Boss") || gameObject.CompareTag("Grimm Boss"))
+                {
+                    DestroyImmediate(fireGenerator);
+                }
+                
                 StartCoroutine(dealFireDamage());
             }
             else
@@ -73,8 +79,40 @@ namespace redwing
 
         private void Update()
         {
-            if (fireGenerator != null)
-                fireGenerator.transform.localPosition = gameObject.transform.position;
+            if (fireGenerator == null) return;
+            
+            if (cachedEnemyHM.isDead)
+            {
+                Destroy(fireGenerator);
+                return;
+            }
+            
+            Vector3 newPos = gameObject.transform.position;
+            newPos.z = -3f;
+            fireGenerator.transform.localPosition = newPos;
+            
+            ParticleSystem.Particle[] particleList = new    ParticleSystem.Particle[fieryParticles.particleCount];
+            fieryParticles.GetParticles(particleList);
+            for(int i = 0; i < particleList.Length; ++i)
+            {
+                float lifePercentage = (particleList[i].remainingLifetime / particleList[i].startLifetime);
+                particleList[i].startColor = Color.Lerp(Color.clear, Color.white, lifePercentage);
+            }
+            fieryParticles.SetParticles(particleList, fieryParticles.particleCount);
+            
+            if (cachedEnemySprite == null) return;
+            
+            if (visible && (!cachedEnemySprite.isActiveAndEnabled || cachedEnemySprite.color.a < 0.05f))
+            {
+                Modding.Logger.Log("Found invisible enemy, making invis!");
+                fieryParticleRenderer.material.color = Color.clear;
+                visible = false;
+            } else if (!visible && (cachedEnemySprite.isActiveAndEnabled || cachedEnemySprite.color.a >= 0.05f))
+            {
+                Modding.Logger.Log("Enemy now visible!");
+                fieryParticleRenderer.material.color = flameColor;
+                visible = true;
+            }
         }
 
         public void addNapalm(double napalm, Color napalmColor)
@@ -107,11 +145,10 @@ namespace redwing
                 napalmStrength = napalm;
             }
 
-            Color blankFlameColor = flameColor;
-            blankFlameColor.a = 0;
-            
-            ParticleSystem.ColorOverLifetimeModule fadeOut = fieryParticles.colorOverLifetime;
-            fadeOut.color = new ParticleSystem.MinMaxGradient(flameColor, blankFlameColor);
+            if (visible)
+            {
+                fieryParticleRenderer.material.color = flameColor;
+            }
         }
 
         private IEnumerator dealFireDamage()
@@ -132,8 +169,7 @@ namespace redwing
                 }
                 else
                 {
-                    ParticleSystem.ColorOverLifetimeModule fadeOut = fieryParticles.colorOverLifetime;
-                    fadeOut.color = new ParticleSystem.MinMaxGradient(Color.clear);
+                    fieryParticleRenderer.material.color = Color.clear;
                 }
                 yield return new WaitForSeconds(0.5f);
             }

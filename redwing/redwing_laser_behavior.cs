@@ -50,11 +50,8 @@ namespace redwing
 			StartCoroutine(playAnimation());
 		}
 
-		private IEnumerator hurtEnemies()
+		private void hurtEnemies()
 		{
-			const float waitTime = 0.15f;
-			yield return new WaitForSecondsRealtime(waitTime);
-
 			//log("there are " + enteredColliders.Count + " enemies in your list");
 			
 			foreach (Collider2D collider in enteredColliders)
@@ -78,7 +75,7 @@ namespace redwing
 		{
 			if (soloLaser)
 			{
-				StartCoroutine(hurtEnemies());
+				hurtEnemies();
 				yPivot = 0.5f;
 			}
 

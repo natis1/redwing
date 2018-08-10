@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AAAAArdvarkAngleIntegration, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\mods\AAAAArdvarkAngleIntegration.dll</HintPath>
+    <Reference Include="AAngleRedwingIntegration, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\mods\AAngleRedwingIntegration.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\mods\Assembly-CSharp.dll</HintPath>
