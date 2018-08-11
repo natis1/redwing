@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using angleintegration;
 using Modding;
 using UnityEngine;
 
@@ -74,26 +73,26 @@ namespace angleintegration
 
         protected modern_mod()
         {
-            globalSettingsFilename = Application.persistentDataPath + ModHooks.PathSeperator + GetType().Name +
-                                     ".GlobalSettings.json";
+            globalSettingsFilename = Application.persistentDataPath + ModHooks.PathSeperator + "Redwing" +
+                                     ".settings.json";
             loadGlobalSettings();
         }
 
-        public TGlobalSettings globalSettings
+        protected TGlobalSettings globalSettings
         {
             get
             {
-                TGlobalSettings gSettings = this.modGlobalSettings;
+                TGlobalSettings gSettings = modGlobalSettings;
                 if ((object) gSettings != null)
                     return gSettings;
-                return this.modGlobalSettings = Activator.CreateInstance<TGlobalSettings>();
+                return modGlobalSettings = Activator.CreateInstance<TGlobalSettings>();
             }
             set { modGlobalSettings = value; }
         }
 
-        public void saveGlobalSettings()
+        protected void saveGlobalSettings()
         {
-            Log("Saving Global Settings");
+            Log("Saving redwing settings!");
             if (File.Exists(globalSettingsFilename + ".bak"))
                 File.Delete(globalSettingsFilename + ".bak");
             if (File.Exists(globalSettingsFilename))
@@ -110,7 +109,7 @@ namespace angleintegration
 
         public void loadGlobalSettings()
         {
-            Log("Loading Global Settings");
+            Log("Loading redwing settings!");
             if (!File.Exists(globalSettingsFilename))
                 return;
             using (FileStream fileStream = File.OpenRead(globalSettingsFilename))
@@ -141,7 +140,7 @@ namespace angleintegration
         private void loadSettings(SaveGameData data)
         {
             string name = GetType().Name;
-            Log("Loading Mod Settings from Save.");
+            Log("Loading savegame data!");
             if (data?.modData == null || !data.modData.ContainsKey(name))
                 return;
             settings = Activator.CreateInstance<TSaveSettings>();
@@ -167,10 +166,71 @@ namespace angleintegration
 
         protected modern_mod()
         {
-            Log("Instantiating Mod");
             ModHooks.Instance.BeforeSavegameSaveHook += saveSettings;
             ModHooks.Instance.AfterSavegameLoadHook += loadSettings;
         }
     }
+
+    public class modern_mod<TSaveSettings, TGlobalSettings, TSecondarySettings> :
+        modern_mod<TSaveSettings, TGlobalSettings> where TSaveSettings : IModSettings, new()
+        where TGlobalSettings : IModSettings, new()
+        where TSecondarySettings : IModSettings, new()
+    {
+        
+        private readonly string secondarySettingsFilename;
+        private TSecondarySettings modSecondarySettings;
+
+        protected modern_mod()
+        {
+            secondarySettingsFilename = Application.persistentDataPath + ModHooks.PathSeperator + "Redwing" +
+                                     ".flamegen.json";
+            loadSecondarySettings();
+        }
+
+        protected TSecondarySettings secondarySettings
+        {
+            get
+            {
+                TSecondarySettings sSettings = modSecondarySettings;
+                if ((object) sSettings != null)
+                    return sSettings;
+                return modSecondarySettings = Activator.CreateInstance<TSecondarySettings>();
+            }
+            set { modSecondarySettings = value; }
+        }
+
+        protected void saveSecondarySettings()
+        {
+            Log("Saving flamegen Settings");
+            if (File.Exists(secondarySettingsFilename + ".bak"))
+                File.Delete(secondarySettingsFilename + ".bak");
+            if (File.Exists(secondarySettingsFilename))
+                File.Move(secondarySettingsFilename, secondarySettingsFilename + ".bak");
+            using (FileStream fileStream = File.Create(secondarySettingsFilename))
+            {
+                using (StreamWriter streamWriter = new StreamWriter((Stream) fileStream))
+                {
+                    string json = JsonUtility.ToJson((object) secondarySettings, true);
+                    streamWriter.Write(json);
+                }
+            }
+        }
+
+        public void loadSecondarySettings()
+        {
+            Log("Loading flamegen Settings");
+            if (!File.Exists(secondarySettingsFilename))
+                return;
+            using (FileStream fileStream = File.OpenRead(secondarySettingsFilename))
+            {
+                using (StreamReader streamReader = new StreamReader((Stream) fileStream))
+                    modSecondarySettings = JsonUtility.FromJson<TSecondarySettings>(streamReader.ReadToEnd());
+            }
+        }
+
+    }
+    
+    
+    
 }
     

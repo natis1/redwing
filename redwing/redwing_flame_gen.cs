@@ -127,10 +127,12 @@ namespace redwing
         //public readonly Color[] flameIntensityCurve = { Color.red, new Color(1f, 0.3f, 0f), Color.yellow, Color.white };
 
         // What are the fire colors anyway?
-        private readonly Color[] flameIntensityCurve = { Color.red, Color.yellow, Color.white, Color.white };
+        //private readonly Color[] flameIntensityCurve = { Color.red, Color.yellow, Color.white, Color.white };
+        public static Color[] flameIntensityCurve;
 
         // At what point do you switch from color X to color Y.
-        private readonly double[] flameIntensityThresholds = { 0.4, 0.7, 2.5, 2.6 };
+        public static double[] flameIntensityThresholds;
+        
 
         private double randomPointOnSin;
 

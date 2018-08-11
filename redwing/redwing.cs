@@ -5,14 +5,15 @@ using UnityEngine;
 using System.IO;
 using angleintegration;
 using ModCommon;
+using On.InControl.NativeProfile;
 
 namespace redwing
 {
     // ReSharper disable once InconsistentNaming because it's the name I want to appear on Modding API.
     // ReSharper disable once UnusedMember.Global because it's used implicitly but importing rider extensions is dumb.
-    public class redwing : modern_mod<redwing_settings, redwing_global_settings>, ITogglableMod
+    public class redwing : modern_mod<redwing_settings, redwing_global_settings, redwing_flamegen_settings>, ITogglableMod
     {
-        private const string VERSION = "1.1.0";
+        private const string VERSION = "1.1.1";
         private const int LOAD_ORDER = 90;
         private const int minApi = 44;
 
@@ -27,8 +28,7 @@ namespace redwing
         // ReSharper disable once ArrangeTypeMemberModifiers
         public redwing()
         {
-            log("Doing meme mod loading I guess");
-            setupModVars(new modern_mod_vars("Redwing", VERSION, 11, LOAD_ORDER));
+            setupModVars(new modern_mod_vars("Redwing CP1", VERSION, 11, LOAD_ORDER));
         }
 
         // Version detection code originally by Seanpr, used with permission.
@@ -142,6 +142,9 @@ namespace redwing
 
             redwing_error.englishLore = globalSettings.useEnglishLoreWhenLanguageMissing;
             redwing_error.englishWarnings = globalSettings.useEnglishWarningInfoWhenLanguageMissing;
+
+            napalm.damageExponent = (float) globalSettings.napalmDamageExponent;
+            napalm.damageMultiplier = (float) globalSettings.napalmDamageMultiplier;
             
             apiTooLow = (Convert.ToInt32(ModHooks.Instance.ModVersion.Split('-')[1]) < minApi);
             if (noModCommon || blackmothError || apiTooLow)
@@ -149,10 +152,30 @@ namespace redwing
             
             
             redwing_error.redwingProblemCode = problemCode;
+
+            redwing_flame_gen.flameIntensityCurve = new[]
+            {
+                new Color(secondarySettings.flameColorR1, secondarySettings.flameColorG1,
+                    secondarySettings.flameColorB1),
+                new Color(secondarySettings.flameColorR2, secondarySettings.flameColorG2,
+                    secondarySettings.flameColorB2),
+                new Color(secondarySettings.flameColorR3, secondarySettings.flameColorG3,
+                    secondarySettings.flameColorB3),
+                new Color(secondarySettings.flameColorR4, secondarySettings.flameColorG4,
+                    secondarySettings.flameColorB4)
+            };
+            redwing_flame_gen.flameIntensityThresholds = new[]
+            {
+                (double) secondarySettings.flameColor1Threshold,
+                (double) secondarySettings.flameColor2Threshold,
+                (double) secondarySettings.flameColor3Threshold,
+                (double) secondarySettings.flameColor4Threshold
+            };
             
             ModHooks.Instance.AfterSavegameLoadHook += saveGame;
             ModHooks.Instance.NewGameHook += addComponent;
             ModHooks.Instance.ApplicationQuitHook += saveGlobalSettings;
+            ModHooks.Instance.ApplicationQuitHook += saveSecondarySettings;
             printErrors();
         }
 
@@ -175,7 +198,7 @@ namespace redwing
 
         private void setupSettings()
         {
-            string settingsFilePath = Application.persistentDataPath + ModHooks.PathSeperator + GetType().Name + ".GlobalSettings.json";
+            string settingsFilePath = Application.persistentDataPath + ModHooks.PathSeperator + "Redwing.settings.json";
 
             bool forceReloadGlobalSettings = (globalSettings != null && globalSettings.settingsVersion != version_info.SETTINGS_VER);
 
@@ -193,6 +216,26 @@ namespace redwing
                 globalSettings?.reset();
             }
             saveGlobalSettings();
+            
+            
+            settingsFilePath = Application.persistentDataPath + ModHooks.PathSeperator + "Redwing.flamegen.json";
+            forceReloadGlobalSettings = (secondarySettings != null && secondarySettings.settingsVersion != version_info.SETTINGS_VER);
+
+            if (forceReloadGlobalSettings || !File.Exists(settingsFilePath))
+            {
+                if (forceReloadGlobalSettings)
+                {
+                    log("Settings outdated! Rebuilding.");
+                }
+                else
+                {
+                    log("Settings not found, rebuilding... File will be saved to: " + settingsFilePath);
+                }
+
+                secondarySettings?.reset();
+            }
+            
+            saveSecondarySettings();
         }
 
         private void saveGame(SaveGameData data)

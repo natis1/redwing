@@ -4,7 +4,8 @@ namespace redwing
 {
     public static class version_info
     {
-        public const int SETTINGS_VER = 10;
+        public const int SETTINGS_VER = 12;
+        public const int FLAMEGEN_VER = 1;
     }
 
     public class redwing_global_settings : IModSettings
@@ -59,6 +60,9 @@ namespace redwing
             laserCooldownBase = 10f;
             shieldCooldownBase = 30f;
             shieldCooldownReductionPerNailHit = 0.5f;
+
+            napalmDamageMultiplier = 0.6f;
+            napalmDamageExponent = 0.7f;
             
             settingsVersion = version_info.SETTINGS_VER;
         }
@@ -120,12 +124,76 @@ namespace redwing
         public float shieldCooldownBase { get => GetFloat(); private set => SetFloat(value); }
         public float shieldCooldownReductionPerNailHit { get => GetFloat(); private set => SetFloat(value); }
         
+        public float napalmDamageExponent { get => GetFloat(); private set => SetFloat(value); }
+        public float napalmDamageMultiplier { get => GetFloat(); private set => SetFloat(value); }
+        
+        
     }
 
 
     public class redwing_settings : IModSettings
     {
         // none needed
+
+    }
+
+
+    public class redwing_flamegen_settings : IModSettings
+    {
+        public void reset()
+        {
+            BoolValues.Clear();
+            IntValues.Clear();
+            FloatValues.Clear();
+            StringValues.Clear();
+
+            flameColor1Threshold = 0.4f;
+            flameColorR1 = 0.58f;
+            flameColorG1 = 0f;
+            flameColorB1 = 0f;
+
+            flameColor2Threshold = 0.7f;
+            flameColorR2 = 1f;
+            flameColorG2 = 0.09f;
+            flameColorB2 = 0f;
+
+            flameColor3Threshold = 2.5f;
+            flameColorR3 = 1f;
+            flameColorG3 = 0.56f;
+            flameColorB3 = 0f;
+
+            flameColor4Threshold = 2.6f;
+            flameColorR4 = 1f;
+            flameColorG4 = 0.56f;
+            flameColorB4 = 0f;
+
+            settingsVersion = version_info.FLAMEGEN_VER;
+        }
+        public int settingsVersion { get => GetInt();
+            private set => SetInt(value); }
+        
+
+        public float flameColor1Threshold { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorR1 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorG1 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorB1 { get => GetFloat(); private set => SetFloat(value); }
+
+        public float flameColor2Threshold { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorR2 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorG2 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorB2 { get => GetFloat(); private set => SetFloat(value); }
+
+        public float flameColor3Threshold { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorR3 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorG3 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorB3 { get => GetFloat(); private set => SetFloat(value); }
+
+        public float flameColor4Threshold { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorR4 { get => GetFloat(); private set => SetFloat(value); }        
+        public float flameColorG4 { get => GetFloat(); private set => SetFloat(value); }
+        public float flameColorB4 { get => GetFloat(); private set => SetFloat(value); }
+        
+        
 
     }
 
