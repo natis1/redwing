@@ -5,6 +5,20 @@ using UnityEngine;
 
 namespace redwing
 {
+    public class napalm_self_destroy : MonoBehaviour
+    {
+        public GameObject destroySelfWhenNull;
+
+        private void Update()
+        {
+            if (destroySelfWhenNull == null)
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
+    
+    
     public class napalm : MonoBehaviour
     {
         private ParticleSystem fieryParticles;
@@ -18,13 +32,17 @@ namespace redwing
         private Color flameColor = Color.gray;
         private bool visible;
 
-        private const double damageExponent = 0.7;
+        public static double damageExponent;
+        public static double damageMultiplier;
+        
 
         public napalm()
         {
             Modding.Logger.Log("Trying to add napalm... wish me luck.");
             
-            fireGenerator = new GameObject(gameObject.name + " napalm", typeof(ParticleSystem), typeof(ParticleSystemRenderer));
+            fireGenerator = new GameObject(gameObject.name + " napalm", typeof(ParticleSystem), 
+                typeof(ParticleSystemRenderer), typeof(napalm_self_destroy));
+            fireGenerator.GetComponent<napalm_self_destroy>().destroySelfWhenNull = gameObject;
             fireGenerator.transform.localPosition = gameObject.transform.position;
             fieryParticles = fireGenerator.GetComponent<ParticleSystem>();
 
@@ -37,19 +55,20 @@ namespace redwing
             //partMain.startColor = new 
             //    ParticleSystem.MinMaxGradient(new Color(1f, 1f, 0.3f));
             partMain.startSize = new ParticleSystem.MinMaxCurve(1f);
-            partMain.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 1.5f);
+            partMain.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.75f);
             partMain.maxParticles = 300;
-            partMain.startSpeed = new ParticleSystem.MinMaxCurve(10f, 16f);
+            partMain.startSpeed = new ParticleSystem.MinMaxCurve(16f, 20f);
+            partMain.startRotation = new ParticleSystem.MinMaxCurve(0, (float) (Math.PI * 2.0));
             
             ParticleSystem.EmissionModule partEmission = fieryParticles.emission;
             partEmission.enabled = true;
-            partEmission.rateOverTime = new ParticleSystem.MinMaxCurve(8f);
+            partEmission.rateOverTime = new ParticleSystem.MinMaxCurve(16f);
 
             fieryParticleRenderer = fireGenerator.GetComponent<ParticleSystemRenderer>();
             
             
             fieryParticleRenderer.material.shader = Shader.Find("Sprites/Default");
-            fieryParticleRenderer.material.mainTexture = redwing_flame_gen.perfectWhiteCircle;
+            fieryParticleRenderer.material.mainTexture = load_textures.spark;
             fieryParticleRenderer.material.color = flameColor;
             fieryParticleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
             partMain.startColor = new ParticleSystem.MinMaxGradient(Color.white);
@@ -60,9 +79,10 @@ namespace redwing
             
             if (cachedEnemyHM != null && cachedEnemyHM.hp > 0)
             {
-                if (gameObject.CompareTag("Nightmare Grimm Boss") || gameObject.CompareTag("Grimm Boss"))
+                if (gameObject.name.StartsWith("Nightmare Grimm Boss") || gameObject.name.StartsWith("Grimm Boss"))
                 {
                     DestroyImmediate(fireGenerator);
+                    return;
                 }
                 
                 StartCoroutine(dealFireDamage());
@@ -70,11 +90,9 @@ namespace redwing
             else
             {
                 DestroyImmediate(fireGenerator);
+                return;
             }
-            
             fireGenerator.SetActive(true);
-
-            
         }
 
         private void Update()
@@ -88,10 +106,10 @@ namespace redwing
             }
             
             Vector3 newPos = gameObject.transform.position;
-            newPos.z = -3f;
+            newPos.z = -1f;
             fireGenerator.transform.localPosition = newPos;
             
-            ParticleSystem.Particle[] particleList = new    ParticleSystem.Particle[fieryParticles.particleCount];
+            ParticleSystem.Particle[] particleList = new ParticleSystem.Particle[fieryParticles.particleCount];
             fieryParticles.GetParticles(particleList);
             for(int i = 0; i < particleList.Length; ++i)
             {
@@ -171,7 +189,7 @@ namespace redwing
                 {
                     fieryParticleRenderer.material.color = Color.clear;
                 }
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds((float) (Math.Pow(Math.E, -0.05*napalmStrength)) + 0.05f);
             }
             DestroyImmediate(fireGenerator);
         }
@@ -181,7 +199,9 @@ namespace redwing
             if (fireGenerator == null) return;
             ParticleSystem.MainModule partMain = fieryParticles.main;
             partMain.startSize = napalmStrength < 30.0 ?
-                new ParticleSystem.MinMaxCurve((float) ((napalmStrength) / 40.0)) : new ParticleSystem.MinMaxCurve(0.75f);
+                new ParticleSystem.MinMaxCurve((float) ((napalmStrength) / 40.0),
+                    (float) ((napalmStrength) / 40.0) + 0.25f) : 
+                new ParticleSystem.MinMaxCurve(0.75f, 1f);
 
             ParticleSystem.EmissionModule partEmission = fieryParticles.emission;
             partEmission.rateOverTime = new ParticleSystem.MinMaxCurve((float) ((napalmStrength) / 2.0));
@@ -190,7 +210,7 @@ namespace redwing
 
         private int calculateNapalmDamage()
         {
-            return (int) (Math.Pow(napalmStrength, damageExponent));
+            return (int) (Math.Pow( (napalmStrength * damageMultiplier), damageExponent));
         }
 
 

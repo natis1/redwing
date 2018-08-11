@@ -15,9 +15,27 @@ namespace redwing
                 {
                     for (int i = 0; i < 16; i++)
                     {
-                        if (res.Contains(i + ".png"))
+                        if (res.EndsWith(i + ".png"))
                         {
                             loadShieldTexture(i);
+                        }
+                    }
+                } else if (res.EndsWith("spark.png"))
+                {
+                    spark = loadImageFromAssembly(res);
+                } else if (res.Contains("nuke.frame00"))
+                {
+                    for (int i = 0; i < 43; i++)
+                    {
+                        if (i <= 9)
+                        {
+                            if (res.EndsWith(nukePrefix + "0" + i + ".png"))
+                                nukeAnimation[i] = loadImageFromAssembly(res);
+                        }
+                        else
+                        {
+                            if (res.EndsWith(nukePrefix + i + ".png"))
+                                nukeAnimation[i] = loadImageFromAssembly(res);
                         }
                     }
                 }
@@ -25,7 +43,6 @@ namespace redwing
             }
 
         }
-
 
         private static void loadShieldTexture(int flameNum)
         {
@@ -130,6 +147,7 @@ namespace redwing
         }
 
         private const string shieldPrefix = "shield.Frame";
+        private const string nukePrefix = "nuke.frame00";
 
         //public const int flameShieldCharge1RepeatFrames = 3;
         //public const int flameShieldCharge2RepeatFrames = 4;
@@ -142,6 +160,10 @@ namespace redwing
         public static readonly Texture2D[] flameShieldCharge2 = new Texture2D[6];
         public static readonly Texture2D[] flameShieldCharged = new Texture2D[5];
         public static readonly Texture2D[] flameShieldLost = new Texture2D[4];
+        
+        public static readonly Texture2D[] nukeAnimation = new Texture2D[43];
+
+        public static Texture2D spark;
 
         //public const int flameLeftX = 200;
         public const int flameYOffset = 200;
