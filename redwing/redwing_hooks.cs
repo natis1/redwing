@@ -84,19 +84,7 @@ namespace redwing
                 return;
             }
             
-            if (hitinstance.Source.name == "Slash")
-            {
-                if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
-                {
-                    redwing_game_objects.addNapalm(self.gameObject, 2.0 * (PlayerData.instance.nailSmithUpgrades + 1.0),
-                        Color.red);
-                }
-                else
-                {
-                    redwing_game_objects.addNapalm(self.gameObject, (PlayerData.instance.nailSmithUpgrades + 1.0),
-                        Color.white);
-                }
-            } else if (hitinstance.Source.name.Contains("Slash"))
+            if (hitinstance.Source.name.Contains("Slash") && (hitinstance.Source.name.Contains("Dash") || hitinstance.Source.name.Contains("Great")))
             {
                 if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
                 {
@@ -107,6 +95,18 @@ namespace redwing
                 {
                     redwing_game_objects.addNapalm(self.gameObject, 3.0 * (PlayerData.instance.nailSmithUpgrades + 1.0),
                         Color.green);
+                }
+            } else if (hitinstance.Source.name.Contains("Slash"))
+            {
+                if (PlayerData.instance.GetBool("equippedCharm_6") && PlayerData.instance.GetInt("health") == 1)
+                {
+                    redwing_game_objects.addNapalm(self.gameObject, 2.0 * (PlayerData.instance.nailSmithUpgrades + 1.0),
+                        Color.red);
+                }
+                else
+                {
+                    redwing_game_objects.addNapalm(self.gameObject, (PlayerData.instance.nailSmithUpgrades + 1.0),
+                        Color.white);
                 }
             } else if (hitinstance.Source.name.Contains("Fireball2"))
             {

@@ -200,6 +200,24 @@ namespace redwing
             shieldDischargeSoundFX = AudioClip.Create("shieldRecharge", (int) (AUDIO_SAMPLE_HZ * 0.4), 1, AUDIO_SAMPLE_HZ, false);
             shieldDischargeSoundFX.SetData(generateShieldDischargeSound((int) (AUDIO_SAMPLE_HZ * 0.4)), 0);
             
+            load_textures.nukeSound = AudioClip.Create("nukeBeep", (int) (AUDIO_SAMPLE_HZ * 6), 1, AUDIO_SAMPLE_HZ, false);
+            load_textures.nukeSound.SetData(generateNukeBeep((int) (AUDIO_SAMPLE_HZ * 6)), 0);
+            
+        }
+
+        private float[] generateNukeBeep(int length)
+        {
+            float[] fx = new float[length];
+            int i = 12000;
+            while (i < length)
+            {
+                fx = generateSawtooth(0.8, 1000, fx, i - 12000, i);
+                i += 24000;
+            }
+
+            fx = normalizeVolume(fx);
+
+            return fx;
         }
         
         private float[] generateShieldDischargeSound(int length)

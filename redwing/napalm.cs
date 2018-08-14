@@ -38,7 +38,7 @@ namespace redwing
 
         public napalm()
         {
-            Modding.Logger.Log("Trying to add napalm... wish me luck.");
+            //Modding.Logger.Log("Trying to add napalm... wish me luck.");
             
             fireGenerator = new GameObject(gameObject.name + " napalm", typeof(ParticleSystem), 
                 typeof(ParticleSystemRenderer), typeof(napalm_self_destroy));
@@ -175,7 +175,7 @@ namespace redwing
             {
                 if (napalmStrength >= 1.0)
                 {
-                    Modding.Logger.Log("Doing " + calculateNapalmDamage() + " napalm dmg to " + gameObject.name);
+                    //Modding.Logger.Log("Doing " + calculateNapalmDamage() + " napalm dmg to " + gameObject.name);
                     cachedEnemyHM.hp -= calculateNapalmDamage();
                     if (cachedEnemyHM.hp <= 0)
                     {

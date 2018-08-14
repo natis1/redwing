@@ -6,7 +6,7 @@ namespace redwing
 {
     public class time_attack : MonoBehaviour
     {
-        private float timeRemaining;
+        public float timeRemaining;
         private bool didDestroy;
         private Text textObj;
         private GameObject canvas;
@@ -18,20 +18,20 @@ namespace redwing
             CanvasUtil.CreateFonts();
             canvas = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));
             GameObject go =
-                CanvasUtil.CreateTextPanel(canvas, "", 27, TextAnchor.MiddleCenter,
+                CanvasUtil.CreateTextPanel(canvas, "", 70, TextAnchor.UpperRight,
                     new CanvasUtil.RectData(
                         new Vector2(0, 0),
                         new Vector2(0, 0),
                         new Vector2(0, 0),
-                        new Vector2(1.9f, 1.9f),
+                        new Vector2(0.95f, 0.95f),
                         new Vector2(0.5f, 0.5f)));
             
             
             textObj = go.GetComponent<Text>();
             textObj.color = Color.black;
             textObj.font = CanvasUtil.TrajanBold;
-            textObj.text = getTimeInCleanFormat(timeRemaining);
-            textObj.fontSize = 50;
+            textObj.text = "Lightbringer\nT-"+ getTimeInCleanFormat(timeRemaining);
+            textObj.fontSize = 90;
             textObj.CrossFadeAlpha(1f, 0f, false);
         }
 
@@ -40,18 +40,12 @@ namespace redwing
             timeRemaining -= Time.deltaTime;
             if (timeRemaining > 0.0f)
             {
-                textObj.text = getTimeInCleanFormat(timeRemaining);
+                textObj.text = "Lightbringer\nT-"+ getTimeInCleanFormat(timeRemaining);
             }
-            else if (timeRemaining > 0.0f)
+            else
             {
                 textObj.color = Color.red;
-                textObj.text = "00:00";
-            }
-            else if (!didDestroy)
-            {
-                didDestroy = true;
-                Destroy(textObj);
-                Destroy(canvas);
+                textObj.text = "Lightbringer\nT-00:00";
             }
         }
 

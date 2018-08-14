@@ -292,8 +292,6 @@ namespace redwing
             behavior.fireballMagmaFireballWidth = redwing_flame_gen.FBMBTEXTURE_WIDTH;
 
             behavior.cachedAudioPlayer = fireballSprite.GetComponent<AudioSource>();
-            
-
         }
 
         private void setupCustomFireballObject(int i)
@@ -411,7 +409,7 @@ namespace redwing
             GameCameras.instance.cameraShakeFSM.SendEvent("EnemyKillShake");
 
             napalm memes = targetHP.gameObject.GetOrAddComponent<napalm>();
-            memes.addNapalm(12.0, Color.green);
+            memes.addNapalm(realDamage * (0.10), Color.green);
             /*
             targetHP.Hit(new HitInstance
             {

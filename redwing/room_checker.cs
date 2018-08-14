@@ -38,7 +38,8 @@ namespace redwing
             else if (to.name == "Dream_Final_Boss")
             {
                 log("Loading false light control... Best of luck little knight. You will need it...");
-                GameObject meme = new GameObject("corruptedRadianceController", typeof(false_light));
+                GameObject meme = new GameObject("corruptedRadianceController", typeof(false_light),
+                    typeof(AudioSource));
             }
         }
 

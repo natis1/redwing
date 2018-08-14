@@ -526,9 +526,9 @@ namespace redwing
             angleint.addLanguageString(new language_string("UI", "CHARM_NAME_36_B", "Radiant Heart"));
             angleint.addLanguageString(new language_string("UI", "CHARM_NAME_36_C", "Lightbringer"));
             angleint.addLanguageString(new language_string("UI", "CHARM_DESC_36_C",
-                "An emptiness from within seals and condenses the radiance inside. " +
-                "Can be opened to briefly unleash a flaming light as radiant as a thousand suns." +
-                "<br><br>This charm cannot, and probably should not be unequipped."));
+                "An emptiness from within seals and condenses the light inside. " +
+                "<br>Will automatically open to briefly unleash a flaming light as radiant as a thousand suns." +
+                "<br>This charm cannot, and probably should not be unequipped."));
             angleint.addLanguageString(new language_string("UI", "CHARM_DESC_36_B",
                 "Radiant charm containing all the untainted light of Hallownest. " +
                 "It emits an endless luminous stream of energy the bearer can see and feel.<br><br>" +
@@ -733,7 +733,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Lore Tablets", "ARCHIVE_02",
                 "-KINGLIGHT-EM-GROWTH-INKIND-FLOW-ALLPOWER-ENFIELD<br>OLDLIGHT-EM-ESSENCE-EM-DREAM-EM-ENEMY<br>O-BRIGHTNESS-ABA-KINGLIGHT-CH-OLDLIGHT-THEMKIN-O-CH<br>WILLFLOW-ABA-DREAM-UNCONTAIN-THIR-ENDKINGDOM-ENDLIFE-"));
             angleint.addLanguageString(new language_string("Credits List", "CREDITS_THANKS_NAME",
-                "Ludum Dare<br>Warren Fenn and Rohan Fraser<br>Ben Gibson and Makoto Koji<br>Trent Kusters and Morgan Jaffit<br>Rod Jago and Tim Mcburnie<br>John Millard and Jason Pamment<br>Zara Pellen and Victoria Roberts<br>Lilly Sim and Nicola Stark<br>Sharyn Stone and Steven Sun<br>Matt Trobbiani and Dan Treble<br>Peter Yong and Jenni Vigaud<br>Chris Wright<br><br>Redwing Thanks<br>FoldingPapers<br>Gradow<br>The Knightmere<br>Grimm Crime Sindicate<br>The Redwing Server<br><br>And you, for supporting modding"));
+                "Ludum Dare<br>Warren Fenn and Rohan Fraser<br>Ben Gibson and Makoto Koji<br>Trent Kusters and Morgan Jaffit<br>Rod Jago and Tim Mcburnie<br>John Millard and Jason Pamment<br>Zara Pellen and Victoria Roberts<br>Lilly Sim and Nicola Stark<br>Sharyn Stone and Steven Sun<br>Matt Trobbiani and Dan Treble<br>Peter Yong and Jenni Vigaud<br>Chris Wright<br><br>Redwing Thanks<br>FoldingPapers<br>Gradow<br>The Knightmere<br>The Grimm Crime Sindicate<br>The Redwing Server<br><br>And you, for supporting modding"));
             angleint.addLanguageString(new language_string("Credits List", "CREDITS_TESTERS_NAME_COL_01",
                 "Hari Dimitriou<br>Tyler Bartley<br>Lili Carlyle<br>Joshua Clark<br>" +
                 "Andrew Cook<br>Shannon Cross<br>Cale \"Embraced\" Firgren<br>Rohan Fraser<br>Yusuf Bham"));
