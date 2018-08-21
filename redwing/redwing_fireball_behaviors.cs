@@ -230,8 +230,19 @@ namespace redwing
                     fireballDmg = 0;
                     doPhysics = false;
                     cachedAudioPlayer.clip = fireballImpact;
-                    cachedAudioPlayer.volume = (GameManager.instance.gameSettings.masterVolume *
-                                                GameManager.instance.gameSettings.soundVolume * 0.01f * 0.3f);
+                    
+                    float vol2 = GameManager.instance.gameSettings.masterVolume *
+                                GameManager.instance.gameSettings.soundVolume * 0.01f;
+                    if (GameManager.instance.gameSettings.masterVolume <= 5)
+                    {
+                        vol2 /= 2f;
+                    }
+
+                    if (GameManager.instance.gameSettings.soundVolume <= 5)
+                    {
+                        vol2 /= 2f;
+                    }
+                    cachedAudioPlayer.volume = (vol2 * 0.3f);
                     cachedAudioPlayer.loop = false;
                     cachedAudioPlayer.Play();
                     ballExplode();
@@ -245,8 +256,18 @@ namespace redwing
             
             
             cachedAudioPlayer.clip = fireballSizzle;
-            cachedAudioPlayer.volume = (GameManager.instance.gameSettings.masterVolume *
-                                        GameManager.instance.gameSettings.soundVolume * 0.01f * 0.12f);
+            float vol = GameManager.instance.gameSettings.masterVolume *
+                        GameManager.instance.gameSettings.soundVolume * 0.01f;
+            if (GameManager.instance.gameSettings.masterVolume <= 5)
+            {
+                vol /= 2f;
+            }
+
+            if (GameManager.instance.gameSettings.soundVolume <= 5)
+            {
+                vol /= 2f;
+            }
+            cachedAudioPlayer.volume = (vol * 0.12f);
             cachedAudioPlayer.loop = false;
             cachedAudioPlayer.Play();
                         

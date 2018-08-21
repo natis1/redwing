@@ -4,7 +4,7 @@ namespace redwing
 {
     public static class version_info
     {
-        public const int SETTINGS_VER = 12;
+        public const int SETTINGS_VER = 13;
         public const int FLAMEGEN_VER = 1;
     }
 
@@ -52,6 +52,13 @@ namespace redwing
             useEnglishLoreWhenLanguageMissing = false;
             useEnglishWarningInfoWhenLanguageMissing = true;
 
+            applyBindingsToRedwingAttacks = true;
+
+            applyCharmBindingToGreymoth = true;
+            applyHealthBindingToShield = true;
+            applyNailBindingToRedwingAttacks = true;
+            applySoulBindingToNapalm = true;
+            
             redwingFirstLaunch = true;
 
             
@@ -84,6 +91,15 @@ namespace redwing
         
         // Set to false ONLY if you have a non-blackmoth dashing mod.
         public bool useGreymothDashWhenBlackmothMissing { get => GetBool(); private set => SetBool(value); }
+        
+        // Master toggle for redwing bindings. if disabled the bools below are ignored
+        public bool applyBindingsToRedwingAttacks { get => GetBool(); private set => SetBool(value); }
+        
+        // Switches for if bindings should also affect certain aspects of redwing.
+        public bool applyNailBindingToRedwingAttacks { get => GetBool(); private set => SetBool(value); }
+        public bool applyCharmBindingToGreymoth { get => GetBool(); private set => SetBool(value); }
+        public bool applySoulBindingToNapalm { get => GetBool(); private set => SetBool(value); }
+        public bool applyHealthBindingToShield { get => GetBool(); private set => SetBool(value); }
         
         // Set to true to make ALL non-redwing damage equal to 1. this includes spells. Although possibly not
         // fluke because bad programming.

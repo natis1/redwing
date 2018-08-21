@@ -123,11 +123,7 @@ namespace redwing
             } else if (hitinstance.Source.name.Contains("Hit"))
             {
                 redwing_game_objects.addNapalm(self.gameObject, hitinstance.DamageDealt * 0.15, Color.yellow);
-            }
-            
-            log("An enemy with name " + self.gameObject.name + " took damage from " + hitinstance.Source.name);
-            log("Damage taken was " + hitinstance.DamageDealt + " with multiplier " + hitinstance.Multiplier);
-            
+            }            
             orig(self, hitinstance);
         }
 
@@ -296,7 +292,7 @@ namespace redwing
                 fsCharge = fsRecharge;
                 invulnTime = IFRAMES;
                 flameShieldAudio.Stop();
-                flameShieldAudio.volume = (GameManager.instance.gameSettings.masterVolume *
+                flameShieldAudio.volume = (0.5f * GameManager.instance.gameSettings.masterVolume *
                                            GameManager.instance.gameSettings.soundVolume * 0.01f);
                 flameShieldAudio.clip = shieldDischargeSoundEffect;
                 flameShieldAudio.Play();
@@ -353,7 +349,7 @@ namespace redwing
         private PlayMakerFSM voidKnightNailArts;
 
         private bool justDidLaserAttack;
-        private double ftTime = 0;
+        public static double ftTime = 0;
         private double fbTime = 0;
         private double laserTime = 0;
         private double fsCharge = 0;
@@ -370,7 +366,7 @@ namespace redwing
         public static bool zeroDmgLaser;
         
         
-        private const double IFRAMES = 0.8f;
+        private const double IFRAMES = 1.5f;
 
         private int currentTrailSprite = 0;
 
@@ -454,6 +450,13 @@ namespace redwing
             
             flameShieldSprite.color = c;
             */
+            
+            if (gng_bindings.hasHealthBinding())
+            {
+                flameShieldSprite.color = Color.clear;
+                fsCharge = 27.0;
+                return;
+            }
             
             
             if (!(fsLastUpdate > FS_UPDATE_TIME)) return;

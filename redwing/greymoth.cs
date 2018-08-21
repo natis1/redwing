@@ -162,6 +162,9 @@ namespace redwing
             if (antiTurboLeft != 0)
                 return true;
 
+            if (gng_bindings.hasCharmBinding() && redwing_hooks.ftTime > 0.0)
+                return false;
+
             hasSharpShadowCached = PlayerData.instance.GetBool("equippedCharm_16");
             
             getPrivateField("dashQueueSteps").SetValue(HeroController.instance, 0);
@@ -216,7 +219,11 @@ namespace redwing
             doDash();
             
             // Fixes TC problem where after tink sharp shadow is broken
-            sharpShadowFSM.SetState("Idle");
+            if (sharpShadowFSM != null)
+            {
+                sharpShadowFSM.SetState("Idle");
+            }
+
             return true;
         }
 
@@ -270,14 +277,18 @@ namespace redwing
             HeroController.instance.dashBurst.transform.localPosition = new Vector3(4.11f, -0.55f, 0.001f);
             HeroController.instance.dashBurst.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
             HeroController.instance.dashingDown = false;
+
+
             
             dashCooldown = HeroController.instance.DASH_COOLDOWN_CH;
-
-            getPrivateField("shadowDashTimer").SetValue(HeroController.instance, getPrivateField("dashCooldownTimer").GetValue(HeroController.instance));
+            getPrivateField("shadowDashTimer").SetValue(HeroController.instance,
+                getPrivateField("dashCooldownTimer").GetValue(HeroController.instance));
             HeroController.instance.proxyFSM.SendEvent("HeroCtrl-ShadowDash");
             HeroController.instance.cState.shadowDashing = true;
-            ((AudioSource)getPrivateField("audioSource").GetValue(HeroController.instance)).PlayOneShot(HeroController.instance.sharpShadowClip, 1f);
+            ((AudioSource) getPrivateField("audioSource").GetValue(HeroController.instance)).PlayOneShot(
+                HeroController.instance.sharpShadowClip, 1f);
             HeroController.instance.sharpShadowPrefab.SetActive(true);
+
 
             if (HeroController.instance.cState.shadowDashing)
             {

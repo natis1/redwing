@@ -3,6 +3,7 @@ using System.Linq;
 using Modding;
 using UnityEngine;
 using System.IO;
+using System.Reflection;
 using angleintegration;
 using ModCommon;
 using On.InControl.NativeProfile;
@@ -13,7 +14,7 @@ namespace redwing
     // ReSharper disable once UnusedMember.Global because it's used implicitly but importing rider extensions is dumb.
     public class redwing : modern_mod<redwing_settings, redwing_global_settings, redwing_flamegen_settings>, ITogglableMod
     {
-        private const string VERSION = "1.1.2";
+        private const string VERSION = "1.2 Godmaster";
         private const int LOAD_ORDER = 90;
         private const int minApi = 44;
 
@@ -77,16 +78,15 @@ namespace redwing
                 problemCode += 1;
             
             // report if the user has modcommon.
-            noModCommon = !(from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "ModCommon" select type).Any();
-            
+            noModCommon = !hasAssembly("ModCommon");
             
             
             // report if the user has blackmoth.
-            blackmothExists = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "BlackmothMod" select type).Any();
+            blackmothExists = hasAssembly("BlackmothMod");
             log("does blackmoth exist? " + blackmothExists);
             
             // report if the user is using shitmothst... lol
-            shitmothst = (from assembly in AppDomain.CurrentDomain.GetAssemblies() from type in assembly.GetTypes() where type.Namespace == "shitmothst" select type).Any();
+            shitmothst = hasAssembly("shitmothst");
             
             redwing_fireball_behavior.fbDamageBase = globalSettings.fireballDamageBase;
             redwing_fireball_behavior.fbDamageScale = globalSettings.fireballDamagePerNailLvl;
@@ -139,6 +139,13 @@ namespace redwing
             redwing_trail_behavior.damagePriNail = globalSettings.trailDamagePerNailLvl;
             redwing_trail_behavior.damageSecBase = 0;
             redwing_trail_behavior.damageSecNail = 0;
+
+            gng_bindings.applyBindings = globalSettings.applyBindingsToRedwingAttacks;
+            gng_bindings.applyCharmBinding = globalSettings.applyCharmBindingToGreymoth;
+            gng_bindings.applyNailBinding = globalSettings.applyNailBindingToRedwingAttacks;
+            gng_bindings.applySpellBinding = globalSettings.applySoulBindingToNapalm;
+            gng_bindings.applyHealthBinding = globalSettings.applyHealthBindingToShield;
+            
 
             redwing_error.englishLore = globalSettings.useEnglishLoreWhenLanguageMissing;
             redwing_error.englishWarnings = globalSettings.useEnglishWarningInfoWhenLanguageMissing;
@@ -300,6 +307,28 @@ namespace redwing
         {
             GameManager.instance.gameObject.GetOrAddComponent<redwing_error>();
         }
+        
+        private static bool hasAssembly(string assemblyNamespaceName)
+        {
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                try
+                {
+                    if (assembly.GetTypes().Any(type => type.Namespace == assemblyNamespaceName))
+                    {
+                        return true;
+                    }
+                }
+                catch
+                {
+                    log("You have a broken assembly named '" + assembly.FullName + "' You should probably remove it.");
+                }
+            }
+
+            return false;
+        }
+
 
         public void Unload()
         {

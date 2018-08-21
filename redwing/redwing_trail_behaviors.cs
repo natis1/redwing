@@ -47,8 +47,19 @@ namespace redwing
             cachedPrimaryDmg = damagePriBase + damagePriNail * PlayerData.instance.GetInt("nailSmithUpgrades");
             cachedSecondaryDmg = damageSecBase + damageSecNail * PlayerData.instance.GetInt("nailSmithUpgrades");
             cachedAudio.loop = false;
-            cachedAudio.volume = (GameManager.instance.gameSettings.masterVolume *
-                                  GameManager.instance.gameSettings.soundVolume * 0.01f * 0.4f);
+            float vol = GameManager.instance.gameSettings.masterVolume *
+                        GameManager.instance.gameSettings.soundVolume * 0.01f;
+            if (GameManager.instance.gameSettings.masterVolume <= 5)
+            {
+                vol /= 2f;
+            }
+
+            if (GameManager.instance.gameSettings.soundVolume <= 5)
+            {
+                vol /= 2f;
+            }
+            cachedAudio.volume = (vol * 0.4f);
+
             cachedAudio.Play();
             StartCoroutine(dashAnimation());
             StartCoroutine(secondaryAttacks());

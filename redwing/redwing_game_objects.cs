@@ -378,6 +378,11 @@ namespace redwing
                 multiplier *= 1.75f;
             }
 
+            if (gng_bindings.hasNailBinding())
+            {
+                multiplier *= 0.3;
+            }
+
             realDamage = (int) Math.Round(realDamage * multiplier);
             
             if (realDamage <= 0)
@@ -395,7 +400,7 @@ namespace redwing
 
             if (targetHP.hp <= 0f)
             {
-                targetHP.Die(0f, AttackTypes.Generic, true);
+                targetHP.Die(0f, AttackTypes.Nail, true);
                 return;
             }
             

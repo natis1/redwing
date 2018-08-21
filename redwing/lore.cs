@@ -17,6 +17,8 @@ namespace redwing
                     setupBlackmothLoreEN();
                 }
             }
+            
+            
         }
         
         public static bool isEnglish()
@@ -499,6 +501,8 @@ namespace redwing
             angleint.addLanguageString(new language_string("Prompts", "GET_DASH_1", "to dash."));
             angleint.addLanguageString(new language_string("Prompts", "GET_DASH_2",
                 "Use the cloak to dash quickly into the air."));
+            angleint.addLanguageString(new language_string("Prompts", "PROMPT_FOCUS_EXPLAINER2",
+                "to focus SOUL, HEAL, and concentrate FIRE."));
             angleint.addLanguageString(new language_string("Titles", "FINAL_BOSS_SUPER", "Corrupted"));
             angleint.addLanguageString(new language_string("UI", "CHARM_DESC_16",
                 "Contains a forbidden spell that enhances the weapons of shadows.<br><br>When dashing, the bearer's body will travel much farther and faster."));

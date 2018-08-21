@@ -176,14 +176,18 @@ namespace redwing
                 if (napalmStrength >= 1.0)
                 {
                     //Modding.Logger.Log("Doing " + calculateNapalmDamage() + " napalm dmg to " + gameObject.name);
-                    cachedEnemyHM.hp -= calculateNapalmDamage();
-                    if (cachedEnemyHM.hp <= 0)
-                    {
-                        cachedEnemyHM.Die(0f, AttackTypes.Generic, true);
-                        DestroyImmediate(fireGenerator);
-                    }
                     napalmStrength = (napalmStrength * 0.95) - 1.0;
                     setNapalmParts();
+
+                    if (!gng_bindings.hasSpellBinding())
+                    {
+                        cachedEnemyHM.hp -= calculateNapalmDamage();
+                        if (cachedEnemyHM.hp <= 0)
+                        {
+                            cachedEnemyHM.Die(0f, AttackTypes.Generic, true);
+                            DestroyImmediate(fireGenerator);
+                        }
+                    }
                 }
                 else
                 {

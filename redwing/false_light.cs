@@ -124,9 +124,19 @@ namespace redwing
             }
 
             gameObject.transform.position = voidKnight.transform.position;
-            voidKnight.GetComponent<AudioSource>().PlayOneShot(load_textures.nukeSound,
-                (GameManager.instance.gameSettings.masterVolume *
-                 GameManager.instance.gameSettings.soundVolume * 0.01f));
+            float vol = GameManager.instance.gameSettings.masterVolume *
+                        GameManager.instance.gameSettings.soundVolume * 0.01f;
+            if (GameManager.instance.gameSettings.masterVolume <= 5)
+            {
+                vol /= 2f;
+            }
+
+            if (GameManager.instance.gameSettings.soundVolume <= 5)
+            {
+                vol /= 2f;
+            }
+            
+            voidKnight.GetComponent<AudioSource>().PlayOneShot(load_textures.nukeSound, vol);
             yield return new WaitForSeconds(5f);
             if (!runningRadiance) yield break;
             

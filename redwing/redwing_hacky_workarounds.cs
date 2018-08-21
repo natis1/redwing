@@ -45,6 +45,16 @@ namespace redwing
             binaryWriter.Write(buffer);
             binaryWriter.Close();
         }
+
+        public static bool validEnemy(GameObject enemy)
+        {
+            if (enemy.name.StartsWith("Health Scuttler"))
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
     
     

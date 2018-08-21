@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using angleintegration;
 using Language;
 using Modding;
 using UnityEngine;
@@ -14,11 +15,6 @@ namespace redwing
         public static int redwingProblemCode;
         public static bool englishWarnings;
         public static bool englishLore;
-        
-        private void OnDestroy()
-        {
-            ModHooks.Instance.LanguageGetHook -= printError;
-        }
 
         private void Start()
         {
@@ -27,47 +23,34 @@ namespace redwing
                 setupWarningEN();
             }
             log("Warning code is " + redwingProblemCode);
-            ModHooks.Instance.LanguageGetHook += printError;
         }
         
         private static void setupWarningEN()
         {
-            langStrings["General"] = new Dictionary<string, string>();
-
             if (redwingProblemCode != 0)
             {
-                langStrings["General"]["PROLOGUE_EXCERPT_04"] = "Thank you for your cooperation and enjoy Redwing!";
-                langStrings["General"]["PROLOGUE_EXCERPT_AUTHOR"] = "- Avenging Angle, on behalf of the Redwing team";
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_04", "Thank you for your cooperation and enjoy Redwing!", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_AUTHOR", "- Avenging Angle, on behalf of the Redwing team", false, 100));
             }
 
             if ((redwingProblemCode & 4) != 0)
             {
-                langStrings["General"]["PROLOGUE_EXCERPT_01"] =
-                    "ERROR: One of your mods is either out of date or missing!";
-                langStrings["General"]["PROLOGUE_EXCERPT_02"] =
-                    "Redwing CANNOT RUN with your current mod configuration.";
-                langStrings["General"]["PROLOGUE_EXCERPT_03"] =
-                    "Please read modlog.txt for more details!";
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_01", "ERROR: One of your mods is either out of date or missing!", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_02", "Redwing CANNOT RUN with your current mod configuration.", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_03", "Please read modlog.txt for more details!", false, 100));
             } else if ( (redwingProblemCode & 1) != 0)
             {
-                langStrings["General"]["PROLOGUE_EXCERPT_01"] =
-                    "WARNING. PLEASE READ THE REDWING README BEFORE PLAYING.";
-                langStrings["General"]["PROLOGUE_EXCERPT_02"] =
-                    "Also check out the global config file: 'Redwing.GlobalSettings' located with your save files";
-                langStrings["General"]["PROLOGUE_EXCERPT_03"] =
-                    "This message will disappear on relaunching the game!";
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_01", "WARNING. PLEASE READ THE REDWING README BEFORE PLAYING.", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_02", "Also check out the global config file: 'Redwing.settings' located with your save files", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_03", "This message will disappear on relaunching the game! Please relaunch to see lore here.", false, 100));
+
                 // Note: add "Please relaunch to see lore here!" when CP1 is out.
             } else if ((redwingProblemCode & 2) != 0)
             {
-                langStrings["General"]["PROLOGUE_EXCERPT_01"] =
-                    "WARNING. ERROR ENABLING HANDICAP: You cannot handicap yourself with Blackmoth installed.";
-                langStrings["General"]["PROLOGUE_EXCERPT_02"] =
-                    "Blackmoth simply makes you too much of a God to be nerfed.";
-                langStrings["General"]["PROLOGUE_EXCERPT_03"] =
-                    "The handicap has been disabled...";
-            } 
-            
-            
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_01", "WARNING. ERROR ENABLING HANDICAP: You cannot handicap yourself with Blackmoth installed.", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_02", "Blackmoth simply makes you too much of a God to be nerfed.", false, 100));
+                angleint.addLanguageString(new language_string("General", "PROLOGUE_EXCERPT_03", "The handicap has been disabled ingame but not in the settings file...", false, 100));
+            }
         }
         
         private static string printError(string smallKey, string key)

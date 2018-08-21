@@ -15,8 +15,18 @@ namespace redwing
 			StartCoroutine(despawn());
 			AudioSource a = gameObject.GetComponent<AudioSource>();
 			a.clip = laserFX;
-			a.volume = (GameManager.instance.gameSettings.masterVolume *
-			            GameManager.instance.gameSettings.soundVolume * 0.01f);
+			float vol = GameManager.instance.gameSettings.masterVolume *
+			            GameManager.instance.gameSettings.soundVolume * 0.01f;
+			if (GameManager.instance.gameSettings.masterVolume <= 5)
+			{
+				vol /= 2f;
+			}
+
+			if (GameManager.instance.gameSettings.soundVolume <= 5)
+			{
+				vol /= 2f;
+			}
+			a.volume = vol;
 			a.Play();
 			
 		}
