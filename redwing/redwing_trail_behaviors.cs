@@ -236,7 +236,7 @@ namespace redwing
             {
 
                 redwing_game_objects.applyHitInstance(collider.gameObject, cachedSecondaryDmg,
-                    AttackTypes.Generic, gameObject);
+                    gameObject, 0f);
             }
             
         }
@@ -272,7 +272,7 @@ namespace redwing
 
         private void burnThatMotherTrucker(GameObject enemy)
         {
-            redwing_game_objects.applyHitInstance(enemy, cachedPrimaryDmg, AttackTypes.Spell, gameObject);
+            redwing_game_objects.applyHitInstance(enemy, cachedPrimaryDmg, gameObject, 0.33f);
         }
         
         

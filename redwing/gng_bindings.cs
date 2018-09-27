@@ -1,4 +1,6 @@
-﻿namespace redwing
+﻿using Modding;
+
+namespace redwing
 {
     public static class gng_bindings
     {
@@ -13,7 +15,7 @@
         {
             if (applyBindings && applyNailBinding)
             {
-                return ( (PlayerData.instance.currentBossSequence.bindings & BossSequenceController.ChallengeBindings.Nail) != 0);
+                return BossSequenceController.BoundNail;
             }
             return false;
         }
@@ -22,7 +24,7 @@
         {
             if (applyBindings && applySpellBinding)
             {
-                return ( (PlayerData.instance.currentBossSequence.bindings & BossSequenceController.ChallengeBindings.Soul) != 0);
+                return BossSequenceController.BoundSoul;
             }
             return false;
         }
@@ -31,7 +33,7 @@
         {
             if (applyBindings && applyCharmBinding)
             {
-                return ( (PlayerData.instance.currentBossSequence.bindings & BossSequenceController.ChallengeBindings.Charms) != 0);
+                return BossSequenceController.BoundCharms;
             }
             return false;
         }
@@ -40,7 +42,7 @@
         {
             if (applyBindings && applyHealthBinding)
             {
-                return ( (PlayerData.instance.currentBossSequence.bindings & BossSequenceController.ChallengeBindings.Shell) != 0);
+                return BossSequenceController.BoundShell;
             }
             return false;
         }

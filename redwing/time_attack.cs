@@ -15,7 +15,6 @@ namespace redwing
         {   
             if (canvas != null) return;
             
-            CanvasUtil.CreateFonts();
             canvas = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));
             GameObject go =
                 CanvasUtil.CreateTextPanel(canvas, "", 70, TextAnchor.UpperRight,

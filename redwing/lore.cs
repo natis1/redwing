@@ -71,7 +71,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Enemy Dreams", "HORNET_GREENPATH_2",
                 "This strength... for a creature so weak."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "HORNET_GREENPATH_1",
-                "What trickery is this little ghost?"));
+                "What trickery is this? Little ghost?"));
             angleint.addLanguageString(new language_string("Enemy Dreams", "HORNET_GREENPATH_3",
                 "How can you fight like this?"));
             angleint.addLanguageString(new language_string("Hornet", "HORNET_SPIDER_TOWN_01",
@@ -82,9 +82,9 @@ namespace redwing
                 "It's quite a debt I owed. Only in allowing her to pass, and taking the burden of the future in her stead, can I begin to repay it."));
             angleint.addLanguageString(new language_string("Hornet", "HORNET_DOOR_UNOPENED",
                 "You never cease to amaze me. You've taken on the fate of this world like it’s nothing.<page>" +
-                "Even breaking the Dreamer's seals would be considered an impossible task for anyone else, but to hold the power of the entire kingdom, that casts you as something rather exceptional."));
+                "Even breaking the Dreamers' seals would be considered an impossible task for anyone else, but to hold the power of the entire kingdom, that casts you as something rather exceptional."));
             angleint.addLanguageString(new language_string("Hornet", "HORNET_SPIDER_TOWN_DREAM",
-                "...Mother... Forgive my inaction... but the knight gives us another path..."));
+                "...Mother... Forgive my inaction... but I see another path..."));
             angleint.addLanguageString(new language_string("Hornet", "HORNET_FINAL_BOSS",
                 "Do it! Make your choice. My thread will only hold so long.<page>" +
                 "Take the strength of the world for yourself or face the heart of the infection!"));
@@ -101,9 +101,9 @@ namespace redwing
                 "Redwing, you possess the strength to enact an end of your choosing. Would you consume our birth-cursed sibling, or would you destroy it?"));
             angleint.addLanguageString(new language_string("Hornet", "HORNET_FOUNTAIN_1",
                 "Hello again, little ghost.<page>" +
-                "I'm normally quite perceptive. And yet I greatly underestimated, though I've since learned the truth.<page>" +
-                "You've seen beyond this kingdom's bounds. Yours is resilience born of void and fire.<page>" +
-                "It's no surprise then you've managed to reach the heart of this world. In so doing, you shall know the being that tore it apart."));
+                "I'm normally quite perceptive. And yet I greatly underestimated you. I've since learned the truth.<page>" +
+                "You've seen beyond this kingdom's bounds. Yours is a resilience born of void and fire.<page>" +
+                "It's no surprise then you've managed to reach the heart of this world. In so doing, you shall know that which tore it apart."));
             angleint.addLanguageString(new language_string("Hornet", "HORNET_FOUNTAIN_2",
                 "If, knowing that truth, you'd still choose to keep Hallownest alive, seek the Grave in Ash and the mark it would grant to one like you."));
             angleint.addLanguageString(new language_string("Cornifer", "FUNGAL_WASTES_BOUGHT",
@@ -117,16 +117,16 @@ namespace redwing
             angleint.addLanguageString(new language_string("Cornifer", "CORNIFER_MEET_DP",
                 "Hh-hello. I'm Cornifer. I'm a m-mapper by trade. I've tried to chart the dense nest beneath here b-b-but it's proving too dangerous for a bug like me.<page>" +
                 "Vicious little creatures burst out all o-over the place and the passages are a dark, twisting maze. Even with my good head for direction, I-I-I've had enough<page>" +
-                "You have an air of strength about you and c-c-can probably handle yourself, would you like to buy m-my meagre map?"));
+                "You have an air of strength about you and c-c-can probably handle yourself... Would you like to buy m-my meagre map?"));
             angleint.addLanguageString(new language_string("Cornifer", "DEEPNEST_GREET",
                 "This p-place gives me the creeps. Vicious little creatures burst out all o-over the place and the passages are a dark, twisting maze.<page>" +
                 "You have an air of strength about you and c-c-can probably handle yourself, would you like to buy my map?"));
             angleint.addLanguageString(new language_string("Cornifer", "MINES_BOUGHT",
                 "I jabbed myself on one of those crystals back there. Awful sharp they are and all over the place. You look like you can handle yourself, but do be careful."));
             angleint.addLanguageString(new language_string("Hunter", "HUNTER_DREAM",
-                "It is so much stronger stronger than me... does it know that? Will it return to hunt me...? I hope not."));
+                "It is so much stronger than me... does it know that? Will it return to hunt me...? I hope not."));
             angleint.addLanguageString(new language_string("Relic Dealer", "RELICDEALER_DREAM_FOUNTAIN",
-                "...Who were you mystery knight?... Why dark secrets do you hide that you only appear in this fountain?.."));
+                "...Who were you, mystery knight?... What dark secrets do you hide that you only appear in this fountain?.."));
             angleint.addLanguageString(new language_string("Relic Dealer", "RELICDEALER_DREAM",
                 "...I’ve seen this short one before... maybe in a dream long ago?.."));
             angleint.addLanguageString(new language_string("Relic Dealer", "RELICDEALER_DUNG",
@@ -155,14 +155,14 @@ namespace redwing
             angleint.addLanguageString(new language_string("Minor NPC", "KING_FINAL_WORDS",
                 "...Soul of Wyrm. Soul of Root. Infinitely radiant..."));
             angleint.addLanguageString(new language_string("Minor NPC", "MINER_DREAM_2",
-                "... how much longer... KILL IT... how much longer... DANGEROUS... how much longer... KILL IT... how much longer... KILL THE FIERY ONE...<page>" +
+                "... how much longer... KILL IT... how much longer... DANGEROUS... how much longer... KILL IT... how much longer... KILL THE FLAME...<page>" +
                 "...how much longer... must I dig...?"));
             angleint.addLanguageString(new language_string("Minor NPC", "MASK_MAKER_UNMASK2",
                 "Has it witnessed that truth most tragic? The Wyrm’s desperate failing.<page>" +
                 "Now this Kingdom's death becomes the Wyrm's legacy."));
             angleint.addLanguageString(new language_string("Minor NPC", "CLOTH_QG_GREET",
                 "Ahhh tiny fire being. Then, you too come to fight that other tribe?<page>" +
-                "A deadly bunch they are that roost within these glades. I'd once've stayed well clear of them, but your actions have shown me the truth of it. We must face down our fears or be defeated by them.<page>" +
+                "A deadly bunch they are that roost within these glades. I'd once stay well clear of them, but your actions have shown me the truth of it. We must face down our fears or be defeated by them.<page>" +
                 "If I somehow make it through, we can swap stories of our adventures. I'd look forward to that!"));
             angleint.addLanguageString(new language_string("Minor NPC", "CLOTH_TRAMWAY_SAVED",
                 "Enough! I cannot wallow in my weakness. I must take strength from your example!<page>" +
@@ -195,7 +195,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Minor NPC", "DUNG_DEFENDER_3",
                 "We knights defend against the physical, but a formless enemy. How to defeat such a foe?<page>" +
                 "When we sought help most, our King vanished. And so, we were brought low... I wonder why he left...<page>" +
-                "Bah! I shouldn't be so morose. You've invigorated me. Tis' truly a delight to meet one whose strength can match my own."));
+                "Bah! I shouldn't be so morose. You've invigorated me. 'Tis truly a delight to meet one whose strength can match my own."));
             angleint.addLanguageString(new language_string("Minor NPC", "BIGCAT_TALK_01",
                 "This falling ash is moult. The Wyrm's corpse decaying. Endless. Rmm... Serene. Sad.<page>" +
                 "With its like gone, the world may finally see peace."));
@@ -214,7 +214,7 @@ namespace redwing
                 "You are the Hollow Knight."));
             angleint.addLanguageString(new language_string("Minor NPC", "BIGCAT_KING_BRAND",
                 "Tiny thing... Oh hmm... The mark of Wyrm you bear. Is it fire you seek? Or to save this ruin?<page>" +
-                "That choice is yours. Always the smallest creatures that wield the largest powers."));
+                "That choice is yours. Always the smallest creatures that wield the greatest powers."));
             angleint.addLanguageString(new language_string("Minor NPC", "BRETTA_DREAM_BED",
                 "Red Wanderer...don't be shy....cold outside....bed is soft..."));
             angleint.addLanguageString(new language_string("Minor NPC", "BRETTA_DIARY_2",
@@ -239,12 +239,12 @@ namespace redwing
                 "...Blazing...Bright...Empty?..."));
             angleint.addLanguageString(new language_string("Minor NPC", "BRETTA_DIARY_1",
                 "The Red Saviour<br>The maiden woke in darkness. Confused she reached out. Sharp brambles jabbed at all sides. Burning acid bubbled close below. What nightmare had led her here? What hope of survival remained?<page>" +
-                "Doomed she thought herself and to despair she fell, until a light bloomed far in the distance, a bright, glowing spot fast approaching. It swept majestic about the thorns, leapt above burning waters and dove towards the maiden.<page>" +
+                "Doomed she thought herself and to despair she fell, until a light bloomed far in the distance, a bright, glowing spot fast approaching. It swept majestic about the thorns, leapt above burning waters, and dove towards the maiden.<page>" +
                 "Coming close, the form revealed at last, a beautiful being, sharp horns gleaming white, a scarlet cloak. Arms reached out for the damsel, gathering her up, grip firm..."));
             angleint.addLanguageString(new language_string("Minor NPC", "BRETTA_DIARY_3",
                 "The Red Saviour in Darkness<br>Troubled dreams beset the maiden. Her saviour gone, consumed below. Now her only companion the cold wind, moaning at her door. Her heart fluttered with sudden fear...<page>" +
                 "Then still. A sudden calm. Why? A presence. A figure close behind.<page>" +
-                "She doesn't dare look, doesn't dare move, fearful the slightest action would break the spell. She knew the presence at her bed, knew the calm only they could bring.<page>" +
+                "She didn't dare look, didn't dare move, fearful the slightest action would break the spell. She knew the presence at her bed, knew the calm only they could bring.<page>" +
                 "Her red saviour, now protector, standing tall beside, powerful, radiant..."));
             angleint.addLanguageString(new language_string("Minor NPC", "BRETTA_DIARY_4",
                 "The Grey Prince<br>Heaving heavy breaths; flush from the exertion of battle; the figure emerged from the well. Triumph was his and trophy he bore to prove it, the fearsome skull of his vanquished opponent.<page>" +
@@ -253,20 +253,20 @@ namespace redwing
             angleint.addLanguageString(new language_string("Minor NPC", "MASK_MAKER_DREAM",
                 "...Does it know of the face that hides beneath? Such remarkable contrast between light and dark...How can it be..."));
             angleint.addLanguageString(new language_string("Minor NPC", "QUEEN_REPEAT_KINGSOUL",
-                "Ahh! So it bears the tool, nearly complete. Such strength, such resolve, such dedication! No mere vessel could wield such power. Even the presence of my beloved Wyrm pails in comparison.<page>" +
+                "Ahh! So it bears the tool, nearly complete. Such strength, such resolve, such dedication! No mere vessel could wield such power. Even the presence of my beloved Wyrm pales in comparison.<page>" +
                 "The Radiant Heart... What is at the center of it I wonder? If it wishes to use it, it should seek out that place. That place where it was born, where it died, where it began..."));
             angleint.addLanguageString(new language_string("Minor NPC", "KING_ABYSS_FINAL_A",
                 "You shall absorb the blinding light which plagues my reign."));
             angleint.addLanguageString(new language_string("Minor NPC", "QUEEN_TALK_01",
                 "Within my roots, the weakening of the Vessel I plainly feel. Only two obvious outcomes there are from such a thing.<page>" +
                 "The first is inevitable on current course, regression, all minds relinquished to the corruption.<page>" +
-                "The second I find preferable, and would seek your aid in its occurance, destruction.<page>" +
-                "I implore you, destroy the Vessel. Its supposed strength was ill-judged. No void could contain the fire of the sun. None except you. You have the strength to take the kingdom’s flames for yourself and let us bugs rest in death."));
+                "The second I find preferable, and would seek your aid in its occurence, destruction.<page>" +
+                "I implore you, destroy the Vessel. Its supposed strength was ill-judged. No void could contain the fire of the sun. None except you. You have the strength to take the kingdom’s flames."));
             angleint.addLanguageString(new language_string("Minor NPC", "QUEEN_TALK_02",
                 "Normally I’d offer fair warning. After all, the Vessel may itself be weak, but it is much empowered by that force within.<page>" +
-                "But you clearly have what it takes to take it on and claim its power if that is what you choose to do."));
+                "But you have what it takes to claim its power if that is what you choose to do."));
             angleint.addLanguageString(new language_string("Ghosts", "XERO_INSPECT",
-                "I mourn those who turn against the King. And those who lost their lives despite staying loyal."));
+                "I mourn those who turn against the King, and who lose their lives despite staying loyal."));
             angleint.addLanguageString(new language_string("Ghosts", "MARKOTH_DEFEAT",
                 "Never... have I been defeated in combat.<page>" +
                 "I can... see myself there, still sleeping. How long have I been hidden here?<page>" +
@@ -311,7 +311,7 @@ namespace redwing
                 "To cast you away into this space between body and soul...<page>" +
                 "But you’ve been here before, and you shall prevail.<page>" +
                 "For you cannot accept their judgement and fade slowly away.<page>" +
-                "You’re strong enough to break out of this on your own. Before you go, though take the weapon before you as a gift, and leave this sad forgotten dream to rot."));
+                "You’re strong enough to break out of this on your own. Before you go, take my weapon as a gift, and leave this sad forgotten dream to rot."));
             angleint.addLanguageString(new language_string("Dream Witch", "WITCH_DREAM_FALL",
                 "Though you may fall, your will shall carry you forward.<page>" +
                 "A dream is endless, but a Kingdom is not.<page>" +
@@ -321,7 +321,7 @@ namespace redwing
                 "How foolish of the Dreamers to try to bury you in that old dream. You must frighten them! Or perhaps, being prisoners themselves, they desired your company?<page>I" +
                 "n any case, you still have a long way to go. Take this old trinket as encouragement from me, and return when you have collected 200 Essence."));
             angleint.addLanguageString(new language_string("Nailsmith", "NAILSMITH_MEET_3",
-                "After a smith are you? Well you've found one. I'm not much for talk, but if its a flame to be rekindled, you’ve come to the right place.<page>" +
+                "After a smith are you? Well you've found one. I'm not much for talk, but if it's a flame to be rekindled, you’ve come to the right place.<page>" +
                 "Your own firenail has nearly fallen apart and lost much of its original power. Still, anything can be refined with enough effort and skill."));
             angleint.addLanguageString(new language_string("Nailsmith", "NAILSMITH_KILL_REPEAT",
                 "Do not hesitate. I beg you. Ignite me! I want to taste that blade's burning edge."));
@@ -356,9 +356,9 @@ namespace redwing
             angleint.addLanguageString(new language_string("Nailsmith", "NAILSMITH_NEED_ORE1",
                 "If you bring me a piece of Pale Ore, I can forge it into your firenail and make it stronger still."));
             angleint.addLanguageString(new language_string("Nailsmith", "NAILSMITH_NEED_ORE2",
-                "If you bring me two pieces of Pale Ore, I can forge it into your firenail and make it stronger still."));
+                "If you bring me two pieces of Pale Ore, I can forge them into your firenail and make it stronger still."));
             angleint.addLanguageString(new language_string("Nailsmith", "NAILSMITH_NEED_ORE3",
-                "If you bring me three pieces of Pale Ore, I can forge it into your firenail and fully expose its power."));
+                "If you bring me three pieces of Pale Ore, I can forge them into your firenail and fully expose its power."));
             angleint.addLanguageString(new language_string("Quirrel", "QUIRREL_GREENPATH_3",
                 "Your firenail looks a fine instrument, but it's showing signs of wear. A few repairs could work wonders towards enhancing your power<page>" +
                 "...I just worry you may soon meet dangers the surface world can't match."));
@@ -376,7 +376,7 @@ namespace redwing
                 "I've some words of advice, my friend. If you plan to challenge the lords of this tribe, you’ll have an easier time with a stronger firenail.<page>" +
                 "There is a city nearby, the old capital of Hallownest. I've heard a smith resides there. Seek the old bug out and you may find progress that much easier."));
             angleint.addLanguageString(new language_string("Quirrel", "QUIRREL_TEMPLE_4",
-                "To persevere in this ruin, I fear your damaged nail  alone may leave you underpowered. Though that's no problem! One only has to look around.<page>" +
+                "To persevere in this ruin, I fear your damaged nail alone may leave you underpowered. Though that's no problem! One only has to look around.<page>" +
                 "Plenty have come before us and most have met their grisly end, many more equipped, though perhaps not as skilled as you.<page>" +
                 "I'm sure they wouldn't mind were a fellow explorer to relieve them of their tools. It's a kindness really. The dead shouldn't be burdened with such things."));
             angleint.addLanguageString(new language_string("Quirrel", "QUIRREL_SPA",
@@ -391,7 +391,7 @@ namespace redwing
                 "Hallownest is a vast and wondrous thing, but with as many wonders as it holds, I've seen none quite so intriguing as you.<page>" +
                 "Ha. My flattery returns only silent stoicism. I like that.<page>" +
                 "I like that very much."));
-            angleint.addLanguageString(new language_string("Quirrel", "QUIRREL_EPILOGUE_B", "...unbelievable..."));
+            angleint.addLanguageString(new language_string("Quirrel", "QUIRREL_EPILOGUE_B", "...Unbelievable..."));
             angleint.addLanguageString(new language_string("Quirrel", "QUIRREL_MANTIS_REPEAT",
                 "My own route takes me towards that great city. If you search out the smith, it may not be long until our paths cross again."));
             angleint.addLanguageString(new language_string("Stag", "STAG_RUINS2",
@@ -408,17 +408,17 @@ namespace redwing
             angleint.addLanguageString(new language_string("Enemy Dreams", "HOLLOW_KNIGHT_4", "...Too radiant..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "HOLLOW_KNIGHT_5", "...Too dark..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "HOLLOW_KNIGHT_6", "...Too fiery..."));
-            angleint.addLanguageString(new language_string("Enemy Dreams", "GENERIC_3", "...empty light..."));
+            angleint.addLanguageString(new language_string("Enemy Dreams", "GENERIC_3", "...Empty light..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GENERIC_5", "...bright...hot..."));
-            angleint.addLanguageString(new language_string("Enemy Dreams", "BEE_HATCHLING_2", "...hive aflame..."));
+            angleint.addLanguageString(new language_string("Enemy Dreams", "BEE_HATCHLING_2", "...Hive aflame..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "HORNET_K_EDGE_2", "How is it so strong?"));
             angleint.addLanguageString(new language_string("Enemy Dreams", "BEE_2", "...Stop flames..."));
             angleint.addLanguageString(
-                new language_string("Enemy Dreams", "MANTIS_PASSIVE_2", "...Outsider...safe?..."));
+                new language_string("Enemy Dreams", "MANTIS_PASSIVE_2", "...outsider...safe?..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "MANTIS_PASSIVE_3", "...strong...hot..."));
-            angleint.addLanguageString(new language_string("Enemy Dreams", "MANTIS_PASSIVE_1", "...bright warrior..."));
+            angleint.addLanguageString(new language_string("Enemy Dreams", "MANTIS_PASSIVE_1", "...Bright warrior..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GRIMM_1",
-                "So radiant... So hot... incredible..."));
+                "So radiant... So hot... Incredible..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GRIMM_2",
                 "I would not want to be its enemy..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GRIMM_3", "And on it burns..."));
@@ -447,16 +447,16 @@ namespace redwing
                 "...Protect...For the light’s return..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "MAGE_3",
                 "...Their voices...cries of pain..."));
-            angleint.addLanguageString(new language_string("Enemy Dreams", "MAGE_2", "...What have I done…?"));
+            angleint.addLanguageString(new language_string("Enemy Dreams", "MAGE_2", "...What have I done...?"));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GRIMM_FLAMEBEARER_2",
-                "Redwing. How great to see you…!"));
+                "Redwing. How great to see you...!"));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GRIMM_FLAMEBEARER_1",
-                "You’re so radiant. My flame dim by comparison..."));
+                "You’re so radiant. My flame dims by comparison..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_2", "...Your heat...Get away..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_3", "...I want to dream..."));
-            angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_4", "...Where am I…?"));
+            angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_4", "...Where am I...?"));
             angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_5", "I cannot escape...wake up..."));
-            angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_6", "You’re fire...It hurts me..."));
+            angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_6", "Your fire...It hurts me..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_7", "I’m not dead..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "ZOMBIE_8", "The light...false..."));
             angleint.addLanguageString(new language_string("Enemy Dreams", "GRIMM_FLAMEBEARER_3",
@@ -516,7 +516,7 @@ namespace redwing
                 "Naturally formed within a crystal over a long period. Draws in SOUL from the surrounding air.<br><br>The bearer will focus SOUL at a slower rate, but the healing effect will double and your fiery pillar will work below full health."));
             angleint.addLanguageString(new language_string("UI", "INV_NAME_NAIL1", "Old Firenail"));
             angleint.addLanguageString(new language_string("UI", "INV_NAME_NAIL2", "Sharpened Firenail"));
-            angleint.addLanguageString(new language_string("UI", "INV_NAME_NAIL3", "Channeled Firenail"));
+            angleint.addLanguageString(new language_string("UI", "INV_NAME_NAIL3", "Channelled Firenail"));
             angleint.addLanguageString(new language_string("UI", "CHARM_DESC_40_N",
                 "Token commemorating the failure of Redwing.<br><br>Contains a song of protection that may defend the bearer from damage... but not shame."));
             angleint.addLanguageString(new language_string("UI", "INV_DESC_SPELL_FOCUS",
@@ -524,7 +524,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("UI", "CHARM_DESC_36_A",
                 "Fragment of a radiant charm. It hums with energy but cannot be equipped."));
             angleint.addLanguageString(new language_string("UI", "INV_DESC_SPELL_SCREAM2",
-                "Blast foes with screaming SOUL and Flame.<br><br>The Wraiths requires SOUL to be conjured. Strike enemies to gather SOUL."));
+                "Blast foes with screaming SOUL and Flame.<br><br>The wraiths require SOUL to be conjured. Strike enemies to gather SOUL."));
             angleint.addLanguageString(new language_string("UI", "INV_DESC_SPELL_QUAKE2",
                 "Strike the ground with a concentrated force of SOUL and Flame. This force can destroy foes or break through fragile structures.<br><br>The force requires SOUL to be conjured. Strike enemies to gather SOUL."));
             angleint.addLanguageString(new language_string("UI", "CHARM_NAME_36_B", "Radiant Heart"));
@@ -542,7 +542,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Journal", "NOTE_ZOM_HORNHEAD",
                 "These bugs have an arrogant air about them. Overly proud of their long horns! I enjoy snapping them off."));
             angleint.addLanguageString(new language_string("Journal", "NOTE_MOSS_WALKER",
-                "I used to think these things were merely ambling plants. Now that I see them as actually living creatures, I began to kill them on sight. This is the nature of the Hunt!"));
+                "I used to think these things were merely ambling plants. Now that I see them as actually living creatures, I kill them on sight. This is the nature of the Hunt!"));
             angleint.addLanguageString(new language_string("Journal", "DESC_ZOM_MINER",
                 "A bug drawn to the Crystal Peak for its precious crystal. Its claw-pick now doubles as a fierce weapon."));
             angleint.addLanguageString(new language_string("Journal", "DESC_TRAITOR_LORD",
@@ -562,7 +562,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Journal", "NOTE_ZOM_BURSTING",
                 "The bugs of Hallownest were twisted out of shape by that corrupting sickness. First they fell into deep slumber, then they awoke with broken minds, and then their bodies started to deform..."));
             angleint.addLanguageString(new language_string("Journal", "NOTE_FINAL_BOSS",
-                "The plague, the infection, the madness that haunts the corpses of Hallownest... All because a battle neither side won? An endless dance between darkness and light that mortal minds will never understand."));
+                "The plague, the infection, the madness that haunts the corpses of Hallownest... All because of a battle neither side won? An endless dance between darkness and light that mortal minds will never understand."));
             angleint.addLanguageString(new language_string("Journal", "DESC_GRIMM",
                 "Master of the Grimm Troupe. The greatest being in the world."));
             angleint.addLanguageString(new language_string("Journal", "DESC_SENTRY_1",
@@ -588,7 +588,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Journal", "DESC_ZOM_GUARD",
                 "A once great Hallownest Crossguard, controlled by a strange force. Instinct still drives it to guard its post against intruders."));
             angleint.addLanguageString(new language_string("Journal", "NOTE_ZOM_BARGER",
-                "A thick orange mist fills these corrupted bugs. It has a sugary taste to it. I find it foul. After you kill these creatures, I suggest you do not eat them."));
+                "A thick orange mist fills these corrupted bugs. It has a sugary taste I find foul. After you kill these creatures, I suggest you do not eat them."));
             angleint.addLanguageString(new language_string("Journal", "NOTE_ZOM_RUNNER", "These \"civilised\" bugs of Hallownest were weak when uninfected and equally weak today. " +
                                                                                          "Send them back into the dirt they were born in!"));
             angleint.addLanguageString(new language_string("Journal", "DESC_NIGHTMARE_GRIMM",
@@ -606,12 +606,12 @@ namespace redwing
                 "We must complete...EXTINGUISH...for Grimm, for the ritual."));
             angleint.addLanguageString(new language_string("CP2", "GRIMM_RITUAL_COMPLETE",
                 "You’ve seen this done before but I can refresh you on the process.<page>" +
-                "My kin have collected some of the flames of this kingdom. Seek them, claim it, and return it to me. Together, marvels shall be achieved.<page>" +
+                "My kin have collected some of the flames of this kingdom. Seek them out, claim their fire, and return to me. Together, marvels shall be achieved.<page>" +
                 "You should have the honor of working with my child, you discovered this land after all. It shall guide you to the flame and gather within itself that burning essence.<page>" +
                 "Like you, the child plays key role in this task. Only with it by your side will the flame, and my kin, reveal themselves to you."));
             angleint.addLanguageString(new language_string("CP2", "ISELDA_NYMM",
                 "How peculiar, a stylish musician made his way to town. I asked him about you and he seems to dislike you.<page>" +
-                "He told me you betrayed some guy named Grimm... Now I don’t trust random strangers but this is quite the peculiar accusation indeed."));
+                "He told me you betrayed a bug named Grimm... Now I don’t trust random strangers but this is quite the peculiar accusation indeed."));
             angleint.addLanguageString(new language_string("CP2", "IGOR_MEET",
                 "Redwing, you called us?<page>" +
                 "Speak to Master."));
@@ -628,24 +628,24 @@ namespace redwing
                 "Even though I taught it, its talents still impress me every time."));
             angleint.addLanguageString(new language_string("CP2", "NYMM_REPEAT",
                 "Are you enjoying my music? It's as upbeat a tune as I know, but I must admit, even it falls a little on the sadder side.<page>" +
-                "I felt bad for this town... They trusted you and you ruined it. This town needs some happiness to counterbalance your failure."));
+                "I felt bad for the inhabitants of this town... They trusted you and you ruined it. This town needs some happiness to counterbalance your failure."));
             angleint.addLanguageString(new language_string("CP2", "NYMM_DREAM", "...Do you feel like a hero yet?"));
             angleint.addLanguageString(new language_string("CP2", "NYMM_FINAL",
                 "Brownwing, I should probably mention I heard a terrible scream down below. Was it pain, or rage? Perhaps another being you betrayed. If so I hope you’re happy with what you’ve done.<page>" +
                 "I’d urge you to head down and let it tear you in half."));
             angleint.addLanguageString(new language_string("CP2", "NYMM_MEET",
-                "Oh, it’s you! What a sad town you have created through your actions, brownwing. You’d best stay here because the whole world outside this land hates you.<page>" +
+                "Oh, it’s you! What a sad town you have created through your actions, Brownwing. You’d best stay here because the whole world outside this land hates you.<page>" +
                 "The old bug over there was very welcoming, and he seemed quite fond of you, surprisingly. This place is quite melancholy, what with the wind, and the darkness, and the sense of decline... I am here to liven up the place after your failure.<page>" +
                 "With my music the whole town feels brighter. And good thing too for your light has seemingly faded.<page>" +
                 "I was told to give you a small gift to commemorate your failing. It will occasionally protect you from taking damage but is mostly useless.<page>" +
-                "Take it, as a white elephant from me to you, and never talk to me again."));
+                "Take it, and never talk to me again."));
             angleint.addLanguageString(new language_string("CP2", "ELDERBUG_NYMM",
-                "Ah ha! Good riddance! That creepy carnival has vanished and town's returned to its former self, yet something seems lost.<page>" +
-                "Sure, we've gained a new addition to the square! But he talks very poorly of you. I wonder what you could have done to deserve that.<page>" +
+                "Ah ha! Good riddance! That creepy carnival has vanished and the town's returned to its former self, yet something seems lost.<page>" +
+                "Sure, we've gained a new addition to the square, but he talks very poorly of you. I wonder what you could have done to deserve that.<page>" +
                 "At any rate, he's a rather good musician, and this town's spent far too long listening only to the wind. Thanks to him, we've gained a new tune and some new company!"));
             angleint.addLanguageString(new language_string("CP2", "BRUMM_LANTERN",
                 "So you followed me here, to where the Ritual began. Leave at once if you value your reputation and the troupe.<page>" +
-                "I cannot control myself much longer... I have an urge to destroy it all that brings me here. Leave now before I change my mind and murder the child.<page>" +
+                "I cannot control myself much longer... An urge to destroy it all brings me here. Leave now before I change my mind and murder the child.<page>" +
                 "Finish the ritual... play your role... save me!"));
             angleint.addLanguageString(new language_string("CP2", "GRIMM_DEFEAT_1",
                 "Bravo, my friend. Isn’t it lovely to hear the crowd adore you once again? They've not seen such a show in a long time."));
@@ -667,7 +667,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("CP2", "DIVINE_DREAM",
                 "Shadow, fire, and light. What a beautiful dance..."));
             angleint.addLanguageString(new language_string("CP2", "NYMM_BRUMM_CHARM",
-                "Ahh. Just marvelous! So now the traitor comes back wearing my joke charm unironically. It’s as bad at humor as rituals.<page>" +
+                "Ahh. Just marvelous! So now the traitor comes back wearing my joke charm unironically. It’s as bad at humor as it is at rituals.<page>" +
                 "To be honest, I'm not even sure where I came upon it, but staring at its design, it’s probably something I picked up while intoxicated.<page>" +
                 "The specifics elude me, but a strange sense remains, fear, but also... corruption? Like a strange dream I could not escape.<page>" +
                 "I've no need for it in any case, and I hope its uselessness gets you killed."));
@@ -677,7 +677,7 @@ namespace redwing
                 "How beautiful it must be, to be like the notes in an old, old song. You and me. Mrmm.<page>" +
                 "But why would I come down to the darkest, furthest reaches of the world. I sense a strange, corrupting force throughout this dying kingdom. I fled to get as far as I could and clear my head but it doesn’t seem to help.<page>" +
                 "Mrmm. I’d wish to help with the song that never ends, but I fear for myself.<page>" +
-                "Strange thoughts enter my head. Desires to burn it all down and cast the master out. I do not think I can go on with these rituals.<page>" +
+                "Strange thoughts enter my head. Desires to extinguish the flame and cast the master out. I do not think I can go on with these rituals.<page>" +
                 "The darkness does not seem to stop the infection’s cruel grasp, so I shall try going to the Howling Cliffs next..."));
             angleint.addLanguageString(new language_string("CP2", "BRUMM_DEEPNEST_1",
                 "Mrmm. You came.<page>" +
@@ -691,24 +691,24 @@ namespace redwing
                 "Take the flame then, it is why you came here."));
             angleint.addLanguageString(new language_string("CP2", "BRUMM_DEEPNEST_4",
                 "It is done... and yet...<page>" +
-                "But why would I come down to the darkest, furthest reaches of the world. I sense a strange, corrupting force throughout this dying kingdom. I fled to get as far as I could and clear my head.<page>" +
+                "Why would I come down to the darkest, furthest reaches of the world? I sense a strange, corrupting force throughout this dying kingdom. I fled to get as far as I could and clear my head.<page>" +
                 "Mrmm. I’d wish to help with the song that never ends, but I fear for myself.<page>" +
-                "Strange thoughts enter my head. Desires to burn it all down and cast the master out. I do not think I can go on with these rituals.<page>" +
+                "Strange thoughts enter my head. Desires to extinguish the flame and cast the master out. I do not think I can go on with these rituals.<page>" +
                 "The darkness does not seem to stop the infection’s cruel grasp, so I shall try going to the Howling Cliffs next...<page>" +
                 "Do not seek me out. Return to the Master and complete the Ritual... I will bear you no hatred."));
             angleint.addLanguageString(new language_string("CP2", "BRUMM_DEEPNEST_REPEAT",
                 "Do not try to follow me. I will be where it began...<page>" +
-                "Please, complete the ritual, for me, for Master, and for yourself, Redwing."));
+                "Please, complete the ritual, for me, for the master, and for yourself, Redwing."));
             angleint.addLanguageString(new language_string("CP2", "GRIMM_MEET2",
                 "Good to see you once again, Redwing. As you must know by now, I am Grimm, master of this troupe.<page>" +
                 "The lantern has been lit, and your summons heeded. Quite the interesting stage you found. This kingdom fallowed by worm and root, perfect earth upon which our Ritual shall take place.<page>" +
-                "As for you, my friend. Your own part is far from over."));
+                "As for you, my friend. Your part is far from over."));
             angleint.addLanguageString(new language_string("CP2", "BRUMM_LANTERN_DREAM",
                 "Master... Let us complete the ritual once more, for the nightmare!"));
             angleint.addLanguageString(new language_string("CP2", "JIJI_GRIMM",
                 "Hmm. A fierce host has settled nearby. Did you summon them? I find their smell... slightly sweet yet toxic... unsettling.<page>" +
                 "Theirs is a scent of distant technologies, unfamiliar even to me. But one which resembles you.<page>" +
-                "Perhaps it is their size but they look so... gaudy and intimidating. They favour projection over truth, shrouding themselves in forms dreamed. No wonder the strength of your small statue must impress them so.<page>" +
+                "Perhaps it is their size but they look so... gaudy and intimidating. They favour projection over truth, shrouding themselves in forms dreamed. No wonder the strength of your small stature must impress them so.<page>" +
                 "You needn’t disguise yourself to impress them with your mastery of flame."));
             angleint.addLanguageString(new language_string("CP2", "ELDERBUG_GRIMM",
                 "Ahh! Look there! Something strange yet familiar has suddenly appeared!<page>" +
@@ -731,7 +731,7 @@ namespace redwing
             angleint.addLanguageString(new language_string("Lore Tablets", "HIGHER_BEING_CORPSE",
                 "...No king... No mind... Happiness..."));
             angleint.addLanguageString(new language_string("Lore Tablets", "ABYSS_TUT_TAB_01",
-                "Higher beings, these words are for you alone.<br><br>Our perfect Vessel has ascended.<br>Let us forget the refuse and regret of its creation.<br>And remember the prosperity it brought."));
+                "Higher beings, these words are for you alone.<br><br>Our perfect Vessel has ascended.<br>Let us forget the refuse and regret of its creation and remember the prosperity it brought."));
             angleint.addLanguageString(new language_string("Lore Tablets", "ARCHIVE_01",
                 "-THIR-YOLK-ABA-ABSENCE-OUTER-SHELL-O-GATE-CONTAIN<br>LIGHT-EM-VESSEL-EM-EGG-EM-SEAL-THIR-WITHDRAW<br>EXTERIOR-O-SEAL-WITHIN-DREAMER-INTWIXT-ATWIXT<br>CONTAIN-LIGHT-THIR-DREAM-CH-ABA-REBELLION-CONTAIN-"));
             angleint.addLanguageString(new language_string("Lore Tablets", "ARCHIVE_02",

@@ -145,37 +145,6 @@ namespace redwing
             
         }
 
-        private IEnumerator launchNuke()
-        {
-            yield return new WaitForSeconds(0.2f);
-            Vector3 currentKnightPosition = voidKnight.transform.position;
-            currentKnightPosition.y += 8f;
-            StartCoroutine(freezeKnight(currentKnightPosition));
-            
-            GameObject plane = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));
-            plane.name = "RedwingDreamWMD";
-            plane.SetActive(true);
-            Sprite renderSprite = Sprite.Create(load_textures.nukeAnimation[0], new Rect(0, 0,
-                load_textures.nukeAnimation[0].width, load_textures.nukeAnimation[0].height), new Vector2(0.5f, 0.5f));
-            GameObject nukeRenderer = CanvasUtil.CreateImagePanel(plane, renderSprite, new CanvasUtil.RectData(new Vector2(1920, 1080), new Vector2(0f, 0f)));
-            nukeRenderer.name = "RedwingDreamWMDSprite";
-            
-            yield return new WaitForSeconds(nukeAnimFrameTime);
-            for (int i = 1; i < load_textures.nukeAnimation.Length; i++)
-            {
-                nukeRenderer.GetComponent<Image>().sprite = Sprite.Create(load_textures.nukeAnimation[i], new Rect(0, 0,
-                        load_textures.nukeAnimation[i].width, load_textures.nukeAnimation[i].height),
-                    new Vector2(0.5f, 0.5f));
-                yield return new WaitForSeconds(nukeAnimFrameTime);
-            }
-            
-            runningRadiance = false;
-            DestroyImmediate(nukeRenderer);
-            DestroyImmediate(plane);
-            GameManager.instance.LoadScene("Cinematic_Ending_C");
-            Destroy(gameObject);
-        }
-
         private IEnumerator freezeKnight(Vector3 locationToFreeze)
         {
             while (runningRadiance)

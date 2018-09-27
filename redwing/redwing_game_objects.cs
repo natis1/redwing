@@ -362,10 +362,8 @@ namespace redwing
         }
         
         
-        public static void applyHitInstance(GameObject target, int expectedDamage, AttackTypes damageType,
-            GameObject source)
+        public static void applyHitInstance(GameObject target, int expectedDamage, GameObject source, float flameGain)
         {
-            
             int realDamage = expectedDamage;
             
             double multiplier = 1;
@@ -393,6 +391,11 @@ namespace redwing
             HealthManager targetHP = getHealthManagerRecursive(target);
 
             if (targetHP == null) return;
+
+            if (GameManager.instance.GetComponent<rebalanced_hooks>() != null)
+            {
+                GameManager.instance.GetComponent<rebalanced_hooks>().flamePower += flameGain;
+            }
             
             //Modding.Logger.Log("[Redwing] Doing " + realDamage + " damage with attack name " + source.name);
 

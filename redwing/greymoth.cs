@@ -64,7 +64,7 @@ namespace redwing
             {
                 log("Error setting up hooks. Error: " + e);
             }
-
+            
             log("GreymothMod added to interpret dashes.");
         }
 
@@ -277,8 +277,6 @@ namespace redwing
             HeroController.instance.dashBurst.transform.localPosition = new Vector3(4.11f, -0.55f, 0.001f);
             HeroController.instance.dashBurst.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
             HeroController.instance.dashingDown = false;
-
-
             
             dashCooldown = HeroController.instance.DASH_COOLDOWN_CH;
             getPrivateField("shadowDashTimer").SetValue(HeroController.instance,

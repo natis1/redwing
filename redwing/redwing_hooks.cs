@@ -44,7 +44,6 @@ namespace redwing
         
         public void Start()
         {
-            load_textures.loadAllTextures();
             
             log("Setting internal slash values.");
             hasGreatSlash = PlayerData.instance.GetBool("hasDashSlash");
@@ -243,7 +242,7 @@ namespace redwing
             return change;
         }
 
-        private bool blackmothGrubberCheck()
+        public static bool blackmothGrubberCheck()
         {
             return BlackmothMod.Blackmoth.Instance.grubberOn;
         }
@@ -264,13 +263,9 @@ namespace redwing
             flameShieldAudio.loop = false;
         }
 
-        private int flameShieldAndLaser(ref int hazardtype, int damage)
+        private int flameShieldAndLaser(ref int hazardType, int damage)
         {
-            
-            
-            if (hazardtype != (int) GlobalEnums.HazardType.SPIKES ||
-                HeroController.instance.cState.invulnerable) return damage;
-            
+            if (!canTakeDamage(hazardType)) return damage;
             if (invulnTime > 0.0)
             {
                 return 0;
@@ -357,7 +352,6 @@ namespace redwing
         private double cycloneTime = 0;
         private int lastFSState = 3;
 
-        private const double CYCLONE_COOLDOWN = 0.22;
         
         public static double fbCooldown;
         public static double laserCooldown;
@@ -366,11 +360,13 @@ namespace redwing
         public static bool zeroDmgLaser;
         
         
-        private const double IFRAMES = 1.5f;
 
         private int currentTrailSprite = 0;
 
+        private const double IFRAMES = 1.5f;
         private const float FP_RANGE = 15f;
+        private const double CYCLONE_COOLDOWN = 0.22;
+
 
         public static int laserDamageBase;
         public static int laserDamagePerNail;
@@ -468,27 +464,27 @@ namespace redwing
             {
                 if (lastFSState == -1)
                 {
-                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[0],
-                        new Rect(0, 0, load_textures.flameShieldLost[0].width, load_textures.flameShieldLost[0].height - load_textures.flameYOffset),
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_LOST[0],
+                        new Rect(0, 0, load_textures.FLAME_SHIELD_LOST[0].width, load_textures.FLAME_SHIELD_LOST[0].height - load_textures.flameYOffset),
                         new Vector2(0.5f, yPivot));
                     lastFSState--;
                 } else if (lastFSState == -2)
                 {
-                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[1],
-                        new Rect(0, 0, load_textures.flameShieldLost[1].width, load_textures.flameShieldLost[1].height - load_textures.flameYOffset),
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_LOST[1],
+                        new Rect(0, 0, load_textures.FLAME_SHIELD_LOST[1].width, load_textures.FLAME_SHIELD_LOST[1].height - load_textures.flameYOffset),
                         new Vector2(0.5f, yPivot));
                     lastFSState--;
                 } else if (lastFSState == -3)
                 {
-                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[2],
-                        new Rect(0, 0, load_textures.flameShieldLost[2].width, load_textures.flameShieldLost[2].height - load_textures.flameYOffset),
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_LOST[2],
+                        new Rect(0, 0, load_textures.FLAME_SHIELD_LOST[2].width, load_textures.FLAME_SHIELD_LOST[2].height - load_textures.flameYOffset),
                         new Vector2(0.5f, yPivot));
                     lastFSState--;
                 }
                 else
                 {
-                    flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldLost[3],
-                        new Rect(0, 0, load_textures.flameShieldLost[3].width, load_textures.flameShieldLost[3].height - load_textures.flameYOffset),
+                    flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_LOST[3],
+                        new Rect(0, 0, load_textures.FLAME_SHIELD_LOST[3].width, load_textures.FLAME_SHIELD_LOST[3].height - load_textures.flameYOffset),
                         new Vector2(0.5f, yPivot));
                     
                     lastFSState = 0;
@@ -505,17 +501,17 @@ namespace redwing
             {
                 if (lastFSState == 0)
                 {
-                    currentFlameShieldTexture = -load_textures.flameShieldCharge1IntroFrames;
+                    currentFlameShieldTexture = -load_textures.FLAME_SHIELD_CHARGE1_INTRO_FRAMES;
                 }
-                int i = load_textures.flameShieldCharge1IntroFrames + currentFlameShieldTexture;
+                int i = load_textures.FLAME_SHIELD_CHARGE1_INTRO_FRAMES + currentFlameShieldTexture;
 
-                if (i >= load_textures.flameShieldCharge1.Length)
+                if (i >= load_textures.FLAME_SHIELD_CHARGE1.Length)
                 {
                     currentFlameShieldTexture = 0;
-                    i = load_textures.flameShieldCharge1IntroFrames;
+                    i = load_textures.FLAME_SHIELD_CHARGE1_INTRO_FRAMES;
                 }
-                flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldCharge1[i],
-                    new Rect(0, 0, load_textures.flameShieldCharge1[i].width, load_textures.flameShieldCharge1[i].height - load_textures.flameYOffset),
+                flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_CHARGE1[i],
+                    new Rect(0, 0, load_textures.FLAME_SHIELD_CHARGE1[i].width, load_textures.FLAME_SHIELD_CHARGE1[i].height - load_textures.flameYOffset),
                     new Vector2(0.5f, yPivot));
                 lastFSState = 1;
                 currentFlameShieldTexture++;
@@ -523,18 +519,18 @@ namespace redwing
             {
                 if (lastFSState == 1)
                 {
-                    currentFlameShieldTexture = -load_textures.flameShieldCharge2IntroFrames;
+                    currentFlameShieldTexture = -load_textures.FLAME_SHIELD_CHARGE2_INTRO_FRAMES;
                 }
                 
-                int i = load_textures.flameShieldCharge2IntroFrames + currentFlameShieldTexture;
-                if (i >= load_textures.flameShieldCharge2.Length)
+                int i = load_textures.FLAME_SHIELD_CHARGE2_INTRO_FRAMES + currentFlameShieldTexture;
+                if (i >= load_textures.FLAME_SHIELD_CHARGE2.Length)
                 {
                     currentFlameShieldTexture = 0;
-                    i = load_textures.flameShieldCharge2IntroFrames;
+                    i = load_textures.FLAME_SHIELD_CHARGE2_INTRO_FRAMES;
                 }
                 
-                flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldCharge2[i],
-                    new Rect(0, 0, load_textures.flameShieldCharge2[i].width, load_textures.flameShieldCharge2[i].height - load_textures.flameYOffset),
+                flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_CHARGE2[i],
+                    new Rect(0, 0, load_textures.FLAME_SHIELD_CHARGE2[i].width, load_textures.FLAME_SHIELD_CHARGE2[i].height - load_textures.flameYOffset),
                     new Vector2(0.5f, yPivot));
                 lastFSState = 2;
                 currentFlameShieldTexture++;
@@ -543,18 +539,18 @@ namespace redwing
             {
                 if (lastFSState == 2)
                 {
-                    currentFlameShieldTexture = -load_textures.flameShieldChargedIntroFrames;
+                    currentFlameShieldTexture = -load_textures.FLAME_SHIELD_CHARGED_INTRO_FRAMES;
                 }
                 
-                int i = load_textures.flameShieldChargedIntroFrames + currentFlameShieldTexture;
-                if (i >= load_textures.flameShieldCharged.Length)
+                int i = load_textures.FLAME_SHIELD_CHARGED_INTRO_FRAMES + currentFlameShieldTexture;
+                if (i >= load_textures.FLAME_SHIELD_CHARGED.Length)
                 {
                     currentFlameShieldTexture = 0;
-                    i = load_textures.flameShieldChargedIntroFrames;
+                    i = load_textures.FLAME_SHIELD_CHARGED_INTRO_FRAMES;
                 }
                 
-                flameShieldSprite.sprite = Sprite.Create(load_textures.flameShieldCharged[i],
-                    new Rect(0, 0, load_textures.flameShieldCharged[i].width, load_textures.flameShieldCharged[i].height - load_textures.flameYOffset),
+                flameShieldSprite.sprite = Sprite.Create(load_textures.FLAME_SHIELD_CHARGED[i],
+                    new Rect(0, 0, load_textures.FLAME_SHIELD_CHARGED[i].width, load_textures.FLAME_SHIELD_CHARGED[i].height - load_textures.flameYOffset),
                     new Vector2(0.5f, 0.5f));
                 lastFSState = 3;
                 currentFlameShieldTexture++;
@@ -675,7 +671,7 @@ namespace redwing
                 
                 redwing_game_objects.applyHitInstance(collider.gameObject,
                     laserDamageBase + laserDamagePerNail * PlayerData.instance.GetInt("nailSmithUpgrades"),
-                    AttackTypes.Generic, voidKnight);
+                    voidKnight, 0f);
             }
 
         }
@@ -960,6 +956,18 @@ namespace redwing
 
                 t.Actions = actions;
             }
+        }
+        
+        private static bool canTakeDamage(int hazardType)
+        {
+            return (HeroController.instance.damageMode != DamageMode.NO_DAMAGE &&
+                    HeroController.instance.transitionState == HeroTransitionState.WAITING_TO_TRANSITION &&
+                    (!HeroController.instance.cState.invulnerable && !HeroController.instance.cState.recoiling) &&
+                    (!HeroController.instance.playerData.isInvincible && !HeroController.instance.cState.dead &&
+                     (!HeroController.instance.cState.hazardDeath && !BossSceneController.IsTransitioning)) &&
+                    (HeroController.instance.damageMode != DamageMode.HAZARD_ONLY || hazardType != 1) &&
+                    (!HeroController.instance.cState.shadowDashing || hazardType != 1) &&
+                    ((double) HeroController.instance.parryInvulnTimer <= 0.0 || hazardType != 1));
         }
         
         private static void log(string str)

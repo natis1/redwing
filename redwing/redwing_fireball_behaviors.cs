@@ -223,7 +223,7 @@ namespace redwing
             else if (targetLayer == 11)
             {
                 redwing_game_objects.applyHitInstance(hitbox.gameObject,
-                    fireballDmg, AttackTypes.Generic, this.gameObject);
+                    fireballDmg, this.gameObject, 0.1f);
 
                 if (doPhysics)
                 {

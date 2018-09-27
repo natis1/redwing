@@ -6,7 +6,6 @@ using System.IO;
 using System.Reflection;
 using angleintegration;
 using ModCommon;
-using On.InControl.NativeProfile;
 
 namespace redwing
 {
@@ -69,7 +68,7 @@ namespace redwing
         public override void Initialize()
         {
             setupSettings();
-            
+            load_textures.loadAllTextures();
             lore.createLore(globalSettings.overrideBlackmothLore, globalSettings.useEnglishLoreWhenLanguageMissing);
             
             problemCode = 0;
@@ -293,8 +292,9 @@ namespace redwing
             }
 
             GameManager.instance.gameObject.AddComponent<redwing_flame_gen>();
-            GameManager.instance.gameObject.AddComponent<redwing_hooks>();
             GameManager.instance.gameObject.AddComponent<room_checker>();
+            GameManager.instance.gameObject.AddComponent<rebalanced_hooks>();
+
             
             if (!noModCommon)
                 modcommonAddRedwingError();
@@ -335,7 +335,6 @@ namespace redwing
             log("Disabling! If you see any more non-settings messages by this mod please report as an issue.");
             ModHooks.Instance.AfterSavegameLoadHook -= saveGame;
             ModHooks.Instance.NewGameHook -= addComponent;
-
         }
 
         private static void log(string str)

@@ -71,8 +71,7 @@ namespace redwing
         {
             foreach (Collider2D collider in enteredColliders.ToList())
             {
-                redwing_game_objects.applyHitInstance(collider.gameObject, cachedPrimaryDmg, AttackTypes.Spell,
-                    gameObject);
+                redwing_game_objects.applyHitInstance(collider.gameObject, cachedPrimaryDmg, gameObject, 0.7f);
             }
 
         }
@@ -87,8 +86,7 @@ namespace redwing
             }
             foreach (Collider2D collider in enteredColliders.ToList())
             {
-                redwing_game_objects.applyHitInstance(collider.gameObject, cachedSecondaryDmg, AttackTypes.Generic,
-                    gameObject);
+                redwing_game_objects.applyHitInstance(collider.gameObject, cachedSecondaryDmg, gameObject, 0f);
             }
             
         }

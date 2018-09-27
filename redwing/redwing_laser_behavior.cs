@@ -74,7 +74,7 @@ namespace redwing
 				redwing_game_objects.applyHitInstance(collider.gameObject,
 					redwing_hooks.laserDamageBase + redwing_hooks.laserDamagePerNail *
 					PlayerData.instance.GetInt("nailSmithUpgrades"),
-					AttackTypes.Spell, redwing_game_objects.voidKnight);
+					redwing_game_objects.voidKnight, 0.2f);
 			}
 
 			soloLaser = false;
